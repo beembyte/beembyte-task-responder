@@ -44,7 +44,6 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ startDate, endDat
         style={{ 
           '--progress-color': color
         } as React.CSSProperties}
-        indicatorStyle={{ backgroundColor: color }}
       />
       <div className="mt-1 flex justify-between text-xs text-gray-500">
         <span>Progress</span>
