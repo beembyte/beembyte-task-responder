@@ -16,6 +16,8 @@ import TaskHistory from "./pages/TaskHistory";
 import Profile from "./pages/Profile";
 import TaskDetail from "./pages/TaskDetail";
 import NotFound from "./pages/NotFound";
+import Wallet from "./pages/Wallet";
+import Chat from "./pages/Chat";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +68,8 @@ const AppRoutes = () => {
         <Route path="/task-history" element={<ProtectedRoute><TaskHistory /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/task/:id" element={<ProtectedRoute><TaskDetail /></ProtectedRoute>} />
+        <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+        <Route path="/chat/:id" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>

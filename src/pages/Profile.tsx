@@ -1,11 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/layout/Navbar';
@@ -13,6 +12,17 @@ import Navbar from '@/components/layout/Navbar';
 const Profile: React.FC = () => {
   const { user, updateProfile, logout } = useAuth();
   const { toast } = useToast();
+  
+  // Generate a responderId from first name and 5 digits
+  const [responderId, setResponderId] = useState('');
+  
+  useEffect(() => {
+    if (user?.firstName) {
+      // Generate a responderId that stays consistent for the user
+      const randomDigits = Math.floor(10000 + Math.random() * 90000);
+      setResponderId(`${user.firstName.toLowerCase()}${randomDigits}`);
+    }
+  }, [user?.firstName]);
   
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
@@ -27,7 +37,6 @@ const Profile: React.FC = () => {
     confirm: '',
   });
   
-  const [isAvailable, setIsAvailable] = useState(user?.availability === 'available');
   const [loading, setLoading] = useState(false);
   
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,18 +47,6 @@ const Profile: React.FC = () => {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setPassword(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleAvailabilityChange = (checked: boolean) => {
-    setIsAvailable(checked);
-    updateProfile({
-      availability: checked ? 'available' : 'busy'
-    });
-    
-    toast({
-      title: "Status Updated",
-      description: `You are now ${checked ? 'available' : 'busy'}`
-    });
   };
   
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -142,21 +139,12 @@ const Profile: React.FC = () => {
                 <h3 className="font-medium text-lg">{formData.firstName} {formData.lastName}</h3>
                 <p className="text-sm text-gray-500">{formData.email}</p>
                 
-                <div className="w-full mt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label htmlFor="availability">Availability</Label>
-                      <p className="text-sm text-gray-500">
-                        Toggle your availability status
-                      </p>
-                    </div>
-                    <Switch
-                      id="availability"
-                      checked={isAvailable}
-                      onCheckedChange={handleAvailabilityChange}
-                    />
-                  </div>
-                  
+                <div className="w-full mt-4 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">Responder ID</p>
+                  <p className="font-mono font-medium text-gray-900">{responderId}</p>
+                </div>
+                
+                <div className="w-full mt-6">                  
                   <Separator className="my-6" />
                   
                   <Button 

@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Calendar, CheckCircle, Clock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTasks } from '@/context/TaskContext';
 import TaskCard from '@/components/TaskCard';
 import Navbar from '@/components/layout/Navbar';
 import ProgressIndicator from '@/components/ui/progress-indicator';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -16,17 +16,6 @@ const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'pending' | 'in-progress' | 'completed'>('pending');
 
   const currentTask = acceptedTasks.length > 0 ? acceptedTasks[0] : null;
-  
-  const getAvailabilityBadge = () => {
-    const isAvailable = user?.availability === 'available';
-    return (
-      <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-      }`}>
-        {isAvailable ? 'Available' : 'Busy'}
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -35,114 +24,83 @@ const Dashboard: React.FC = () => {
       <div className="flex-1 container mx-auto px-4 py-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.firstName}!
+            Welcome, {user?.firstName}!
           </h1>
-          <p className="text-gray-600">
-            Here's an overview of your dashboard
+          <p className="text-gray-600 flex items-center">
+            <span className="text-sm font-medium mr-2">ResponderId:</span>
+            <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
+              {user?.firstName?.toLowerCase() || 'user'}{Math.floor(10000 + Math.random() * 90000)}
+            </span>
           </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Active Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold">{acceptedTasks.length}</div>
-                <div className="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                  <Calendar className="h-5 w-5" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Completed Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold">{completedTasks.length}</div>
-                <div className="h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                  <CheckCircle className="h-5 w-5" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Pending Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold">{pendingTasks.length}</div>
-                <div className="h-10 w-10 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center">
-                  <Clock className="h-5 w-5" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Availability
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {getAvailabilityBadge()}
-                </div>
-                <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
-                  <User className="h-5 w-5" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
         
         {currentTask && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-3">Current Task</h2>
-            <div className="bg-white border rounded-lg p-4">
-              <div className="mb-3">
-                <h3 className="text-lg font-medium">{currentTask.title}</h3>
-                <p className="text-sm text-gray-500">{currentTask.subject}</p>
+            <h2 className="text-xl font-semibold mb-3 flex items-center">
+              <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+              Current Task
+            </h2>
+            <Card className="overflow-hidden border-l-4 border-l-primary">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900">{currentTask.title}</h3>
+                  <p className="text-sm text-gray-500 mb-4">{currentTask.subject}</p>
+                  
+                  <div className="mb-6">
+                    <ProgressIndicator 
+                      startDate={new Date(currentTask.createdAt)} 
+                      endDate={new Date(currentTask.deadline)} 
+                    />
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <Link 
+                      to={`/task/${currentTask.id}`}
+                      className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 text-sm"
+                    >
+                      View Details
+                    </Link>
+                    <Link 
+                      to={`/chat/${currentTask.id}`}
+                      className="bg-secondary text-gray-700 px-4 py-2 rounded hover:bg-secondary/70 text-sm flex items-center"
+                    >
+                      <span>Chat with Client</span>
+                    </Link>
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-6 flex flex-col justify-center">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">Payment Amount</h4>
+                    <p className="text-2xl font-bold text-green-600">
+                      NGN {currentTask.payment?.toLocaleString() || '0.00'}
+                    </p>
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="text-sm font-semibold mb-1">Deadline</h4>
+                    <p className="text-base text-gray-700">
+                      {new Date(currentTask.deadline).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
               </div>
-              
-              <ProgressIndicator 
-                startDate={new Date(currentTask.createdAt)} 
-                endDate={new Date(currentTask.deadline)} 
-              />
-              
-              <div className="mt-4 flex justify-end">
-                <Link 
-                  to={`/task/${currentTask.id}`}
-                  className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
-                >
-                  View Details
-                </Link>
-              </div>
-            </div>
+            </Card>
           </div>
         )}
         
         <div>
-          <h2 className="text-xl font-semibold mb-3">Tasks</h2>
-          <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
+          <h2 className="text-xl font-semibold mb-3 flex items-center">
+            <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+            Available Tasks
+          </h2>
+          <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+            <TabsList className="mb-4 w-full justify-start">
+              <TabsTrigger value="pending" className="flex-grow-0">Pending</TabsTrigger>
+              <TabsTrigger value="in-progress" className="flex-grow-0">In Progress</TabsTrigger>
+              <TabsTrigger value="completed" className="flex-grow-0">Completed</TabsTrigger>
             </TabsList>
             
             <TabsContent value="pending">
@@ -160,8 +118,9 @@ const Dashboard: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">No pending tasks available</p>
+                <div className="text-center py-16 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900">No pending tasks</h3>
+                  <p className="text-sm text-gray-500 mt-2">New tasks will appear here when available</p>
                 </div>
               )}
             </TabsContent>
@@ -178,8 +137,9 @@ const Dashboard: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">No tasks in progress</p>
+                <div className="text-center py-16 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900">No tasks in progress</h3>
+                  <p className="text-sm text-gray-500 mt-2">Accept new tasks to see them here</p>
                 </div>
               )}
             </TabsContent>
@@ -195,8 +155,9 @@ const Dashboard: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">No completed tasks</p>
+                <div className="text-center py-16 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900">No completed tasks</h3>
+                  <p className="text-sm text-gray-500 mt-2">Completed tasks will appear here</p>
                 </div>
               )}
             </TabsContent>
