@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/context/AuthContext';
 import { useTasks } from '@/context/TaskContext';
 import Navbar from '@/components/layout/Navbar';
-import { Paperclip, Send } from 'lucide-react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Download, File, FileText, Image, Paperclip, Send } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -18,6 +19,7 @@ interface Message {
   isFile?: boolean;
   fileUrl?: string;
   fileName?: string;
+  fileType?: string;
 }
 
 const Chat: React.FC = () => {
@@ -59,7 +61,19 @@ const Chat: React.FC = () => {
       timestamp: new Date(Date.now() - 55 * 60 * 1000), // 55 minutes ago
       isFile: true,
       fileName: 'project-requirements.pdf',
-      fileUrl: '#'
+      fileUrl: 'https://source.unsplash.com/random/800x600/?document',
+      fileType: 'pdf'
+    },
+    {
+      id: '5',
+      text: 'Here\'s the mockup image',
+      senderId: 'client123',
+      senderName: 'Client',
+      timestamp: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
+      isFile: true,
+      fileName: 'mockup.jpg',
+      fileUrl: 'https://source.unsplash.com/random/800x600/?design',
+      fileType: 'image'
     }
   ]);
   
@@ -100,6 +114,10 @@ const Chat: React.FC = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      const fileType = getFileType(file.type);
+      
+      // Create a temporary URL for the uploaded file
+      const fileUrl = URL.createObjectURL(file);
       
       const newMessage: Message = {
         id: Math.random().toString(36).substring(2, 9),
@@ -109,11 +127,22 @@ const Chat: React.FC = () => {
         timestamp: new Date(),
         isFile: true,
         fileName: file.name,
-        fileUrl: '#' // In a real app, this would be the uploaded file URL
+        fileUrl: fileUrl,
+        fileType: fileType
       };
       
       setMessages([...messages, newMessage]);
     }
+  };
+  
+  // Get file type from MIME type
+  const getFileType = (mimeType: string): string => {
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType.startsWith('video/')) return 'video';
+    if (mimeType === 'application/pdf') return 'pdf';
+    if (mimeType.includes('document') || mimeType.includes('word')) return 'document';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'spreadsheet';
+    return 'file';
   };
   
   // Format message time
@@ -122,6 +151,95 @@ const Chat: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+  
+  // Render file preview based on file type
+  const renderFilePreview = (message: Message) => {
+    if (!message.fileUrl) return null;
+    
+    // For image files
+    if (message.fileType === 'image') {
+      return (
+        <div className="mt-2 relative rounded-md overflow-hidden">
+          <AspectRatio ratio={16 / 9} className="bg-gray-100">
+            <img 
+              src={message.fileUrl} 
+              alt={message.fileName} 
+              className="object-cover w-full h-full rounded-md"
+            />
+          </AspectRatio>
+          <div className="absolute bottom-2 right-2">
+            <a 
+              href={message.fileUrl} 
+              download={message.fileName}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1 bg-white/90 rounded-full hover:bg-white"
+            >
+              <Download className="h-5 w-5" />
+            </a>
+          </div>
+        </div>
+      );
+    }
+    
+    // For PDF files
+    if (message.fileType === 'pdf') {
+      return (
+        <div className="mt-2 border rounded-md overflow-hidden">
+          <div className="flex items-center justify-between p-3 bg-gray-50">
+            <div className="flex items-center">
+              <FileText className="h-6 w-6 text-red-500 mr-2" />
+              <span className="text-sm font-medium truncate max-w-[200px]">
+                {message.fileName}
+              </span>
+            </div>
+            <a 
+              href={message.fileUrl} 
+              download={message.fileName}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1 hover:bg-gray-200 rounded-full"
+            >
+              <Download className="h-5 w-5" />
+            </a>
+          </div>
+          <div className="p-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+              onClick={() => window.open(message.fileUrl, '_blank')}
+            >
+              View Document
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    
+    // Default file preview
+    return (
+      <div className="mt-2 border rounded-md overflow-hidden">
+        <div className="flex items-center justify-between p-3 bg-gray-50">
+          <div className="flex items-center">
+            <File className="h-6 w-6 text-blue-500 mr-2" />
+            <span className="text-sm font-medium truncate max-w-[200px]">
+              {message.fileName}
+            </span>
+          </div>
+          <a 
+            href={message.fileUrl} 
+            download={message.fileName}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1 hover:bg-gray-200 rounded-full"
+          >
+            <Download className="h-5 w-5" />
+          </a>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -177,15 +295,13 @@ const Chat: React.FC = () => {
                     }`}
                   >
                     {message.isFile ? (
-                      <a
-                        href={message.fileUrl}
-                        className="flex items-center space-x-2 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Paperclip className="h-4 w-4" />
-                        <span>{message.fileName}</span>
-                      </a>
+                      <>
+                        <div className="flex items-center space-x-2">
+                          <Paperclip className="h-4 w-4" />
+                          <span>{message.fileName}</span>
+                        </div>
+                        {renderFilePreview(message)}
+                      </>
                     ) : (
                       <p>{message.text}</p>
                     )}
