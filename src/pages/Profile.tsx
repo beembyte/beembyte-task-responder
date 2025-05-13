@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/layout/Navbar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Profile: React.FC = () => {
   const { user, updateProfile, logout } = useAuth();
@@ -133,15 +134,28 @@ const Profile: React.FC = () => {
                 <CardDescription>Update your account details</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
-                <div className="h-24 w-24 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mb-4">
-                  {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
-                </div>
+                <Avatar className="h-24 w-24 mb-4">
+                  <AvatarImage src={`https://robohash.org/${formData.firstName}?set=set4`} alt={formData.firstName} />
+                  <AvatarFallback className="text-2xl">
+                    {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <h3 className="font-medium text-lg">{formData.firstName} {formData.lastName}</h3>
                 <p className="text-sm text-gray-500">{formData.email}</p>
                 
                 <div className="w-full mt-4 p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">Responder ID</p>
                   <p className="font-mono font-medium text-gray-900">{responderId}</p>
+                </div>
+                
+                <div className="w-full mt-4 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">Status</p>
+                  <div className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability === 'available' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                    <p className={`font-medium ${user?.availability === 'available' ? 'text-green-600' : 'text-red-600'}`}>
+                      {user?.availability === 'available' ? 'Available' : 'Busy'}
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="w-full mt-6">                  

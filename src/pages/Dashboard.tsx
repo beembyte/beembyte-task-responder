@@ -9,6 +9,7 @@ import TaskCard from '@/components/TaskCard';
 import Navbar from '@/components/layout/Navbar';
 import ProgressIndicator from '@/components/ui/progress-indicator';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -16,6 +17,8 @@ const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'pending' | 'in-progress' | 'completed'>('pending');
 
   const currentTask = acceptedTasks.length > 0 ? acceptedTasks[0] : null;
+  const responderId = user?.firstName ? `${user.firstName.toLowerCase()}${Math.floor(10000 + Math.random() * 90000)}` : 'user12345';
+  const isAvailable = user?.availability === 'available';
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -23,15 +26,31 @@ const Dashboard: React.FC = () => {
       
       <div className="flex-1 container mx-auto px-4 py-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome, {user?.firstName}!
-          </h1>
-          <p className="text-gray-600 flex items-center">
-            <span className="text-sm font-medium mr-2">ResponderId:</span>
-            <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-              {user?.firstName?.toLowerCase() || 'user'}{Math.floor(10000 + Math.random() * 90000)}
-            </span>
-          </p>
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-16 w-16 border">
+              <AvatarImage src={`https://robohash.org/${user?.firstName || 'user'}?set=set4`} alt={user?.firstName} />
+              <AvatarFallback>{user?.firstName?.charAt(0) || 'U'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome, {user?.firstName}!
+              </h1>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-500">
+                  <span className="mr-2">ResponderId:</span>
+                  <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
+                    {responderId}
+                  </span>
+                </span>
+                <span className="flex items-center mt-1">
+                  <span className={`w-2 h-2 rounded-full mr-2 ${isAvailable ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className={`text-sm font-medium ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                    {isAvailable ? 'Available' : 'Busy'}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
         
         {currentTask && (

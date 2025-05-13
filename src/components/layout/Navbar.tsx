@@ -6,20 +6,13 @@ import Logo from '../Logo';
 import { useIsMobile } from '@/hooks/use-mobile';
 import NotificationBadge from '../NotificationBadge';
 import { useAuth } from '@/context/AuthContext';
-import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { user, updateProfile } = useAuth();
+  const { user, logout } = useAuth();
   const isLoggedIn = !!user;
-  const isAvailable = user?.availability === 'available';
-
-  const handleAvailabilityChange = (checked: boolean) => {
-    updateProfile({
-      availability: checked ? 'available' : 'busy'
-    });
-  };
 
   if (!isLoggedIn && (location.pathname === '/login' || location.pathname === '/register')) {
     return null;
@@ -51,18 +44,6 @@ const Navbar: React.FC = () => {
               History
             </Link>
             
-            {/* Availability Status */}
-            <div className="hidden sm:flex items-center space-x-2">
-              <span className="text-sm text-gray-600">
-                {isAvailable ? 'Available' : 'Busy'}
-              </span>
-              <Switch
-                checked={isAvailable}
-                onCheckedChange={handleAvailabilityChange}
-                className="data-[state=checked]:bg-green-500"
-              />
-            </div>
-            
             <div className="relative">
               <Link to="/notifications">
                 <Bell className="h-5 w-5 text-gray-600 hover:text-primary" />
@@ -70,9 +51,10 @@ const Navbar: React.FC = () => {
               </Link>
             </div>
             <Link to="/profile">
-              <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
-                <span className="text-sm font-medium">{user?.firstName?.charAt(0) || 'U'}</span>
-              </div>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={`https://robohash.org/${user?.firstName || 'user'}?set=4`} alt={user?.firstName} />
+                <AvatarFallback>{user?.firstName?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
             </Link>
           </div>
         ) : (
