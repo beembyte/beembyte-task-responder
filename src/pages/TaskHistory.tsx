@@ -50,7 +50,7 @@ const TaskHistory: React.FC = () => {
   // Format date
   const formatDate = (date: Date) => {
     const d = new Date(date);
-    return `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })}${task.status === 'completed' ? ` · ${formatTime(d)}` : ''}`;
+    return `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })}${d.status === 'completed' ? ` · ${formatTime(d)}` : ''}`;
   };
   
   const formatTime = (date: Date) => {
@@ -157,7 +157,9 @@ const TaskHistory: React.FC = () => {
                       {getTaskIcon(task.status)}
                       
                       <div className="flex-1">
-                        <div className="text-sm text-gray-500">{formatDate(task.createdAt)} · {task.status === 'rejected' ? 'Cancelled' : task.status}</div>
+                        <div className="text-sm text-gray-500">
+                          {formatDate(task.createdAt)} · {task.status === 'rejected' ? 'Cancelled' : task.status}
+                        </div>
                         <div className="font-medium">{task.title}</div>
                         <div className="text-sm text-gray-700 mt-1">{task.subject}</div>
                         {task.payment && (
