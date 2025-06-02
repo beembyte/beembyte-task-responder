@@ -2,9 +2,10 @@ import { io } from "socket.io-client";
 import { API_HOST_ADDRESS } from "@/config/env";
 
 // Make sure API_HOST_ADDRESS includes the protocol (http:// or https://)
+console.log(API_HOST_ADDRESS);
 const SOCKET_URL = API_HOST_ADDRESS.startsWith("http")
   ? API_HOST_ADDRESS
-  : `http://${API_HOST_ADDRESS}`;
+  : `https://${API_HOST_ADDRESS}`;
 
 console.log("Connecting to socket URL:", SOCKET_URL);
 
