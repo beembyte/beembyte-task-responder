@@ -18,40 +18,41 @@ import TaskDetail from "./pages/TaskDetail";
 import NotFound from "./pages/NotFound";
 import Wallet from "./pages/Wallet";
 import Chat from "./pages/Chat";
+import VerifyCode from "./pages/VerifyCode";
 
 const queryClient = new QueryClient();
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 // Auth layout route component
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
-  
+
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 const AppRoutes = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     // Check if auth state is resolved
     setIsLoading(false);
   }, [user]);
-  
+
   if (isLoading) {
     return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
   }
@@ -62,7 +63,8 @@ const AppRoutes = () => {
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
         <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
-        
+        <Route path="/verify-code" element={<VerifyCode />} />
+
         {/* Protected Routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/task-history" element={<ProtectedRoute><TaskHistory /></ProtectedRoute>} />
@@ -70,7 +72,7 @@ const AppRoutes = () => {
         <Route path="/task/:id" element={<ProtectedRoute><TaskDetail /></ProtectedRoute>} />
         <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
         <Route path="/chat/:id" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-        
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TaskProvider>
