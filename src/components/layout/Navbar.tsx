@@ -5,18 +5,30 @@ import { Bell, Wallet } from 'lucide-react';
 import Logo from '../Logo';
 import { useIsMobile } from '@/hooks/use-mobile';
 import NotificationBadge from '../NotificationBadge';
-import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { user, logout } = useAuth();
-  const isLoggedIn = !!user;
+  
+  // Check authentication state from localStorage and cookies
+  const storedUser = localStorage.getItem("authorizeUser");
+  const authCookie = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('authToken='));
+  
+  const isLoggedIn = !!(storedUser && authCookie);
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   if (!isLoggedIn && (location.pathname === '/login' || location.pathname === '/register')) {
     return null;
   }
+
+  const handleLogout = () => {
+    localStorage.removeItem('authorizeUser');
+    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    window.location.href = '/login';
+  };
 
   return (
     <nav className="border-b border-gray-200 bg-white px-4 py-3">

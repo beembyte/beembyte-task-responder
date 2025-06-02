@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import { TaskProvider } from "./context/TaskContext";
 
 import Index from "./pages/Index";
@@ -22,9 +22,19 @@ import VerifyCode from "./pages/VerifyCode";
 
 const queryClient = new QueryClient();
 
+// Helper function to check if user is authenticated
+const isUserAuthenticated = () => {
+  const storedUser = localStorage.getItem("authorizeUser");
+  const authCookie = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('authToken='));
+  
+  return !!(storedUser && authCookie);
+};
+
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = isUserAuthenticated();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -35,7 +45,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Auth layout route component
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = isUserAuthenticated();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -45,13 +55,12 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check if auth state is resolved
     setIsLoading(false);
-  }, [user]);
+  }, []);
 
   if (isLoading) {
     return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;

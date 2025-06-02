@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/context/AuthContext';
 import { useTasks } from '@/context/TaskContext';
 import TaskCard from '@/components/TaskCard';
 import Navbar from '@/components/layout/Navbar';
@@ -12,7 +10,10 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  // Get user from localStorage instead of context
+  const storedUser = localStorage.getItem("authorizeUser");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  
   const { pendingTasks, acceptedTasks, completedTasks, acceptTask, rejectTask, completeTask, isLoading } = useTasks();
   const [activeTab, setActiveTab] = useState<'pending' | 'in-progress' | 'completed'>('pending');
 
