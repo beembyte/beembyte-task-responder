@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,52 +8,57 @@ import Navbar from '@/components/layout/Navbar';
 import ProgressIndicator from '@/components/ui/progress-indicator';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { User } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 const Dashboard: React.FC = () => {
-  // Get user from localStorage instead of context
-  const storedUser = localStorage.getItem("authorizeUser");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  
+
+  const { loggedInUser } = useAuth()
+
+  const [user, setUser] = useState<User>(null)
+
+  useEffect(() => {
+    const userFromStorage = loggedInUser();
+    setUser(userFromStorage);
+  }, []);
   const { pendingTasks, acceptedTasks, completedTasks, acceptTask, rejectTask, completeTask, isLoading } = useTasks();
   const [activeTab, setActiveTab] = useState<'pending' | 'in-progress' | 'completed'>('pending');
 
   const currentTask = acceptedTasks.length > 0 ? acceptedTasks[0] : null;
-  const responderId = user?.firstName ? `${user.firstName.toLowerCase()}${Math.floor(10000 + Math.random() * 90000)}` : 'user12345';
-  const isAvailable = user?.availability === 'available';
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <div className="flex-1 container mx-auto px-4 py-6">
         <div className="mb-8">
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16 border">
-              <AvatarImage src={`https://robohash.org/${user?.firstName || 'user'}?set=set4`} alt={user?.firstName} />
-              <AvatarFallback>{user?.firstName?.charAt(0) || 'U'}</AvatarFallback>
+              <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`} alt={user?.first_name} />
+              <AvatarFallback>{user?.first_name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Welcome, {user?.firstName}!
+                Welcome, {user?.first_name}!
               </h1>
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-gray-500">
                   <span className="mr-2">ResponderId:</span>
                   <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-                    {responderId}
+                    {user?.responder_id}
                   </span>
                 </span>
                 <span className="flex items-center mt-1">
-                  <span className={`w-2 h-2 rounded-full mr-2 ${isAvailable ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span className={`text-sm font-medium ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>
-                    {isAvailable ? 'Available' : 'Busy'}
+                  <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability_status ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className={`text-sm font-medium ${user?.availability_status ? 'text-green-600' : 'text-red-600'}`}>
+                    {user?.availability_status ? 'Available' : 'Busy'}
                   </span>
                 </span>
               </div>
             </div>
           </div>
         </div>
-        
+
         {currentTask && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-3 flex items-center">
@@ -65,22 +70,22 @@ const Dashboard: React.FC = () => {
                 <div className="md:col-span-2 p-6">
                   <h3 className="text-lg font-semibold text-gray-900">{currentTask.title}</h3>
                   <p className="text-sm text-gray-500 mb-4">{currentTask.subject}</p>
-                  
+
                   <div className="mb-6">
-                    <ProgressIndicator 
-                      startDate={new Date(currentTask.createdAt)} 
-                      endDate={new Date(currentTask.deadline)} 
+                    <ProgressIndicator
+                      startDate={new Date(currentTask.createdAt)}
+                      endDate={new Date(currentTask.deadline)}
                     />
                   </div>
-                  
+
                   <div className="flex space-x-2">
-                    <Link 
+                    <Link
                       to={`/task/${currentTask.id}`}
                       className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 text-sm"
                     >
                       View Details
                     </Link>
-                    <Link 
+                    <Link
                       to={`/chat/${currentTask.id}`}
                       className="bg-secondary text-gray-700 px-4 py-2 rounded hover:bg-secondary/70 text-sm flex items-center"
                     >
@@ -110,7 +115,7 @@ const Dashboard: React.FC = () => {
             </Card>
           </div>
         )}
-        
+
         <div>
           <h2 className="text-xl font-semibold mb-3 flex items-center">
             <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
@@ -122,7 +127,7 @@ const Dashboard: React.FC = () => {
               <TabsTrigger value="in-progress" className="flex-grow-0">In Progress</TabsTrigger>
               <TabsTrigger value="completed" className="flex-grow-0">Completed</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="pending">
               {isLoading ? (
                 <div className="text-center py-8">Loading tasks...</div>
@@ -144,7 +149,7 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
             </TabsContent>
-            
+
             <TabsContent value="in-progress">
               {acceptedTasks.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,7 +168,7 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
             </TabsContent>
-            
+
             <TabsContent value="completed">
               {completedTasks.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

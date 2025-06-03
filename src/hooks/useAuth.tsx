@@ -75,7 +75,7 @@ export const useAuth = () => {
           }
         }
 
-        navigate("/")
+        navigate("/dashboard")
       } else {
         handleApiErrors(response)
       }
@@ -140,19 +140,35 @@ export const useAuth = () => {
   }
 
   const logout = () => {
-    // Disconnect socket before logout
     try {
       socketService.disconnect()
     } catch (error) {
       console.error("Error disconnecting socket:", error)
       // Don't block logout due to socket issues
     }
-
     authApi.logout()
     setUser(null)
     navigate("/login")
     toast.success("Successfully logged out")
+
   }
+
+  const updateProfile = () => { }
+
+  const loggedInUser = () => {
+    try {
+      setIsLoading(true)
+      const user = JSON.parse(localStorage.getItem("authorizeUser") || "null");
+      return user;
+    } catch (error) {
+      setIsLoading(false)
+      console.error("Error fetching user:", error);
+      toast.error("Failed to connect, please check network connection.");
+      return null;
+    } finally {
+      setIsLoading(false)
+    }
+  };
 
   return {
     isLoading,
@@ -162,5 +178,7 @@ export const useAuth = () => {
     resendVerification,
     resendCountdown,
     logout,
+    updateProfile,
+    loggedInUser
   }
 }

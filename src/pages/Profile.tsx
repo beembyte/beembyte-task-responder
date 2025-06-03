@@ -5,58 +5,55 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/layout/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/useAuth';
+import { User } from '@/types';
 
 const Profile: React.FC = () => {
-  const { user, updateProfile, logout } = useAuth();
+  const { updateProfile, logout, loggedInUser } = useAuth();
   const { toast } = useToast();
-  
-  // Generate a responderId from first name and 5 digits
-  const [responderId, setResponderId] = useState('');
-  
+  const [user, setUser] = useState<User>(null);
+
   useEffect(() => {
-    if (user?.firstName) {
-      // Generate a responderId that stays consistent for the user
-      const randomDigits = Math.floor(10000 + Math.random() * 90000);
-      setResponderId(`${user.firstName.toLowerCase()}${randomDigits}`);
-    }
-  }, [user?.firstName]);
-  
+    const userFromStorage = loggedInUser();
+    setUser(userFromStorage);
+  }, []);
+
+
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+    first_name: user?.first_name || '',
+    last_name: user?.last_name || '',
     email: user?.email || '',
-    phoneNumber: user?.phoneNumber || '',
+    phone_number: user?.phone_number || '',
   });
-  
+
   const [password, setPassword] = useState({
     current: '',
     new: '',
     confirm: '',
   });
-  
+
   const [loading, setLoading] = useState(false);
-  
+
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setPassword(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      await updateProfile(formData);
-      
+      // await updateProfile(formData);
+
       toast({
         title: "Profile Updated",
         description: "Your profile information has been updated successfully."
@@ -71,10 +68,10 @@ const Profile: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password.new !== password.confirm) {
       toast({
         title: "Password Mismatch",
@@ -83,18 +80,18 @@ const Profile: React.FC = () => {
       });
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // In a real app, you would call an API to update the password
       // await updatePassword(password.current, password.new);
-      
+
       toast({
         title: "Password Updated",
         description: "Your password has been updated successfully."
       });
-      
+
       setPassword({
         current: '',
         new: '',
@@ -110,7 +107,7 @@ const Profile: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const handleLogout = () => {
     logout();
     // Will be redirected by our protected route
@@ -119,13 +116,13 @@ const Profile: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <div className="flex-1 container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
           <p className="text-gray-600">Manage your account settings and preferences</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
             <Card>
@@ -135,34 +132,34 @@ const Profile: React.FC = () => {
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src={`https://robohash.org/${formData.firstName}?set=set4`} alt={formData.firstName} />
+                  <AvatarImage src={`https://robohash.org/${formData.first_name}?set=set4`} alt={formData.first_name} />
                   <AvatarFallback className="text-2xl">
-                    {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
+                    {formData.first_name.charAt(0)}{formData.last_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <h3 className="font-medium text-lg">{formData.firstName} {formData.lastName}</h3>
+                <h3 className="font-medium text-lg">{formData.first_name} {formData.last_name}</h3>
                 <p className="text-sm text-gray-500">{formData.email}</p>
-                
+
                 <div className="w-full mt-4 p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">Responder ID</p>
-                  <p className="font-mono font-medium text-gray-900">{responderId}</p>
+                  <p className="font-mono font-medium text-gray-900">{user?.responder_id}</p>
                 </div>
-                
+
                 <div className="w-full mt-4 p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 mb-1">Status</p>
                   <div className="flex items-center">
-                    <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability === 'available' ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                    <p className={`font-medium ${user?.availability === 'available' ? 'text-green-600' : 'text-red-600'}`}>
-                      {user?.availability === 'available' ? 'Available' : 'Busy'}
+                    <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability_status === 'available' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                    <p className={`font-medium ${user?.availability_status === 'available' ? 'text-green-600' : 'text-red-600'}`}>
+                      {user?.availability_status === 'available' ? 'Available' : 'Busy'}
                     </p>
                   </div>
                 </div>
-                
-                <div className="w-full mt-6">                  
+
+                <div className="w-full mt-6">
                   <Separator className="my-6" />
-                  
-                  <Button 
-                    variant="outline" 
+
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={handleLogout}
                   >
@@ -172,7 +169,7 @@ const Profile: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="md:col-span-2 space-y-6">
             <Card>
               <CardHeader>
@@ -183,25 +180,25 @@ const Profile: React.FC = () => {
                 <form onSubmit={handleProfileUpdate}>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="first_name">First Name</Label>
                       <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
+                        id="first_name"
+                        name="first_name"
+                        value={formData.first_name}
                         onChange={handleFormChange}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="last_name">Last Name</Label>
                       <Input
-                        id="lastName"
-                        name="lastName"
-                        value={formData.lastName}
+                        id="last_name"
+                        name="last_name"
+                        value={formData.last_name}
                         onChange={handleFormChange}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2 mt-4">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -212,24 +209,24 @@ const Profile: React.FC = () => {
                       onChange={handleFormChange}
                     />
                   </div>
-                  
+
                   <div className="space-y-2 mt-4">
-                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    <Label htmlFor="phone_number">Phone Number</Label>
                     <Input
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
+                      id="phone_number"
+                      name="phone_number"
+                      value={formData.phone_number}
                       onChange={handleFormChange}
                     />
                   </div>
-                  
+
                   <Button className="mt-6" type="submit" disabled={loading}>
                     {loading ? 'Updating...' : 'Update Profile'}
                   </Button>
                 </form>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Change Password</CardTitle>
@@ -247,7 +244,7 @@ const Profile: React.FC = () => {
                       onChange={handlePasswordChange}
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div className="space-y-2">
                       <Label htmlFor="newPassword">New Password</Label>
@@ -270,7 +267,7 @@ const Profile: React.FC = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <Button className="mt-6" type="submit" disabled={loading}>
                     {loading ? 'Updating...' : 'Change Password'}
                   </Button>
