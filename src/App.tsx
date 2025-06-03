@@ -19,6 +19,9 @@ import NotFound from "./pages/NotFound";
 import Wallet from "./pages/Wallet";
 import Chat from "./pages/Chat";
 import VerifyCode from "./pages/VerifyCode";
+import PendingTasks from "./pages/PendingTasks";
+import OngoingTasks from "./pages/OngoingTasks";
+import CompletedTasks from "./pages/CompletedTasks";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +84,11 @@ const AppRoutes = () => {
         <Route path="/task/:id" element={<ProtectedRoute><TaskDetail /></ProtectedRoute>} />
         <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
         <Route path="/chat/:id" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        
+        {/* Task Management Routes */}
+        <Route path="/pending-tasks" element={<ProtectedRoute><PendingTasks /></ProtectedRoute>} />
+        <Route path="/ongoing-tasks" element={<ProtectedRoute><OngoingTasks /></ProtectedRoute>} />
+        <Route path="/completed-tasks" element={<ProtectedRoute><CompletedTasks /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

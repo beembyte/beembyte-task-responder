@@ -1,30 +1,45 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTasks } from '@/context/TaskContext';
-import TaskCard from '@/components/TaskCard';
+import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
 import ProgressIndicator from '@/components/ui/progress-indicator';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import useTask from '@/hooks/useTask';
+import CompactTaskCard from '@/components/CompactTaskCard';
+import { ArrowRight } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-
   const { loggedInUser } = useAuth()
-
+  const { isLoading, getPendingUnassignedTask, pendingTasks } = useTask()
   const [user, setUser] = useState<User>(null)
+  const [recentTasks, setRecentTasks] = useState<any[]>([])
 
   useEffect(() => {
     const userFromStorage = loggedInUser();
     setUser(userFromStorage);
   }, []);
-  const { pendingTasks, acceptedTasks, completedTasks, acceptTask, rejectTask, completeTask, isLoading } = useTasks();
-  const [activeTab, setActiveTab] = useState<'pending' | 'in-progress' | 'completed'>('pending');
 
-  const currentTask = acceptedTasks.length > 0 ? acceptedTasks[0] : null;
+  useEffect(() => {
+    const fetchRecentTasks = async () => {
+      const response = await getPendingUnassignedTask({
+        limit: 6, // Fetch only 6 for dashboard overview
+        page: 1,
+        sort: 1,
+        title: '',
+        description: ''
+      });
+      
+      if (response.success && response.data) {
+        setRecentTasks(response.data.tasks);
+      }
+    };
+
+    fetchRecentTasks();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,134 +74,105 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {currentTask && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-3 flex items-center">
-              <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-              Current Task
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Available Tasks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">12</div>
+              <p className="text-xs text-gray-500">Ready to apply</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Ongoing Tasks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">3</div>
+              <p className="text-xs text-gray-500">In progress</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Completed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">28</div>
+              <p className="text-xs text-gray-500">This month</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Available Tasks */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold flex items-center">
+              <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+              Recent Available Tasks
             </h2>
-            <Card className="overflow-hidden border-l-4 border-l-primary">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900">{currentTask.title}</h3>
-                  <p className="text-sm text-gray-500 mb-4">{currentTask.subject}</p>
-
-                  <div className="mb-6">
-                    <ProgressIndicator
-                      startDate={new Date(currentTask.createdAt)}
-                      endDate={new Date(currentTask.deadline)}
-                    />
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Link
-                      to={`/task/${currentTask.id}`}
-                      className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 text-sm"
-                    >
-                      View Details
-                    </Link>
-                    <Link
-                      to={`/chat/${currentTask.id}`}
-                      className="bg-secondary text-gray-700 px-4 py-2 rounded hover:bg-secondary/70 text-sm flex items-center"
-                    >
-                      <span>Chat with Client</span>
-                    </Link>
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-6 flex flex-col justify-center">
-                  <div>
-                    <h4 className="text-sm font-semibold mb-1">Payment Amount</h4>
-                    <p className="text-2xl font-bold text-green-600">
-                      NGN {currentTask.payment?.toLocaleString() || '0.00'}
-                    </p>
-                  </div>
-                  <div className="mt-4">
-                    <h4 className="text-sm font-semibold mb-1">Deadline</h4>
-                    <p className="text-base text-gray-700">
-                      {new Date(currentTask.deadline).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <Link to="/pending-tasks">
+              <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                <span>View All</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
-        )}
+          
+          {isLoading ? (
+            <div className="text-center py-8">Loading tasks...</div>
+          ) : recentTasks.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentTasks.map((task, index) => (
+                <CompactTaskCard
+                  key={task.id || index}
+                  task={task}
+                  onClick={() => {/* Navigate to task detail */}}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-900">No tasks available</h3>
+              <p className="text-sm text-gray-500 mt-2">New tasks will appear here when available</p>
+            </div>
+          )}
+        </div>
 
-        <div>
-          <h2 className="text-xl font-semibold mb-3 flex items-center">
-            <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-            Available Tasks
-          </h2>
-          <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-            <TabsList className="mb-4 w-full justify-start">
-              <TabsTrigger value="pending" className="flex-grow-0">Pending</TabsTrigger>
-              <TabsTrigger value="in-progress" className="flex-grow-0">In Progress</TabsTrigger>
-              <TabsTrigger value="completed" className="flex-grow-0">Completed</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="pending">
-              {isLoading ? (
-                <div className="text-center py-8">Loading tasks...</div>
-              ) : pendingTasks.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {pendingTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onAccept={acceptTask}
-                      onReject={rejectTask}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-16 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-medium text-gray-900">No pending tasks</h3>
-                  <p className="text-sm text-gray-500 mt-2">New tasks will appear here when available</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="in-progress">
-              {acceptedTasks.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {acceptedTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onComplete={completeTask}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-16 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-medium text-gray-900">No tasks in progress</h3>
-                  <p className="text-sm text-gray-500 mt-2">Accept new tasks to see them here</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="completed">
-              {completedTasks.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {completedTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-16 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-medium text-gray-900">No completed tasks</h3>
-                  <p className="text-sm text-gray-500 mt-2">Completed tasks will appear here</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-dashed border-2 hover:border-primary transition-colors">
+            <CardContent className="p-6 text-center">
+              <h3 className="font-semibold mb-2">Pending Tasks</h3>
+              <p className="text-sm text-gray-600 mb-4">Browse and apply for available tasks</p>
+              <Link to="/pending-tasks">
+                <Button className="w-full">Browse Tasks</Button>
+              </Link>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-dashed border-2 hover:border-primary transition-colors">
+            <CardContent className="p-6 text-center">
+              <h3 className="font-semibold mb-2">Ongoing Work</h3>
+              <p className="text-sm text-gray-600 mb-4">Track your current projects</p>
+              <Link to="/ongoing-tasks">
+                <Button variant="outline" className="w-full">View Progress</Button>
+              </Link>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-dashed border-2 hover:border-primary transition-colors">
+            <CardContent className="p-6 text-center">
+              <h3 className="font-semibold mb-2">Work History</h3>
+              <p className="text-sm text-gray-600 mb-4">Review completed projects</p>
+              <Link to="/completed-tasks">
+                <Button variant="outline" className="w-full">View History</Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
