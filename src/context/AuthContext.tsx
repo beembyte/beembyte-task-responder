@@ -45,11 +45,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     // Mock login - in a real app this would call an API
     const mockUser: User = {
-      id: '123',
-      firstName: 'Prince',
-      lastName: 'Smith',
+      _id: '123',
+      first_name: 'Prince',
+      last_name: 'Smith',
       email: email,
-      availability: 'available',
+      phone_number: '',
+      password: '',
+      role: 'user' as any,
+      is_verified: true,
+      availability_status: 'available' as any,
     };
     
     setUser(mockUser);
@@ -59,12 +63,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: Partial<User>, password: string) => {
     // Mock registration - in a real app this would call an API
     const newUser: User = {
-      id: Math.random().toString(36).substring(2, 9),
-      firstName: userData.firstName || '',
-      lastName: userData.lastName || '',
+      _id: Math.random().toString(36).substring(2, 9),
+      first_name: userData.first_name || '',
+      last_name: userData.last_name || '',
       email: userData.email || '',
-      phoneNumber: userData.phoneNumber,
-      availability: 'available',
+      phone_number: userData.phone_number || '',
+      password: password,
+      role: 'user' as any,
+      is_verified: true,
+      availability_status: 'available' as any,
     };
     
     setUser(newUser);
