@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,25 +8,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Attachment } from '@/types';
-import { useTasks } from '@/context/TaskContext';
+import { Attachment, TaskInfo } from '@/types';
 import Navbar from '@/components/layout/Navbar';
 import ProgressIndicator from '@/components/ui/progress-indicator';
 import { useToast } from '@/hooks/use-toast';
+import useTask from '@/hooks/useTask';
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getTaskById, completeTask, acceptTask, rejectTask, addAttachment } = useTasks();
+  const { getOneTaskById, isLoading: TaskIsLoading } = useTask();
   const { toast } = useToast();
-  
-  const task = getTaskById(id!);
-  
+
   const [attachmentType, setAttachmentType] = useState<'file' | 'link' | 'text'>('text');
   const [attachmentContent, setAttachmentContent] = useState('');
   const [attachmentName, setAttachmentName] = useState('');
   const [loading, setLoading] = useState(false);
-  
+  const [task, setTask] = useState<TaskInfo>(null)
+
+  useEffect(() => {
+    const getTask = async () => {
+      const response = await getOneTaskById(id!)
+      setTask(response.data)
+    }
+    getTask()
+  })
+
   if (!task) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -43,7 +50,7 @@ const TaskDetail: React.FC = () => {
       </div>
     );
   }
-  
+
   const handleComplete = () => {
     if (attachmentType && (attachmentContent || attachmentType === 'file') && attachmentName) {
       const newAttachment: Omit<Attachment, 'id' | 'createdAt'> = {
@@ -51,13 +58,13 @@ const TaskDetail: React.FC = () => {
         type: attachmentType,
         content: attachmentContent,
       };
-      
-      completeTask(task.id, [{
-        id: Math.random().toString(36).substring(2, 9),
-        createdAt: new Date(),
-        ...newAttachment
-      }]);
-      
+
+      // completeTask(task._id, [{
+      //   id: Math.random().toString(36).substring(2, 9),
+      //   createdAt: new Date(),
+      //   ...newAttachment
+      // }]);
+
       navigate('/dashboard');
     } else {
       toast({
@@ -67,7 +74,7 @@ const TaskDetail: React.FC = () => {
       });
     }
   };
-  
+
   // Format date
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -76,7 +83,7 @@ const TaskDetail: React.FC = () => {
       year: 'numeric'
     });
   };
-  
+
   // Format date and time
   const formatDateTime = (date: Date) => {
     return new Date(date).toLocaleString('en-US', {
@@ -87,17 +94,17 @@ const TaskDetail: React.FC = () => {
       minute: '2-digit'
     });
   };
-  
+
   // Get status badge
   const getStatusBadge = () => {
-    switch(task.status) {
+    switch (task.status) {
       case 'pending':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>;
-      case 'accepted':
+      case 'in_progress':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">In Progress</span>;
       case 'completed':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Completed</span>;
-      case 'rejected':
+      case 'cancelled':
         return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Rejected</span>;
       default:
         return null;
@@ -107,7 +114,7 @@ const TaskDetail: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <div className="flex-1 container mx-auto px-4 py-6">
         <Button
           variant="outline"
@@ -116,7 +123,7 @@ const TaskDetail: React.FC = () => {
         >
           Back
         </Button>
-        
+
         <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -127,13 +134,13 @@ const TaskDetail: React.FC = () => {
               {getStatusBadge()}
             </div>
           </CardHeader>
-          
+
           <CardContent className="space-y-4">
             <div>
               <h3 className="font-medium text-gray-900 mb-1">Description</h3>
               <p className="text-gray-700">{task.description}</p>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="font-medium text-gray-900 mb-1">Created</h3>
@@ -144,42 +151,42 @@ const TaskDetail: React.FC = () => {
                 <p className="text-gray-600">{formatDate(task.deadline)}</p>
               </div>
             </div>
-            
-            {task.payment && (
+
+            {task.price && (
               <div>
                 <h3 className="font-medium text-gray-900 mb-1">Payment</h3>
                 <p className="text-lg font-bold text-green-600">
-                  NGN {task.payment.toLocaleString()}
+                  NGN {task.price.toLocaleString()}
                 </p>
               </div>
             )}
-            
-            {(task.status === 'accepted' || task.status === 'completed') && (
+
+            {(task.status === 'in_progress' || task.status === 'completed') && (
               <div>
                 <h3 className="font-medium text-gray-900 mb-1">Progress</h3>
-                <ProgressIndicator 
-                  startDate={new Date(task.createdAt)} 
-                  endDate={new Date(task.deadline)} 
+                <ProgressIndicator
+                  startDate={new Date(task.createdAt)}
+                  endDate={new Date(task.deadline)}
                 />
               </div>
             )}
-            
-            {task.notes && (
+
+            {task.key_notes && (
               <div>
                 <h3 className="font-medium text-gray-900 mb-1">Notes</h3>
                 <p className="text-gray-700">{task.notes}</p>
               </div>
             )}
-            
-            {task.attachments && task.attachments.length > 0 && (
+
+            {task.file_urls && task.file_urls.length > 0 && (
               <div>
                 <h3 className="font-medium text-gray-900 mb-1">Attachments</h3>
                 <ul className="space-y-2 mt-2">
-                  {task.attachments.map((attachment) => (
+                  {task.file_urls.map((attachment) => (
                     <li key={attachment.id} className="bg-gray-50 p-3 rounded-md">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-medium">{attachment.name}</p>
+                          <p className="font-medium">{attachment.title}</p>
                           <p className="text-xs text-gray-500">
                             {formatDateTime(attachment.createdAt)}
                           </p>
@@ -207,7 +214,7 @@ const TaskDetail: React.FC = () => {
               </div>
             )}
           </CardContent>
-          
+
           <CardFooter className="justify-end">
             {task.status === 'pending' && (
               <div className="space-x-2">
@@ -232,7 +239,7 @@ const TaskDetail: React.FC = () => {
             )}
           </CardFooter>
         </Card>
-        
+
         {task.status === 'accepted' && (
           <Card>
             <CardHeader>
@@ -246,7 +253,7 @@ const TaskDetail: React.FC = () => {
                   <TabsTrigger value="link">Add Link</TabsTrigger>
                   <TabsTrigger value="file">Upload File</TabsTrigger>
                 </TabsList>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="attachmentName">Attachment Name</Label>
@@ -257,7 +264,7 @@ const TaskDetail: React.FC = () => {
                       placeholder="Enter a name for this attachment"
                     />
                   </div>
-                  
+
                   <TabsContent value="text" className="mt-0">
                     <div className="space-y-2">
                       <Label htmlFor="textContent">Text Content</Label>
@@ -270,7 +277,7 @@ const TaskDetail: React.FC = () => {
                       />
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="link" className="mt-0">
                     <div className="space-y-2">
                       <Label htmlFor="linkContent">Link</Label>
@@ -282,7 +289,7 @@ const TaskDetail: React.FC = () => {
                       />
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="file" className="mt-0">
                     <div className="space-y-2">
                       <Label htmlFor="fileUpload">Upload File</Label>

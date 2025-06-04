@@ -70,3 +70,53 @@ export type ProgressStatus = {
   percentage: number;
   color: string;
 };
+
+export enum ASSIGNED_STATUS {
+  PENDING = "pending",
+  ASSIGNED = "assigned",
+}
+
+export enum TASK_STATUS {
+  PENDING = "pending",
+  INPROGRESS = "in_progress",
+  COMPLETED = "completed",
+  CLANCELLED = "cancelled",
+}
+
+export enum USER_FINAL_DECISION {
+  APPROVED = "approved",
+  DISPUTED = "disputed",
+}
+
+export enum RESPONDER_FINAL_DECISION {
+  FINISHED = "finished",
+  CANCELLED = "cancelled",
+}
+
+export enum TASK_DIFFICULTY {
+  EASY = "easy",
+  MEDIUM = "medium",
+  HARD = "hard",
+}
+
+export type TaskInfo = {
+  title: string;
+  subject?: string;
+  description?: string;
+  deadline: string;
+  file_urls: string[];
+  key_notes: string[];
+  created_by: string;
+  price: number;
+  difficulty: TASK_DIFFICULTY;
+  _id?: string;
+  responder?: string;
+  files?: string[];
+  assigned_status: ASSIGNED_STATUS;
+  user_final_decision: USER_FINAL_DECISION;
+  status: TASK_STATUS;
+  responder_final_decision: RESPONDER_FINAL_DECISION;
+  progress_percentage: number;
+  createdAt: Date;
+  updatedAt: Date;
+};

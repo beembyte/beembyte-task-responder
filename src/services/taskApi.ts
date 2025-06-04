@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from "@/config/env";
 
 export interface getAllunAssignedTaskPayload {
@@ -31,7 +30,7 @@ export const taskApi = {
     const { limit, page, sort, title, description } = payload;
     try {
       const token = getAuthToken();
-      
+
       // Build query parameters properly
       const queryParams = new URLSearchParams({
         limit: limit.toString(),
@@ -41,10 +40,10 @@ export const taskApi = {
 
       // Add search parameters only if they have values
       if (title.trim()) {
-        queryParams.append('title', title.trim());
+        queryParams.append("title", title.trim());
       }
       if (description.trim()) {
-        queryParams.append('description', description.trim());
+        queryParams.append("description", description.trim());
       }
 
       const response = await fetch(
@@ -72,7 +71,7 @@ export const taskApi = {
     const { limit, page, sort, title, description } = payload;
     try {
       const token = getAuthToken();
-      
+
       // Build query parameters properly
       const queryParams = new URLSearchParams({
         limit: limit.toString(),
@@ -82,10 +81,10 @@ export const taskApi = {
 
       // Add search parameters only if they have values
       if (title.trim()) {
-        queryParams.append('title', title.trim());
+        queryParams.append("title", title.trim());
       }
       if (description.trim()) {
-        queryParams.append('description', description.trim());
+        queryParams.append("description", description.trim());
       }
 
       const response = await fetch(
@@ -126,6 +125,30 @@ export const taskApi = {
       return data;
     } catch (error) {
       console.error("Fetch dashboard stats error:", error);
+      return {
+        success: false,
+        message: "Failed to fetch. Please try again later.",
+      };
+    }
+  },
+
+  getOneTaskById: async (task_id: string) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `${API_BASE_URL}/responder/task/findOne?task_id=${task_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Fetch task by id error:", error);
       return {
         success: false,
         message: "Failed to fetch. Please try again later.",
