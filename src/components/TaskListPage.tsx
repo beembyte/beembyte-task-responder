@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Search, Clock, MapPin, Calendar, User } from 'lucide-react';
+import { Search, Clock, Calendar, User } from 'lucide-react';
 import useTask, { TaskResponse } from '@/hooks/useTask';
 import { getAllunAssignedTaskPayload } from '@/services/taskApi';
 
@@ -23,7 +23,7 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTasks, setTotalTasks] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
 
   const fetchTasks = async (page: number = 1, search: string = '') => {
     const payload: getAllunAssignedTaskPayload = {
@@ -171,79 +171,69 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
         </div>
       ) : tasks && tasks.length > 0 ? (
         <div className="space-y-6">
-          {tasks.map((task, index) => (
-            <Card 
-              key={task._id || index} 
-              className="hover:shadow-lg transition-all duration-200 cursor-pointer border hover:border-blue-300"
-              onClick={() => handleTaskClick(task._id)}
-            >
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row gap-6">
-                  {/* Main Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tasks.map((task, index) => (
+              <Card 
+                key={task._id || index} 
+                className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-l-blue-500 h-full"
+                onClick={() => handleTaskClick(task._id)}
+              >
+                <CardContent className="p-6 flex flex-col h-full">
                   <div className="flex-1">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
-                          {task.title}
-                        </h3>
-                        <p className="text-sm text-blue-600 font-medium mb-2">
-                          {task.subject}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <Badge className={`${getStatusColor(task.status || taskType)}`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-bold text-lg text-gray-900 line-clamp-2 flex-1 mr-2 hover:text-blue-600 transition-colors">
+                        {task.title}
+                      </h3>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={`text-xs ${getStatusColor(task.status || taskType)}`}>
                           {task.status || taskType}
                         </Badge>
                         {task.difficulty && (
-                          <Badge className={`${getDifficultyColor(task.difficulty)} font-semibold`}>
+                          <Badge className={`text-xs ${getDifficultyColor(task.difficulty)}`}>
                             {task.difficulty.toUpperCase()}
                           </Badge>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-gray-700 mb-4 text-base leading-relaxed line-clamp-3">
+                    <p className="text-sm text-blue-600 font-medium mb-3">
+                      {task.subject}
+                    </p>
+
+                    <p className="text-gray-700 mb-4 text-sm leading-relaxed line-clamp-3">
                       {task.description}
                     </p>
 
-                    {/* Task Meta Information */}
-                    <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                    <div className="flex flex-col gap-2 text-xs text-gray-600 mb-4">
                       <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <Calendar className="w-3 h-3 text-gray-400" />
                         <span>Due: {formatDate(task.deadline || task.createdAt)}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>Created: {formatDate(task.createdAt)}</span>
+                        <Clock className="w-3 h-3 text-gray-400" />
+                        <span>Posted: {formatDate(task.createdAt)}</span>
                       </div>
-                      {task.location && (
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          <span>{task.location}</span>
-                        </div>
-                      )}
                       {task.key_notes && task.key_notes.length > 0 && (
                         <div className="flex items-center space-x-2">
-                          <User className="w-4 h-4 text-gray-400" />
-                          <span>{task.key_notes.join(', ')}</span>
+                          <User className="w-3 h-3 text-gray-400" />
+                          <span className="line-clamp-1">{task.key_notes.join(', ')}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Price and Actions */}
-                  <div className="lg:w-64 flex flex-col justify-between">
-                    <div className="text-center lg:text-right mb-6">
-                      <div className="text-3xl font-bold text-green-600 mb-1">
+                  <div className="border-t pt-4 mt-auto">
+                    <div className="text-center mb-4">
+                      <div className="text-2xl font-bold text-green-600">
                         {formatPayment(task.price || 0)}
                       </div>
-                      <p className="text-sm text-gray-500">Fixed price</p>
+                      <p className="text-xs text-gray-500">Fixed price</p>
                     </div>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
                       <Button 
                         variant="outline" 
-                        size="lg" 
+                        size="sm" 
                         className="w-full"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -256,14 +246,14 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                         <div className="flex gap-2">
                           <Button 
                             variant="outline" 
-                            size="lg" 
+                            size="sm" 
                             className="flex-1 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
                             onClick={(e) => handleDeclineTask(e, task._id)}
                           >
                             Decline
                           </Button>
                           <Button 
-                            size="lg" 
+                            size="sm" 
                             className="flex-1 bg-green-600 hover:bg-green-700"
                             onClick={(e) => handleAcceptTask(e, task._id)}
                           >
@@ -273,10 +263,10 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                       )}
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
