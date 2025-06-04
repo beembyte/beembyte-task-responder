@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from "@/config/env";
 
 export interface getAllunAssignedTaskPayload {
@@ -30,8 +31,24 @@ export const taskApi = {
     const { limit, page, sort, title, description } = payload;
     try {
       const token = getAuthToken();
+      
+      // Build query parameters properly
+      const queryParams = new URLSearchParams({
+        limit: limit.toString(),
+        page: page.toString(),
+        sort: sort.toString(),
+      });
+
+      // Add search parameters only if they have values
+      if (title.trim()) {
+        queryParams.append('title', title.trim());
+      }
+      if (description.trim()) {
+        queryParams.append('description', description.trim());
+      }
+
       const response = await fetch(
-        `${API_BASE_URL}/responder/task/all-unassigned-pending-task?limit=${limit}&page=${page}&sort=${sort},title=${title}&description=${description}`,
+        `${API_BASE_URL}/responder/task/all-unassigned-pending-task?${queryParams.toString()}`,
         {
           method: "GET",
           headers: {
@@ -55,8 +72,24 @@ export const taskApi = {
     const { limit, page, sort, title, description } = payload;
     try {
       const token = getAuthToken();
+      
+      // Build query parameters properly
+      const queryParams = new URLSearchParams({
+        limit: limit.toString(),
+        page: page.toString(),
+        sort: sort.toString(),
+      });
+
+      // Add search parameters only if they have values
+      if (title.trim()) {
+        queryParams.append('title', title.trim());
+      }
+      if (description.trim()) {
+        queryParams.append('description', description.trim());
+      }
+
       const response = await fetch(
-        `${API_BASE_URL}/responder/task/all-completed-task?limit=${limit}&page=${page}&sort=${sort},title=${title}&description=${description}`,
+        `${API_BASE_URL}/responder/task/all-completed-task?${queryParams.toString()}`,
         {
           method: "GET",
           headers: {
@@ -68,7 +101,7 @@ export const taskApi = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Fetch pending task error:", error);
+      console.error("Fetch completed task error:", error);
       return {
         success: false,
         message: "Failed to fetch. Please try again later.",
@@ -92,7 +125,7 @@ export const taskApi = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Fetch pending task error:", error);
+      console.error("Fetch dashboard stats error:", error);
       return {
         success: false,
         message: "Failed to fetch. Please try again later.",

@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Calendar, Clock, MapPin, User, FileText, AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 
@@ -32,6 +32,13 @@ const SingleTask: React.FC = () => {
           "files": [],
           "key_notes": ["urgent", "high-priority", "financial"],
           "created_by": "682038f63dc68317f799e7b3",
+          "creator_info": {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@example.com",
+            "company": "TechCorp Solutions",
+            "avatar": null
+          },
           "price": 15993.8,
           "difficulty": "hard",
           "status": "pending",
@@ -235,6 +242,54 @@ const SingleTask: React.FC = () => {
               </CardContent>
             </Card>
 
+            {/* Creator Information */}
+            {task.creator_info && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    Task Creator
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage 
+                        src={task.creator_info.avatar || `https://robohash.org/${task.creator_info.first_name}?set=set4`} 
+                        alt={`${task.creator_info.first_name} ${task.creator_info.last_name}`} 
+                      />
+                      <AvatarFallback>
+                        {task.creator_info.first_name?.charAt(0)}{task.creator_info.last_name?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {task.creator_info.first_name} {task.creator_info.last_name}
+                      </p>
+                      <p className="text-sm text-gray-600">{task.creator_info.email}</p>
+                    </div>
+                  </div>
+
+                  {task.creator_info.company && (
+                    <>
+                      <Separator />
+                      <div>
+                        <p className="font-medium text-gray-700">Company</p>
+                        <p className="text-sm text-gray-600">{task.creator_info.company}</p>
+                      </div>
+                    </>
+                  )}
+
+                  <Separator />
+
+                  <div>
+                    <p className="font-medium text-gray-700">Client ID</p>
+                    <p className="text-sm text-gray-600 font-mono">{task.created_by}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Task Details */}
             <Card>
               <CardHeader>
@@ -256,16 +311,6 @@ const SingleTask: React.FC = () => {
                   <div>
                     <p className="font-medium">Posted</p>
                     <p className="text-sm text-gray-600">{formatDate(task.createdAt)}</p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center gap-3">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="font-medium">Client ID</p>
-                    <p className="text-sm text-gray-600 font-mono">{task.created_by}</p>
                   </div>
                 </div>
               </CardContent>

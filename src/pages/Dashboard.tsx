@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
@@ -14,6 +13,7 @@ import { ArrowRight, Clock, Calendar, User as UserIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { loggedInUser } = useAuth()
   const { isLoading, getPendingUnassignedTask, getOngoingTasks, getDashboardStats } = useTask()
   const [user, setUser] = useState<User>(null)
@@ -98,6 +98,12 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleOngoingTaskClick = () => {
+    if (ongoingTask) {
+      navigate(`/task/${ongoingTask._id}`);
+    }
+  };
+
   console.log(dashboardStats)
 
   return (
@@ -173,7 +179,7 @@ const Dashboard: React.FC = () => {
               <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
               Current Task
             </h2>
-            <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = `/task/${ongoingTask._id}`}>
+            <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow cursor-pointer" onClick={handleOngoingTaskClick}>
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1">
@@ -228,7 +234,7 @@ const Dashboard: React.FC = () => {
                       className="w-full"
                       onClick={(e) => {
                         e.stopPropagation();
-                        window.location.href = `/task/${ongoingTask._id}`;
+                        navigate(`/task/${ongoingTask._id}`);
                       }}
                     >
                       Continue Work
