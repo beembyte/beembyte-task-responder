@@ -54,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       role: 'user' as any,
       is_verified: true,
       availability_status: 'available' as any,
+      last_login: new Date(),
     };
     
     setUser(mockUser);
@@ -72,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       role: 'user' as any,
       is_verified: true,
       availability_status: 'available' as any,
+      last_login: new Date(),
     };
     
     setUser(newUser);

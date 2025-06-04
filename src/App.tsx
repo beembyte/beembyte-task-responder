@@ -1,18 +1,21 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
 import Dashboard from './pages/Dashboard';
 import PendingTasks from './pages/PendingTasks';
 import OngoingTasks from './pages/OngoingTasks';
 import CompletedTasks from './pages/CompletedTasks';
-import { QueryClient } from 'react-query';
 import TaskDetail from './pages/TaskDetail';
 import SingleTask from '@/pages/SingleTask';
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <QueryClient>
+    <QueryClientProvider client={queryClient}>
       <div className="App">
         <AuthProvider>
           <TaskProvider>
@@ -27,7 +30,7 @@ function App() {
           </TaskProvider>
         </AuthProvider>
       </div>
-    </QueryClient>
+    </QueryClientProvider>
   );
 }
 
