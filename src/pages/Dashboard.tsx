@@ -8,15 +8,16 @@ import ProgressIndicator from '@/components/ui/progress-indicator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import useTask from '@/hooks/useTask';
+import useTask, { DashStatsData } from '@/hooks/useTask';
 import CompactTaskCard from '@/components/CompactTaskCard';
 import { ArrowRight } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { loggedInUser } = useAuth()
-  const { isLoading, getPendingUnassignedTask, pendingTasks } = useTask()
+  const { isLoading, getPendingUnassignedTask, getDashboardStats } = useTask()
   const [user, setUser] = useState<User>(null)
   const [recentTasks, setRecentTasks] = useState<any[]>([])
+  const [dashboardStats, setDashStats] = useState<DashStatsData>(null)
 
   useEffect(() => {
     const userFromStorage = loggedInUser();
@@ -32,14 +33,24 @@ const Dashboard: React.FC = () => {
         title: '',
         description: ''
       });
-      
+
       if (response.success && response.data) {
-        setRecentTasks(response.data.tasks);
+        setRecentTasks(response.data.items);
       }
     };
 
     fetchRecentTasks();
   }, []);
+
+  useEffect(() => {
+    const getStats = async () => {
+      const response = await getDashboardStats()
+      setDashStats(response.data)
+    }
+    getStats()
+  }, [])
+
+  console.log(dashboardStats)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -81,27 +92,27 @@ const Dashboard: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Available Tasks</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">{dashboardStats && dashboardStats?.pendingTasksCount}</div>
               <p className="text-xs text-gray-500">Ready to apply</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Ongoing Tasks</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3</div>
+              <div className="text-2xl font-bold">{dashboardStats && dashboardStats?.inProgressTask}</div>
               <p className="text-xs text-gray-500">In progress</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">28</div>
+              <div className="text-2xl font-bold">{dashboardStats && dashboardStats?.completedThisMonthCount}</div>
               <p className="text-xs text-gray-500">This month</p>
             </CardContent>
           </Card>
@@ -121,16 +132,16 @@ const Dashboard: React.FC = () => {
               </Button>
             </Link>
           </div>
-          
+
           {isLoading ? (
             <div className="text-center py-8">Loading tasks...</div>
-          ) : recentTasks.length > 0 ? (
+          ) : recentTasks && recentTasks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {recentTasks.map((task, index) => (
                 <CompactTaskCard
                   key={task.id || index}
                   task={task}
-                  onClick={() => {/* Navigate to task detail */}}
+                  onClick={() => {/* Navigate to task detail */ }}
                 />
               ))}
             </div>
@@ -153,7 +164,7 @@ const Dashboard: React.FC = () => {
               </Link>
             </CardContent>
           </Card>
-          
+
           <Card className="border-dashed border-2 hover:border-primary transition-colors">
             <CardContent className="p-6 text-center">
               <h3 className="font-semibold mb-2">Ongoing Work</h3>
@@ -163,7 +174,7 @@ const Dashboard: React.FC = () => {
               </Link>
             </CardContent>
           </Card>
-          
+
           <Card className="border-dashed border-2 hover:border-primary transition-colors">
             <CardContent className="p-6 text-center">
               <h3 className="font-semibold mb-2">Work History</h3>

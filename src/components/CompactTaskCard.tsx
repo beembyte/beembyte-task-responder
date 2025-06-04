@@ -25,7 +25,7 @@ const CompactTaskCard: React.FC<CompactTaskCardProps> = ({ task, onClick }) => {
   };
 
   return (
-    <Card 
+    <Card
       className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-blue-500"
       onClick={onClick}
     >
@@ -39,16 +39,16 @@ const CompactTaskCard: React.FC<CompactTaskCardProps> = ({ task, onClick }) => {
               {task.status || 'pending'}
             </Badge>
           </div>
-          
+
           <p className="text-xs text-gray-600 line-clamp-2">
             {task.description}
           </p>
-          
+
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center space-x-1">
-              <DollarSign className="w-3 h-3" />
+              {/* <DollarSign className="w-3 h-3" /> */}
               <span className="font-medium text-green-600">
-                {formatPayment(task.payment || 0)}
+                {formatPayment(task.price || 0)}
               </span>
             </div>
             <div className="flex items-center space-x-1">

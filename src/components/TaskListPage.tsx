@@ -33,7 +33,7 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
     };
 
     let response: TaskResponse;
-    
+
     switch (taskType) {
       case 'pending':
         response = await getPendingUnassignedTask(payload);
@@ -49,9 +49,9 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
     }
 
     if (response.success && response.data) {
-      setTasks(response.data.tasks);
-      setTotalPages(response.data.totalPages);
-      setTotalTasks(response.data.totalTasks);
+      setTasks(response.data.items);
+      setTotalPages(response.data.meta.page);
+      setTotalTasks(response.data.meta.total);
     }
   };
 
@@ -88,6 +88,8 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
     }
   };
 
+  console.log(tasks)
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
@@ -119,7 +121,7 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
         <div className="text-center py-8">
           <div className="text-lg">Loading tasks...</div>
         </div>
-      ) : tasks.length > 0 ? (
+      ) : tasks && tasks.length > 0 ? (
         <div className="space-y-4">
           {tasks.map((task, index) => (
             <Card key={task.id || index} className="hover:shadow-md transition-shadow">
@@ -134,11 +136,11 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                         {task.status || taskType}
                       </Badge>
                     </div>
-                    
+
                     <p className="text-gray-600 mb-3 line-clamp-2">
                       {task.description}
                     </p>
-                    
+
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
                         <Clock className="w-4 h-4" />
@@ -152,18 +154,18 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="lg:w-48 flex flex-col justify-between">
                     <div className="text-right mb-4">
                       <div className="flex items-center justify-end space-x-1 mb-1">
-                        <DollarSign className="w-4 h-4 text-green-600" />
+                        {/* <DollarSign className="w-4 h-4 text-green-600" /> */}
                         <span className="text-2xl font-bold text-green-600">
-                          {formatPayment(task.payment || 0)}
+                          {formatPayment(task.price || 0)}
                         </span>
                       </div>
                       <p className="text-xs text-gray-500">Fixed price</p>
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1">
                         View Details
@@ -179,18 +181,18 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
               </CardContent>
             </Card>
           ))}
-          
+
           {totalPages > 1 && (
             <div className="mt-8">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
+                    <PaginationPrevious
                       onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
                       className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />
                   </PaginationItem>
-                  
+
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     const pageNum = i + 1;
                     return (
@@ -205,9 +207,9 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                       </PaginationItem>
                     );
                   })}
-                  
+
                   <PaginationItem>
-                    <PaginationNext 
+                    <PaginationNext
                       onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
                       className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />

@@ -7,6 +7,15 @@ export interface getAllunAssignedTaskPayload {
   title: string;
   description: string;
 }
+
+export interface getCompletedTaskPayload {
+  limit: number;
+  page: number;
+  sort: number;
+  title: string;
+  description: string;
+}
+
 const getAuthToken = () => {
   return document.cookie
     .split("; ")
@@ -23,6 +32,55 @@ export const taskApi = {
       const token = getAuthToken();
       const response = await fetch(
         `${API_BASE_URL}/responder/task/all-unassigned-pending-task?limit=${limit}&page=${page}&sort=${sort},title=${title}&description=${description}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Fetch pending task error:", error);
+      return {
+        success: false,
+        message: "Failed to fetch. Please try again later.",
+      };
+    }
+  },
+
+  getCompletedTask: async (payload: getCompletedTaskPayload) => {
+    const { limit, page, sort, title, description } = payload;
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `${API_BASE_URL}/responder/task/all-completed-task?limit=${limit}&page=${page}&sort=${sort},title=${title}&description=${description}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Fetch pending task error:", error);
+      return {
+        success: false,
+        message: "Failed to fetch. Please try again later.",
+      };
+    }
+  },
+
+  getDashboardStats: async () => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `${API_BASE_URL}/responder/task/dashboard-stats`,
         {
           method: "GET",
           headers: {
