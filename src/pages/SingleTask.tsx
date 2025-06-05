@@ -12,14 +12,16 @@ import { ArrowLeft, Calendar, Clock, User, FileText, AlertTriangle } from "lucid
 import Navbar from "@/components/layout/Navbar"
 import { useToast } from "@/hooks/use-toast"
 import useTask from "@/hooks/useTask"
-import { type TaskInfo, TASK_STATUS, TASK_DIFFICULTY } from "@/types"
+import { type TaskInfo, TASK_STATUS, TASK_DIFFICULTY, ASSIGNED_STATUS } from "@/types"
 
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getOneTaskById, isLoading } = useTask()
+  const { getOneTaskById, acceptTask, cancelTask, isLoading } = useTask()
   const { toast } = useToast()
   const [task, setTask] = useState<TaskInfo | null>(null)
+  const [isAccepting, setIsAccepting] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -85,15 +87,85 @@ const SingleTask: React.FC = () => {
     }
   }
 
-  const handleAcceptTask = () => {
-    // Add accept task logic here
-    console.log("Accept task:", id)
+  const handleAcceptTask = async () => {
+    if (!id) return
+    
+    setIsAccepting(true)
+    try {
+      const response = await acceptTask(id)
+      if (response.success) {
+        toast({
+          title: "Task Accepted",
+          description: "You have successfully accepted this task.",
+        })
+        // Refresh task data to get updated status
+        const updatedResponse = await getOneTaskById(id)
+        if (updatedResponse.success && updatedResponse.data) {
+          setTask(updatedResponse.data)
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to accept task",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Accept task error:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsAccepting(false)
+    }
+  }
+
+  const handleCancelTask = async () => {
+    if (!id) return
+    
+    setIsCancelling(true)
+    try {
+      const response = await cancelTask(id)
+      if (response.success) {
+        toast({
+          title: "Task Cancelled",
+          description: "You have successfully cancelled this task.",
+        })
+        // Refresh task data to get updated status
+        const updatedResponse = await getOneTaskById(id)
+        if (updatedResponse.success && updatedResponse.data) {
+          setTask(updatedResponse.data)
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to cancel task",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Cancel task error:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCancelling(false)
+    }
   }
 
   const handleDeclineTask = () => {
-    // Add decline task logic here
-    console.log("Decline task:", id)
+    toast({
+      title: "Task Declined",
+      description: "You have declined this task.",
+    })
+    navigate("/dashboard")
   }
+
+  const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
   if (isLoading) {
     return (
@@ -302,20 +374,37 @@ const SingleTask: React.FC = () => {
             </Card>
 
             {/* Action Buttons */}
-            {task.status === TASK_STATUS.PENDING && (
+            {task?.status === TASK_STATUS.PENDING && (
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-3">
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-lg py-6" onClick={handleAcceptTask}>
-                      Accept Task
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-lg py-6"
-                      onClick={handleDeclineTask}
-                    >
-                      Decline Task
-                    </Button>
+                    {!isTaskAccepted ? (
+                      <>
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700 text-lg py-6" 
+                          onClick={handleAcceptTask}
+                          disabled={isAccepting || isLoading}
+                        >
+                          {isAccepting ? "Accepting..." : "Accept Task"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-lg py-6"
+                          onClick={handleDeclineTask}
+                        >
+                          Decline Task
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-lg py-6"
+                        onClick={handleCancelTask}
+                        disabled={isCancelling || isLoading}
+                      >
+                        {isCancelling ? "Cancelling..." : "Cancel Task"}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
