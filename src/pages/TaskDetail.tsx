@@ -46,6 +46,8 @@ const TaskDetail: React.FC = () => {
     getTask();
   }, [id, getOneTaskById, toast]);
 
+  console.log('task', task)
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -77,10 +79,10 @@ const TaskDetail: React.FC = () => {
   const handleComplete = async () => {
     if (attachmentType && (attachmentContent || attachmentType === 'file') && attachmentName) {
       setSubmitting(true);
-      
+
       // In a real implementation, you would call an API to complete the task
       // For now, we'll just show a success message and navigate back
-      
+
       setTimeout(() => {
         toast({
           title: "Task Completed",
@@ -234,9 +236,9 @@ const TaskDetail: React.FC = () => {
                   <div className="space-y-2">
                     {task.file_urls.map((fileUrl, index) => (
                       <div key={index} className="bg-gray-50 p-3 rounded-md">
-                        <a 
-                          href={fileUrl} 
-                          target="_blank" 
+                        <a
+                          href={fileUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
                         >
@@ -262,8 +264,8 @@ const TaskDetail: React.FC = () => {
                       <span>{task.progress_percentage}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${task.progress_percentage}%` }}
                       ></div>
                     </div>
@@ -313,7 +315,7 @@ const TaskDetail: React.FC = () => {
                   <Clock className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="font-medium">Created</p>
-                    <p className="text-sm text-gray-600">{formatDateTime(task.createdAt)}</p>
+                    <p className="text-sm text-gray-600">{formatDateTime(task.createdAt.toISOString())}</p>
                   </div>
                 </div>
 
@@ -323,7 +325,7 @@ const TaskDetail: React.FC = () => {
                   <User className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="font-medium">Created By</p>
-                    <p className="text-sm text-gray-600 font-mono">{task.created_by}</p>
+                    <p className="text-sm text-gray-600 font-mono">{task.created_by.first_name}</p>
                   </div>
                 </div>
               </CardContent>
@@ -334,7 +336,7 @@ const TaskDetail: React.FC = () => {
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-3">
-                    <Button 
+                    <Button
                       className="w-full bg-green-600 hover:bg-green-700 text-lg py-6"
                       onClick={() => {
                         // Handle accept task
@@ -346,8 +348,8 @@ const TaskDetail: React.FC = () => {
                     >
                       Accept Task
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-lg py-6"
                       onClick={() => {
                         // Handle decline task
@@ -439,8 +441,8 @@ const TaskDetail: React.FC = () => {
               </Tabs>
             </CardContent>
             <CardFooter>
-              <Button 
-                onClick={handleComplete} 
+              <Button
+                onClick={handleComplete}
                 disabled={submitting}
                 className="bg-green-600 hover:bg-green-700"
               >

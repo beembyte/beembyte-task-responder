@@ -155,4 +155,54 @@ export const taskApi = {
       };
     }
   },
+
+  acceptTask: async (task_id: string) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `${API_BASE_URL}/responder/task/accept-task`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ task_id }),
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Accept task error:", error);
+      return {
+        success: false,
+        message: "Failed to accept task. Please try again later.",
+      };
+    }
+  },
+
+  cancelTask: async (task_id: string) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `${API_BASE_URL}/responder/task/cancel-task`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ task_id }),
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("cancel task error:", error);
+      return {
+        success: false,
+        message: "Failed to cancel task. Please try again later.",
+      };
+    }
+  },
 };

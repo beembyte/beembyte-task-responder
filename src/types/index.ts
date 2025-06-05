@@ -106,11 +106,11 @@ export type TaskInfo = {
   deadline: string;
   file_urls: string[];
   key_notes: string[];
-  created_by: string;
+  created_by: User;
   price: number;
   difficulty: TASK_DIFFICULTY;
   _id?: string;
-  responder?: string;
+  responder?: User;
   files?: string[];
   assigned_status: ASSIGNED_STATUS;
   user_final_decision: USER_FINAL_DECISION;

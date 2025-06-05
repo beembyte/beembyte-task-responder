@@ -156,6 +156,49 @@ const useTask = () => {
             setIsLoading(false)
         }
     }
+
+    const acceptTask = async (task_id: string): Promise<SingleTaskResponse> => {
+        setIsLoading(true)
+        try {
+            const response = await taskApi.acceptTask(task_id)
+            if (response.success) {
+                return response
+            }
+            toast.error(response.message || "Failed to accept tasks")
+            return response
+        } catch (error) {
+            console.error("Accept task error:", error)
+            toast.error("An unexpected error occurred. Please try again later.")
+            return {
+                success: false,
+                message: "An unexpected error occurred"
+            }
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const cancelTask = async (task_id: string): Promise<SingleTaskResponse> => {
+        setIsLoading(true)
+        try {
+            const response = await taskApi.cancelTask(task_id)
+            if (response.success) {
+                return response
+            }
+            toast.error(response.message || "Failed to cancel tasks")
+            return response
+        } catch (error) {
+            console.error("Cancel task error:", error)
+            toast.error("An unexpected error occurred. Please try again later.")
+            return {
+                success: false,
+                message: "An unexpected error occurred"
+            }
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return {
         isLoading,
         pendingTasks,
@@ -165,7 +208,9 @@ const useTask = () => {
         getOngoingTasks,
         getCompletedTasks,
         getDashboardStats,
-        getOneTaskById
+        getOneTaskById,
+        acceptTask,
+        cancelTask
     }
 }
 
