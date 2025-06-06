@@ -1,4 +1,3 @@
-
 import { longFormatters } from "date-fns";
 
 // Format price to currency
@@ -49,4 +48,11 @@ export const formatFileSize = (bytes: number): string => {
 export const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return `${text.substring(0, maxLength)}...`;
+};
+
+export const getCookie = (name: string): string | null => {
+  const match = document.cookie.match(
+    new RegExp("(^|;\\s*)" + name + "=([^;]*)")
+  );
+  return match ? decodeURIComponent(match[2]) : null;
 };

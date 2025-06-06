@@ -1,6 +1,7 @@
 
 import { taskApi, getAllunAssignedTaskPayload, getCompletedTaskPayload } from "@/services/taskApi"
 import { TaskInfo } from "@/types";
+import { handleApiErrors } from "@/utils/apiResponse";
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -142,9 +143,9 @@ const useTask = () => {
             const response = await taskApi.getOneTaskById(task_id)
             if (response.success) {
                 return response
+            } else {
+                handleApiErrors(response);
             }
-            toast.error(response.message || "Failed to fetch tasks")
-            return response
         } catch (error) {
             console.error("Fetch single task error:", error)
             toast.error("An unexpected error occurred. Please try again later.")
@@ -163,9 +164,9 @@ const useTask = () => {
             const response = await taskApi.acceptTask(task_id)
             if (response.success) {
                 return response
+            } else {
+                handleApiErrors(response);
             }
-            toast.error(response.message || "Failed to accept tasks")
-            return response
         } catch (error) {
             console.error("Accept task error:", error)
             toast.error("An unexpected error occurred. Please try again later.")
@@ -184,9 +185,9 @@ const useTask = () => {
             const response = await taskApi.cancelTask(task_id)
             if (response.success) {
                 return response
+            } else {
+                handleApiErrors(response);
             }
-            toast.error(response.message || "Failed to cancel tasks")
-            return response
         } catch (error) {
             console.error("Cancel task error:", error)
             toast.error("An unexpected error occurred. Please try again later.")

@@ -148,6 +148,29 @@ export const authApi = {
     }
   },
 
+  verifyAuthToken: async (auth_token: string) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/responder/verify-authToken/${auth_token}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("verify auth token error:", error);
+      return {
+        success: false,
+        message: "Failed to verify auth token Please try again later.",
+      };
+    }
+  },
+
   // Logout user and clear cookie
   logout: () => {
     document.cookie =

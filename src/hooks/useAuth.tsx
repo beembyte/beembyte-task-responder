@@ -13,6 +13,7 @@ import {
 import { handleApiErrors } from "@/utils/apiResponse"
 import type { User } from "@/types"
 import { socketService, socket } from "@/services/socket"
+import { getCookie } from "@/utils/formatUtils"
 
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -170,6 +171,20 @@ export const useAuth = () => {
     }
   };
 
+  const verifyAuthToken = async () => {
+    try {
+      const auth_token = getCookie('authToken');
+
+      const response = await authApi.verifyAuthToken(auth_token)
+      if (!response.success) {
+        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+      }
+    } catch (error) {
+      console.error("Resend verification error:", error)
+      toast.error("Failed to connect please check network connection.")
+    }
+  }
+
   return {
     isLoading,
     register,
@@ -179,6 +194,7 @@ export const useAuth = () => {
     resendCountdown,
     logout,
     updateProfile,
-    loggedInUser
+    loggedInUser,
+    verifyAuthToken
   }
 }
