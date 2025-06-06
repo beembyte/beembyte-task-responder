@@ -32,7 +32,7 @@ export interface DashboardStats {
 export interface DashStatsData {
     pendingTasksCount: number | null,
     completedThisMonthCount: number | null,
-    inProgressTask: number | null
+    inProgressTask: TaskInfo | null
 }
 
 

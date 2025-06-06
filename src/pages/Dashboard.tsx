@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
 import ProgressIndicator from '@/components/ui/progress-indicator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User } from '@/types';
+import { AVAILABILITY_STATUS, User } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import useTask, { DashStatsData } from '@/hooks/useTask';
 import CompactTaskCard from '@/components/CompactTaskCard';
@@ -104,8 +104,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  console.log(dashboardStats)
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -129,9 +127,9 @@ const Dashboard: React.FC = () => {
                   </span>
                 </span>
                 <span className="flex items-center mt-1">
-                  <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability_status ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span className={`text-sm font-medium ${user?.availability_status ? 'text-green-600' : 'text-red-600'}`}>
-                    {user?.availability_status ? 'Available' : 'Busy'}
+                  <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className={`text-sm font-medium ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'text-green-600' : 'text-red-600'}`}>
+                    {user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'Available' : 'Busy'}
                   </span>
                 </span>
               </div>
@@ -156,7 +154,7 @@ const Dashboard: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Current Task</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{ongoingTask ? 1 : 0}</div>
+              <div className="text-2xl font-bold">{dashboardStats && dashboardStats?.inProgressTask ? 1 : 0}</div>
               <p className="text-xs text-gray-500">In progress</p>
             </CardContent>
           </Card>
@@ -228,9 +226,9 @@ const Dashboard: React.FC = () => {
                       <p className="text-sm text-gray-500">Fixed price</p>
                     </div>
 
-                    <Button 
-                      variant="outline" 
-                      size="lg" 
+                    <Button
+                      variant="outline"
+                      size="lg"
                       className="w-full"
                       onClick={(e) => {
                         e.stopPropagation();
