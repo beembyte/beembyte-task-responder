@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 
 export const useAuthGuard = (requireAuth = true) => {
-
   const { verifyAuthToken } = useAuth()
   const location = useLocation();
   const navigate = useNavigate();
@@ -15,19 +14,29 @@ export const useAuthGuard = (requireAuth = true) => {
   const storedUser = localStorage.getItem("authorizeUser");
   const isAuthenticated = hasAuthCookie && !!storedUser;
 
-
   useEffect(() => {
-    verifyAuthToken()
+    const checkAuth = async () => {
+      if (requireAuth) {
+        if (!isAuthenticated) {
+          console.log(`Protected route access attempted: ${location.pathname}`);
+          toast.error("Please login to access this page");
+          navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
+          return;
+        }
+        
+        // Verify token validity
+        try {
+          await verifyAuthToken();
+        } catch (error) {
+          console.error("Token verification failed:", error);
+          toast.error("Session expired. Please login again.");
+          navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
+        }
+      }
+    };
 
-  }, [])
-
-  useEffect(() => {
-    if (requireAuth && !isAuthenticated) {
-      console.log(`Protected route access attempted: ${location.pathname}`);
-      toast.error("Please login to access this page");
-      navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
-    }
-  }, [isAuthenticated, navigate, location.pathname, requireAuth]);
+    checkAuth();
+  }, [isAuthenticated, navigate, location.pathname, requireAuth, verifyAuthToken])
 
   return { isAuthenticated };
 };

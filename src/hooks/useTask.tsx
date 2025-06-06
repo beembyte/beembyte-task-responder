@@ -142,10 +142,10 @@ const useTask = () => {
         try {
             const response = await taskApi.getOneTaskById(task_id)
             if (response.success) {
-                console.log('here 1')
+                console.log('Task fetched successfully')
                 return response
             } else {
-                console.log('here 2')
+                console.log('Failed to fetch task')
                 handleApiErrors(response);
             }
             return response
@@ -162,14 +162,27 @@ const useTask = () => {
     }
 
     const acceptTask = async (task_id: string): Promise<SingleTaskResponse> => {
-        setIsLoading(true)
         try {
             const response = await taskApi.acceptTask(task_id)
-            if (response.success) {
+            
+            // Handle undefined success or error responses
+            if (response && response.success === true) {
+                toast.success(response.message || "Task accepted successfully!")
                 return response
             } else {
-                handleApiErrors(response);
-                return
+                // Handle cases where success is false or undefined
+                if (response && response.errors) {
+                    handleApiErrors(response);
+                } else if (response && response.message) {
+                    toast.error(response.message);
+                } else {
+                    toast.error("Failed to accept task. Please try again.");
+                }
+                
+                return {
+                    success: false,
+                    message: response?.message || "Failed to accept task"
+                }
             }
         } catch (error) {
             console.error("Accept task error:", error)
@@ -178,19 +191,31 @@ const useTask = () => {
                 success: false,
                 message: "An unexpected error occurred"
             }
-        } finally {
-            setIsLoading(false)
         }
     }
 
     const cancelTask = async (task_id: string): Promise<SingleTaskResponse> => {
-        setIsLoading(true)
         try {
             const response = await taskApi.cancelTask(task_id)
-            if (response.success) {
+            
+            // Handle undefined success or error responses
+            if (response && response.success === true) {
+                toast.success(response.message || "Task cancelled successfully!")
                 return response
             } else {
-                handleApiErrors(response);
+                // Handle cases where success is false or undefined
+                if (response && response.errors) {
+                    handleApiErrors(response);
+                } else if (response && response.message) {
+                    toast.error(response.message);
+                } else {
+                    toast.error("Failed to cancel task. Please try again.");
+                }
+                
+                return {
+                    success: false,
+                    message: response?.message || "Failed to cancel task"
+                }
             }
         } catch (error) {
             console.error("Cancel task error:", error)
@@ -199,8 +224,6 @@ const useTask = () => {
                 success: false,
                 message: "An unexpected error occurred"
             }
-        } finally {
-            setIsLoading(false)
         }
     }
 

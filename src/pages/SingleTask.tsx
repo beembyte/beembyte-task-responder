@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
 import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
 import TaskHeader from "@/components/task/TaskHeader"
@@ -19,15 +20,23 @@ import TaskSidebar from "@/components/task/TaskSidebar"
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getOneTaskById, acceptTask, cancelTask, isLoading } = useTask()
+  const { getOneTaskById, acceptTask, cancelTask } = useTask()
+  const { verifyAuthToken } = useAuth()
   const { toast } = useToast()
   const [task, setTask] = useState<TaskInfo | null>(null)
   const [isAccepting, setIsAccepting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+  const [isLoadingTask, setIsLoadingTask] = useState(true)
+
+  // Verify auth token on component mount
+  useEffect(() => {
+    verifyAuthToken()
+  }, [verifyAuthToken])
 
   useEffect(() => {
     const fetchTask = async () => {
       if (id) {
+        setIsLoadingTask(true)
         const response = await getOneTaskById(id)
         if (response.success && response.data) {
           setTask(response.data)
@@ -38,6 +47,7 @@ const SingleTask: React.FC = () => {
             variant: "destructive",
           })
         }
+        setIsLoadingTask(false)
       }
     }
 
@@ -52,29 +62,14 @@ const SingleTask: React.FC = () => {
       const response = await acceptTask(id)
 
       if (response.success) {
-        toast({
-          title: "Task Accepted",
-          description: "You have successfully accepted this task.",
-        })
         // Refresh task data to get updated status
         const updatedResponse = await getOneTaskById(id)
         if (updatedResponse.success && updatedResponse.data) {
           setTask(updatedResponse.data)
         }
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to accept task",
-          variant: "destructive",
-        })
       }
     } catch (error) {
       console.error("Accept task error:", error)
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      })
     } finally {
       setIsAccepting(false)
     }
@@ -87,29 +82,14 @@ const SingleTask: React.FC = () => {
     try {
       const response = await cancelTask(id)
       if (response.success) {
-        toast({
-          title: "Task Cancelled",
-          description: "You have successfully cancelled this task.",
-        })
         // Refresh task data to get updated status
         const updatedResponse = await getOneTaskById(id)
         if (updatedResponse.success && updatedResponse.data) {
           setTask(updatedResponse.data)
         }
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to cancel task",
-          variant: "destructive",
-        })
       }
     } catch (error) {
       console.error("Cancel task error:", error)
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      })
     } finally {
       setIsCancelling(false)
     }
@@ -125,7 +105,7 @@ const SingleTask: React.FC = () => {
 
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
-  if (isLoading) {
+  if (isLoadingTask) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -177,7 +157,7 @@ const SingleTask: React.FC = () => {
             isTaskAccepted={isTaskAccepted}
             isAccepting={isAccepting}
             isCancelling={isCancelling}
-            isLoading={isLoading}
+            isLoading={false}
             onAcceptTask={handleAcceptTask}
             onCancelTask={handleCancelTask}
             onDeclineTask={handleDeclineTask}
