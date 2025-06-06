@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 export const handleApiErrors = (response: {
@@ -15,19 +14,23 @@ export const handleApiErrors = (response: {
 };
 
 export const handleNetworkError = (error: unknown) => {
-  console.error('Network error:', error);
-  
+  console.error("Network error:", error);
+
   if (error instanceof Error) {
-    if (error.message.includes('NetworkError') || 
-        error.message.includes('Failed to fetch') ||
-        error.message.includes('Network request failed')) {
-      toast.error('Network connection issue. Please check your internet connection.');
-    } else if (error.message.includes('WebSocket')) {
-      toast.error('Live connection failed. Some features may be limited.');
+    if (
+      error.message.includes("NetworkError") ||
+      error.message.includes("Failed to fetch") ||
+      error.message.includes("Network request failed")
+    ) {
+      toast.error(
+        "Network connection issue. Please check your internet connection."
+      );
+    } else if (error.message.includes("WebSocket")) {
+      toast.error("Live connection failed. Some features may be limited.");
     } else {
       toast.error(`Error: ${error.message}`);
     }
   } else {
-    toast.error('An unexpected error occurred. Please try again later.');
+    toast.error("An unexpected error occurred. Please try again later.");
   }
 };

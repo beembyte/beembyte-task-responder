@@ -46,10 +46,11 @@ const SingleTask: React.FC = () => {
 
   const handleAcceptTask = async () => {
     if (!id) return
-    
+
     setIsAccepting(true)
     try {
       const response = await acceptTask(id)
+
       if (response.success) {
         toast({
           title: "Task Accepted",
@@ -81,7 +82,7 @@ const SingleTask: React.FC = () => {
 
   const handleCancelTask = async () => {
     if (!id) return
-    
+
     setIsCancelling(true)
     try {
       const response = await cancelTask(id)

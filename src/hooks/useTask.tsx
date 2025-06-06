@@ -142,10 +142,13 @@ const useTask = () => {
         try {
             const response = await taskApi.getOneTaskById(task_id)
             if (response.success) {
+                console.log('here 1')
                 return response
             } else {
+                console.log('here 2')
                 handleApiErrors(response);
             }
+            return response
         } catch (error) {
             console.error("Fetch single task error:", error)
             toast.error("An unexpected error occurred. Please try again later.")
@@ -166,6 +169,7 @@ const useTask = () => {
                 return response
             } else {
                 handleApiErrors(response);
+                return
             }
         } catch (error) {
             console.error("Accept task error:", error)
