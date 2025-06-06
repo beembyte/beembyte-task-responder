@@ -164,21 +164,25 @@ const useTask = () => {
     const acceptTask = async (task_id: string): Promise<SingleTaskResponse> => {
         try {
             const response = await taskApi.acceptTask(task_id)
-            
+
             // Handle undefined success or error responses
             if (response && response.success === true) {
+
                 toast.success(response.message || "Task accepted successfully!")
                 return response
             } else {
+
                 // Handle cases where success is false or undefined
                 if (response && response.errors) {
+
                     handleApiErrors(response);
                 } else if (response && response.message) {
+
                     toast.error(response.message);
                 } else {
                     toast.error("Failed to accept task. Please try again.");
                 }
-                
+
                 return {
                     success: false,
                     message: response?.message || "Failed to accept task"
@@ -197,7 +201,7 @@ const useTask = () => {
     const cancelTask = async (task_id: string): Promise<SingleTaskResponse> => {
         try {
             const response = await taskApi.cancelTask(task_id)
-            
+
             // Handle undefined success or error responses
             if (response && response.success === true) {
                 toast.success(response.message || "Task cancelled successfully!")
@@ -211,7 +215,7 @@ const useTask = () => {
                 } else {
                     toast.error("Failed to cancel task. Please try again.");
                 }
-                
+
                 return {
                     success: false,
                     message: response?.message || "Failed to cancel task"

@@ -4,11 +4,14 @@ export const handleApiErrors = (response: {
   message?: string;
   errors?: { msg: string; field?: string }[];
 }) => {
+  console.log(response);
   if (response.errors && Array.isArray(response.errors)) {
+    console.log("1");
     response.errors.forEach((err) => {
       toast.error(err.msg);
     });
   } else {
+    console.log(response.message);
     toast.error(response.message || "Something went wrong. Please try again.");
   }
 };
