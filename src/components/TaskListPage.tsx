@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Search, Clock, Calendar, User } from 'lucide-react';
 import useTask, { TaskResponse } from '@/hooks/useTask';
 import { getAllunAssignedTaskPayload } from '@/services/taskApi';
+import { toast } from 'sonner';
 
 interface TaskListPageProps {
   title: string;
@@ -17,12 +17,13 @@ interface TaskListPageProps {
 
 const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
   const navigate = useNavigate();
-  const { isLoading, getPendingUnassignedTask, getOngoingTasks, getCompletedTasks } = useTask();
+  const { isLoading, getPendingUnassignedTask, getOngoingTasks, getCompletedTasks, acceptTask } = useTask();
   const [tasks, setTasks] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTasks, setTotalTasks] = useState(0);
+  const [acceptingTasks, setAcceptingTasks] = useState<Set<string>>(new Set());
   const itemsPerPage = 12;
 
   const fetchTasks = async (page: number = 1, search: string = '') => {
@@ -107,16 +108,37 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
     navigate(`/task/${taskId}`);
   };
 
-  const handleAcceptTask = (e: React.MouseEvent, taskId: string) => {
+  const handleAcceptTask = async (e: React.MouseEvent, taskId: string) => {
     e.stopPropagation();
-    // Add accept task logic here
-    console.log('Accept task:', taskId);
+    
+    setAcceptingTasks(prev => new Set(prev).add(taskId));
+    
+    try {
+      const response = await acceptTask(taskId);
+      if (response.success) {
+        toast.success('Task accepted successfully!');
+        // Remove the accepted task from the list
+        setTasks(prev => prev.filter(task => task._id !== taskId));
+      } else {
+        toast.error(response.message || 'Failed to accept task');
+      }
+    } catch (error) {
+      console.error('Accept task error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setAcceptingTasks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(taskId);
+        return newSet;
+      });
+    }
   };
 
   const handleDeclineTask = (e: React.MouseEvent, taskId: string) => {
     e.stopPropagation();
-    // Add decline task logic here
-    console.log('Decline task:', taskId);
+    toast.success('Task declined');
+    // Remove the declined task from the list
+    setTasks(prev => prev.filter(task => task._id !== taskId));
   };
 
   return (
@@ -234,7 +256,7 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="w-full"
+                        className="w-full h-8"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleTaskClick(task._id);
@@ -247,17 +269,18 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="flex-1 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
+                            className="flex-1 h-8 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
                             onClick={(e) => handleDeclineTask(e, task._id)}
                           >
                             Decline
                           </Button>
                           <Button 
                             size="sm" 
-                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            className="flex-1 h-8 bg-green-600 hover:bg-green-700"
                             onClick={(e) => handleAcceptTask(e, task._id)}
+                            disabled={acceptingTasks.has(task._id)}
                           >
-                            Accept
+                            {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
                           </Button>
                         </div>
                       )}

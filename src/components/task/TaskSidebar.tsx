@@ -136,7 +136,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
               {!isTaskAccepted ? (
                 <>
                   <Button 
-                    className="w-full bg-green-600 hover:bg-green-700 text-lg py-6" 
+                    className="w-full bg-green-600 hover:bg-green-700 h-10" 
                     onClick={onAcceptTask}
                     disabled={isAccepting || isLoading}
                   >
@@ -144,8 +144,9 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-lg py-6"
+                    className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 h-10"
                     onClick={onDeclineTask}
+                    disabled={isAccepting}
                   >
                     Decline Task
                   </Button>
@@ -153,7 +154,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
               ) : (
                 <Button
                   variant="outline"
-                  className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 text-lg py-6"
+                  className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 h-10"
                   onClick={onCancelTask}
                   disabled={isCancelling || isLoading}
                 >
