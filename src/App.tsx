@@ -17,6 +17,7 @@ import Register from '@/pages/Register';
 import VerifyCode from '@/pages/VerifyCode';
 import Profile from '@/pages/Profile';
 import Wallet from '@/pages/Wallet';
+import { Toaster } from '@/components/ui/sonner';
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ function App() {
                   </ProtectedRoute>
                 } />
               </Routes>
+              <Toaster />
             </TaskProvider>
           </AuthProvider>
         </div>

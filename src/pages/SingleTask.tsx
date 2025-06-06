@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -7,7 +6,6 @@ import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
-import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
 import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
@@ -16,13 +14,13 @@ import TaskDescription from "@/components/task/TaskDescription"
 import TaskKeyNotes from "@/components/task/TaskKeyNotes"
 import TaskAttachments from "@/components/task/TaskAttachments"
 import TaskSidebar from "@/components/task/TaskSidebar"
+import { toast } from "sonner"
 
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { getOneTaskById, acceptTask, cancelTask } = useTask()
   const { verifyAuthToken } = useAuth()
-  const { toast } = useToast()
   const [task, setTask] = useState<TaskInfo | null>(null)
   const [isAccepting, setIsAccepting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
@@ -41,18 +39,14 @@ const SingleTask: React.FC = () => {
         if (response.success && response.data) {
           setTask(response.data)
         } else {
-          toast({
-            title: "Error",
-            description: response.message || "Failed to fetch task details",
-            variant: "destructive",
-          })
+          toast.error(response.message || "Failed to fetch task details")
         }
         setIsLoadingTask(false)
       }
     }
 
     fetchTask()
-  }, [id, toast])
+  }, [id])
 
   const handleAcceptTask = async () => {
     if (!id) return
@@ -96,10 +90,7 @@ const SingleTask: React.FC = () => {
   }
 
   const handleDeclineTask = () => {
-    toast({
-      title: "Task Declined",
-      description: "You have declined this task.",
-    })
+    toast.success("Task declined successfully")
     navigate("/dashboard")
   }
 
