@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, Clock, User } from "lucide-react"
+import { Calendar, Clock, User, Loader2 } from "lucide-react"
 import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
 
 interface TaskSidebarProps {
@@ -44,6 +44,24 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
       currency: "NGN",
     }).format(amount)
   }
+
+  const handleAcceptClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAcceptTask();
+  };
+
+  const handleCancelClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onCancelTask();
+  };
+
+  const handleDeclineClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDeclineTask();
+  };
 
   return (
     <div className="space-y-6">
@@ -137,15 +155,22 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
                 <>
                   <Button 
                     className="w-full bg-green-600 hover:bg-green-700 h-10" 
-                    onClick={onAcceptTask}
+                    onClick={handleAcceptClick}
                     disabled={isAccepting || isLoading}
                   >
-                    {isAccepting ? "Accepting..." : "Accept Task"}
+                    {isAccepting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Accepting...
+                      </>
+                    ) : (
+                      "Accept Task"
+                    )}
                   </Button>
                   <Button
                     variant="outline"
                     className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 h-10"
-                    onClick={onDeclineTask}
+                    onClick={handleDeclineClick}
                     disabled={isAccepting}
                   >
                     Decline Task
@@ -155,10 +180,17 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
                 <Button
                   variant="outline"
                   className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 h-10"
-                  onClick={onCancelTask}
+                  onClick={handleCancelClick}
                   disabled={isCancelling || isLoading}
                 >
-                  {isCancelling ? "Cancelling..." : "Cancel Task"}
+                  {isCancelling ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    "Cancel Task"
+                  )}
                 </Button>
               )}
             </div>

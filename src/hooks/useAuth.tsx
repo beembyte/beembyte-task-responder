@@ -158,16 +158,11 @@ export const useAuth = () => {
 
   const loggedInUser = () => {
     try {
-      setIsLoading(true)
       const user = JSON.parse(localStorage.getItem("authorizeUser") || "null");
       return user;
     } catch (error) {
-      setIsLoading(false)
       console.error("Error fetching user:", error);
-      toast.error("Failed to connect, please check network connection.");
       return null;
-    } finally {
-      setIsLoading(false)
     }
   };
 

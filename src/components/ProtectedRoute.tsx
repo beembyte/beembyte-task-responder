@@ -27,7 +27,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     };
 
     checkAuth();
-  }, [loggedInUser]);
+  }, []); // Empty dependency array to prevent infinite loop
 
   // Show loading state while checking authentication
   if (isChecking) {
