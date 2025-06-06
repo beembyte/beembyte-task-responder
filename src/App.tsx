@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import PendingTasks from './pages/PendingTasks';
 import OngoingTasks from './pages/OngoingTasks';
@@ -27,18 +28,57 @@ function App() {
           <AuthProvider>
             <TaskProvider>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                {/* Public routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-code" element={<VerifyCode />} />
-                <Route path="/pending-tasks" element={<PendingTasks />} />
-                <Route path="/ongoing-tasks" element={<OngoingTasks />} />
-                <Route path="/completed-tasks" element={<CompletedTasks />} />
-                <Route path="/task/:id" element={<SingleTask />} />
-                <Route path="/task-history" element={<TaskHistory />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/wallet" element={<Wallet />} />
+                
+                {/* Protected routes */}
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/pending-tasks" element={
+                  <ProtectedRoute>
+                    <PendingTasks />
+                  </ProtectedRoute>
+                } />
+                <Route path="/ongoing-tasks" element={
+                  <ProtectedRoute>
+                    <OngoingTasks />
+                  </ProtectedRoute>
+                } />
+                <Route path="/completed-tasks" element={
+                  <ProtectedRoute>
+                    <CompletedTasks />
+                  </ProtectedRoute>
+                } />
+                <Route path="/task/:id" element={
+                  <ProtectedRoute>
+                    <SingleTask />
+                  </ProtectedRoute>
+                } />
+                <Route path="/task-history" element={
+                  <ProtectedRoute>
+                    <TaskHistory />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/wallet" element={
+                  <ProtectedRoute>
+                    <Wallet />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </TaskProvider>
           </AuthProvider>

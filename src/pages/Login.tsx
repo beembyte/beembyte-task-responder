@@ -9,21 +9,32 @@ import { useAuth } from '@/hooks/useAuth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email, password });
+    setLoading(true);
+    
+    try {
+      await login({ email, password });
+      
+      // Get the returnTo parameter from URL
+      const params = new URLSearchParams(location.search);
+      const returnTo = params.get('returnTo') || '/dashboard';
+      
+      // Navigate to the intended page after successful login
+      navigate(returnTo);
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      setLoading(false);
+    }
   };
-
-
-  const params = new URLSearchParams(location.search);
-  const returnTo = params.get('returnTo') || '/';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
