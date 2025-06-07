@@ -14,6 +14,7 @@ import ProgressIndicator from '@/components/ui/progress-indicator';
 import { useToast } from '@/hooks/use-toast';
 import useTask from '@/hooks/useTask';
 import { Calendar, Clock, DollarSign, User, FileText, AlertTriangle, Loader2 } from 'lucide-react';
+import DeadlineProgressBar from '@/components/ui/deadline-progress';
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -197,6 +198,7 @@ const TaskDetail: React.FC = () => {
               </CardHeader>
             </Card>
 
+
             {/* Task Description */}
             <Card>
               <CardHeader>
@@ -209,6 +211,7 @@ const TaskDetail: React.FC = () => {
                 <p className="text-gray-700 leading-relaxed text-lg">
                   {task.description || 'No description provided'}
                 </p>
+
               </CardContent>
             </Card>
 

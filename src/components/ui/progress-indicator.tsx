@@ -13,9 +13,9 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ startDate, endDat
     const now = new Date();
     const total = endDate.getTime() - startDate.getTime();
     const elapsed = now.getTime() - startDate.getTime();
-    
+
     let calculatedPercentage = Math.min(Math.max(Math.round((elapsed / total) * 100), 0), 100);
-    
+
     // Color calculation: green (hsl(142, 71%, 45%)) to red (hsl(0, 84%, 60%))
     // First half: green to yellow, second half: yellow to red
     let hue;
@@ -26,22 +26,22 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ startDate, endDat
       // Yellow (60) to Red (0)
       hue = 60 - 60 * ((calculatedPercentage - 50) / 50);
     }
-    
+
     // Ensure hue is within valid range
     hue = Math.max(Math.min(hue, 142), 0);
-    
-    return { 
-      percentage: calculatedPercentage, 
+
+    return {
+      percentage: calculatedPercentage,
       color: `hsl(${hue}, 71%, 45%)`
     };
   }, [startDate, endDate]);
 
   return (
     <div className={`w-full ${className}`}>
-      <Progress 
-        value={percentage} 
+      <Progress
+        value={percentage}
         className="h-2"
-        style={{ 
+        style={{
           '--progress-color': color
         } as React.CSSProperties}
       />

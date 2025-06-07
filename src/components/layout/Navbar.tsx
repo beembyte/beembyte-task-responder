@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
             </div>
             <Link to="/profile">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=4`} alt={user?.first_name} />
+                <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`} alt={user?.first_name} />
                 <AvatarFallback>{user?.first_name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
             </Link>

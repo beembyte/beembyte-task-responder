@@ -135,7 +135,7 @@ const Profile: React.FC = () => {
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src={`https://robohash.org/${formData.first_name}?set=set4`} alt={formData.first_name} />
+                  <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`} alt={user?.first_name} />
                   <AvatarFallback className="text-2xl">
                     {formData.first_name.charAt(0)}{formData.last_name.charAt(0)}
                   </AvatarFallback>
