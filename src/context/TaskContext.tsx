@@ -119,7 +119,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Update user availability
     if (user) {
-      updateProfile({ availability: 'busy' });
+      updateProfile({ availability_status: 'busy' as any });
     }
     
     toast({
@@ -151,7 +151,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Update user availability
     if (user) {
-      updateProfile({ availability: 'available' });
+      updateProfile({ availability_status: 'available' as any });
     }
     
     toast({
