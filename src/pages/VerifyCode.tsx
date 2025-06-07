@@ -97,6 +97,7 @@ const VerifyCode = () => {
             ) : (
               <>Enter the 6-digit verification code</>
             )}
+            <br />
             <>Just use 123456 as default</>
           </CardDescription>
         </CardHeader>
