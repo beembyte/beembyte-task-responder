@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -42,8 +41,8 @@ const Chat: React.FC = () => {
     {
       id: '2',
       text: 'I\'m making good progress. Should be done on time.',
-      senderId: user?.id || 'responder123',
-      senderName: user?.firstName || 'You',
+      senderId: user?._id || 'responder123',
+      senderName: user?.first_name || 'You',
       timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000) // 1.5 hours ago
     },
     {
@@ -102,8 +101,8 @@ const Chat: React.FC = () => {
     const newMessage: Message = {
       id: Math.random().toString(36).substring(2, 9),
       text: messageText,
-      senderId: user?.id || 'responder123',
-      senderName: user?.firstName || 'You',
+      senderId: user?._id || 'responder123',
+      senderName: user?.first_name || 'You',
       timestamp: new Date()
     };
     
@@ -122,8 +121,8 @@ const Chat: React.FC = () => {
       const newMessage: Message = {
         id: Math.random().toString(36).substring(2, 9),
         text: file.name,
-        senderId: user?.id || 'responder123',
-        senderName: user?.firstName || 'You',
+        senderId: user?._id || 'responder123',
+        senderName: user?.first_name || 'You',
         timestamp: new Date(),
         isFile: true,
         fileName: file.name,
@@ -285,11 +284,11 @@ const Chat: React.FC = () => {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.senderId === user?.id || message.senderId === 'responder123' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.senderId === user?._id || message.senderId === 'responder123' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
                     className={`max-w-[75%] rounded-lg px-4 py-2 ${
-                      message.senderId === user?.id || message.senderId === 'responder123'
+                      message.senderId === user?._id || message.senderId === 'responder123'
                         ? 'bg-primary text-white'
                         : 'bg-gray-100 text-gray-800'
                     }`}
@@ -307,7 +306,7 @@ const Chat: React.FC = () => {
                     )}
                     <div
                       className={`text-xs mt-1 ${
-                        message.senderId === user?.id || message.senderId === 'responder123'
+                        message.senderId === user?._id || message.senderId === 'responder123'
                           ? 'text-white/70'
                           : 'text-gray-500'
                       }`}
