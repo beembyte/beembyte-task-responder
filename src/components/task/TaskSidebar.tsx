@@ -197,6 +197,29 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Cancel Button for Ongoing Tasks */}
+      {task?.status === TASK_STATUS.INPROGRESS && (
+        <Card>
+          <CardContent className="p-6">
+            <Button
+              variant="outline"
+              className="w-full hover:bg-red-50 hover:border-red-300 hover:text-red-600 h-10"
+              onClick={handleCancelClick}
+              disabled={isCancelling || isLoading}
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                "Cancel Task"
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
