@@ -22,8 +22,11 @@ const Dashboard: React.FC = () => {
   const [dashboardStats, setDashStats] = useState<DashStatsData>(null)
 
   useEffect(() => {
-    const userFromStorage = loggedInUser();
-    setUser(userFromStorage);
+    const fetchUser = async () => {
+      const userProfile = await loggedInUser();
+      setUser(userProfile);
+    }
+    fetchUser()
   }, []);
 
   useEffect(() => {
@@ -44,23 +47,23 @@ const Dashboard: React.FC = () => {
     fetchRecentTasks();
   }, []);
 
-  useEffect(() => {
-    const fetchOngoingTask = async () => {
-      const response = await getOngoingTasks({
-        limit: 1, // Only fetch one ongoing task
-        page: 1,
-        sort: 1,
-        title: '',
-        description: ''
-      });
+  // useEffect(() => {
+  //   const fetchOngoingTask = async () => {
+  //     const response = await getOngoingTasks({
+  //       limit: 1, // Only fetch one ongoing task
+  //       page: 1,
+  //       sort: 1,
+  //       title: '',
+  //       description: ''
+  //     });
 
-      if (response.success && response.data && response.data.items.length > 0) {
-        setOngoingTask(response.data.items[0]);
-      }
-    };
+  //     if (response.success && response.data && response.data.items.length > 0) {
+  //       setOngoingTask(response.data.items[0]);
+  //     }
+  //   };
 
-    fetchOngoingTask();
-  }, []);
+  //   fetchOngoingTask();
+  // }, []);
 
   useEffect(() => {
     const getStats = async () => {
@@ -99,8 +102,8 @@ const Dashboard: React.FC = () => {
   };
 
   const handleOngoingTaskClick = () => {
-    if (ongoingTask) {
-      navigate(`/task/${ongoingTask._id}`);
+    if (dashboardStats.inProgressTask) {
+      navigate(`/task/${dashboardStats?.inProgressTask._id}`);
     }
   };
 
@@ -171,7 +174,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Current Ongoing Task */}
-        {ongoingTask && (
+        {dashboardStats?.inProgressTask && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold flex items-center mb-4">
               <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
@@ -184,36 +187,36 @@ const Dashboard: React.FC = () => {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          {ongoingTask.title}
+                          {dashboardStats.inProgressTask.title}
                         </h3>
                         <p className="text-sm text-blue-600 font-medium mb-2">
-                          {ongoingTask.subject}
+                          {dashboardStats.inProgressTask.subject}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <Badge className="bg-blue-100 text-blue-800">
                           In Progress
                         </Badge>
-                        {ongoingTask.difficulty && (
-                          <Badge className={`${getDifficultyColor(ongoingTask.difficulty)} font-semibold`}>
-                            {ongoingTask.difficulty.toUpperCase()}
+                        {dashboardStats.inProgressTask.difficulty && (
+                          <Badge className={`${getDifficultyColor(dashboardStats.inProgressTask.difficulty)} font-semibold`}>
+                            {dashboardStats.inProgressTask.difficulty.toUpperCase()}
                           </Badge>
                         )}
                       </div>
                     </div>
 
                     <p className="text-gray-700 mb-4 text-base leading-relaxed line-clamp-2">
-                      {ongoingTask.description}
+                      {dashboardStats.inProgressTask.description}
                     </p>
 
                     <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>Due: {formatDate(ongoingTask.deadline || ongoingTask.createdAt)}</span>
+                        <span>Due: {formatDate(String(dashboardStats.inProgressTask.deadline || dashboardStats.inProgressTask.createdAt))}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Clock className="w-4 h-4 text-gray-400" />
-                        <span>Started: {formatDate(ongoingTask.createdAt)}</span>
+                        <span>Started: {formatDate(String(dashboardStats.inProgressTask.createdAt))}</span>
                       </div>
                     </div>
                   </div>
@@ -221,7 +224,7 @@ const Dashboard: React.FC = () => {
                   <div className="lg:w-64 flex flex-col justify-between">
                     <div className="text-center lg:text-right mb-6">
                       <div className="text-3xl font-bold text-green-600 mb-1">
-                        {formatPayment(ongoingTask.price || 0)}
+                        {formatPayment(dashboardStats.inProgressTask.price || 0)}
                       </div>
                       <p className="text-sm text-gray-500">Fixed price</p>
                     </div>
@@ -232,7 +235,7 @@ const Dashboard: React.FC = () => {
                       className="w-full"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/task/${ongoingTask._id}`);
+                        navigate(`/task/${dashboardStats.inProgressTask._id}`);
                       }}
                     >
                       Continue Work

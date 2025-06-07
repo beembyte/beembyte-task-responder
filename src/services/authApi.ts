@@ -44,6 +44,13 @@ const setAuthCookie = (token: string) => {
   document.cookie = `authToken=${token}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
 };
 
+const getAuthToken = () => {
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("authToken="))
+    ?.split("=")[1];
+};
+
 // Authentication API service
 export const authApi = {
   // Register a new user
@@ -167,6 +174,28 @@ export const authApi = {
       return {
         success: false,
         message: "Failed to verify auth token Please try again later.",
+      };
+    }
+  },
+
+  logedInUser: async () => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/responder/user-profile`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("fetch user error:", error);
+      return {
+        success: false,
+        message: "Failed to fetch user Please try again later.",
       };
     }
   },

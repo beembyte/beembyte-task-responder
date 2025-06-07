@@ -156,10 +156,12 @@ export const useAuth = () => {
 
   const updateProfile = () => { }
 
-  const loggedInUser = () => {
+  const loggedInUser = async (): Promise<User> => {
     try {
-      const user = JSON.parse(localStorage.getItem("authorizeUser") || "null");
-      return user;
+      const response = await authApi.logedInUser()
+      if (response.success) {
+        return response.data;
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
       return null;

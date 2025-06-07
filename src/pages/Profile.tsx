@@ -17,8 +17,11 @@ const Profile: React.FC = () => {
   const [user, setUser] = useState<User>(null);
 
   useEffect(() => {
-    const userFromStorage = loggedInUser();
-    setUser(userFromStorage);
+    const fetchUser = async () => {
+      const userProfile = await loggedInUser();
+      setUser(userProfile);
+    }
+    fetchUser()
   }, []);
 
 
