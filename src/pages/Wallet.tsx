@@ -45,7 +45,7 @@ const Wallet: React.FC = () => {
     bankName: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Calculate wallet balance
   const walletBalance = transactions.reduce((total, transaction) => {
     if (transaction.status === 'completed') {
@@ -57,10 +57,10 @@ const Wallet: React.FC = () => {
     }
     return total;
   }, 0);
-  
+
   const handleWithdrawalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
       toast({
         title: "Invalid Amount",
@@ -69,7 +69,7 @@ const Wallet: React.FC = () => {
       });
       return;
     }
-    
+
     if (parseFloat(withdrawAmount) > walletBalance) {
       toast({
         title: "Insufficient Balance",
@@ -78,7 +78,7 @@ const Wallet: React.FC = () => {
       });
       return;
     }
-    
+
     if (!bankDetails.accountName || !bankDetails.accountNumber || !bankDetails.bankName) {
       toast({
         title: "Missing Bank Details",
@@ -87,31 +87,31 @@ const Wallet: React.FC = () => {
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       toast({
         title: "Withdrawal Initiated",
         description: `Your withdrawal of NGN ${parseFloat(withdrawAmount).toLocaleString()} has been initiated and is being processed.`
       });
-      
+
       setWithdrawAmount('');
       setIsSubmitting(false);
     }, 1500);
   };
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <div className="flex-1 container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Wallet</h1>
           <p className="text-gray-600">Manage your earnings and withdrawals</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="md:col-span-2 bg-gradient-to-br from-primary/90 to-primary">
             <CardHeader className="text-white pb-2">
@@ -129,7 +129,7 @@ const Wallet: React.FC = () => {
               </Button>
             </CardFooter>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
@@ -147,7 +147,7 @@ const Wallet: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <Card>
@@ -175,12 +175,11 @@ const Wallet: React.FC = () => {
                         <p className={`font-semibold ${transaction.type === 'payment' ? 'text-green-600' : 'text-amber-600'}`}>
                           {transaction.type === 'payment' ? '+' : '-'} NGN {transaction.amount.toLocaleString()}
                         </p>
-                        <span 
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            transaction.status === 'completed' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-amber-100 text-amber-800'
-                          }`}
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${transaction.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-amber-100 text-amber-800'
+                            }`}
                         >
                           {transaction.status === 'completed' ? 'Completed' : 'Processing'}
                         </span>
@@ -196,7 +195,7 @@ const Wallet: React.FC = () => {
               </CardFooter>
             </Card>
           </div>
-          
+
           <div>
             <Card>
               <CardHeader>
@@ -216,37 +215,37 @@ const Wallet: React.FC = () => {
                       min={0}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="bankName">Bank Name</Label>
                     <Input
                       id="bankName"
                       placeholder="Enter your bank name"
                       value={bankDetails.bankName}
-                      onChange={(e) => setBankDetails({...bankDetails, bankName: e.target.value})}
+                      onChange={(e) => setBankDetails({ ...bankDetails, bankName: e.target.value })}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="accountNumber">Account Number</Label>
                     <Input
                       id="accountNumber"
                       placeholder="Enter your account number"
                       value={bankDetails.accountNumber}
-                      onChange={(e) => setBankDetails({...bankDetails, accountNumber: e.target.value})}
+                      onChange={(e) => setBankDetails({ ...bankDetails, accountNumber: e.target.value })}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="accountName">Account Name</Label>
                     <Input
                       id="accountName"
                       placeholder="Enter account name"
                       value={bankDetails.accountName}
-                      onChange={(e) => setBankDetails({...bankDetails, accountName: e.target.value})}
+                      onChange={(e) => setBankDetails({ ...bankDetails, accountName: e.target.value })}
                     />
                   </div>
-                  
+
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? 'Processing...' : 'Withdraw'}
                   </Button>
