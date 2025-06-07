@@ -9,13 +9,15 @@ import { Search, Clock, Calendar, User } from 'lucide-react';
 import useTask, { TaskResponse } from '@/hooks/useTask';
 import { getAllunAssignedTaskPayload } from '@/services/taskApi';
 import { toast } from 'sonner';
+import CancelTaskButton from '@/components/task/CancelTaskButton';
 
 interface TaskListPageProps {
   title: string;
   taskType: 'pending' | 'ongoing' | 'completed';
+  showCancelButton?: boolean;
 }
 
-const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
+const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancelButton = false }) => {
   const navigate = useNavigate();
   const { isLoading, getPendingUnassignedTask, getOngoingTasks, getCompletedTasks, acceptTask } = useTask();
   const [tasks, setTasks] = useState<any[]>([]);
@@ -139,6 +141,12 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
     toast.success('Task declined');
     // Remove the declined task from the list
     setTasks(prev => prev.filter(task => task._id !== taskId));
+  };
+
+  const handleTaskCancelled = (taskId: string) => {
+    // Remove the cancelled task from the list
+    setTasks(prev => prev.filter(task => task._id !== taskId));
+    toast.success('Task cancelled successfully!');
   };
 
   return (
@@ -283,6 +291,13 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType }) => {
                             {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
                           </Button>
                         </div>
+                      )}
+                      {showCancelButton && taskType === 'ongoing' && (
+                        <CancelTaskButton
+                          taskId={task._id}
+                          onTaskCancelled={() => handleTaskCancelled(task._id)}
+                          className="w-full h-8"
+                        />
                       )}
                     </div>
                   </div>
