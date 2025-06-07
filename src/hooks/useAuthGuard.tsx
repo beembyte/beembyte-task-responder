@@ -24,12 +24,15 @@ export const useAuthGuard = (requireAuth = true) => {
           return;
         }
         
-        // Verify token validity
+        // Verify token validity and auto-redirect if expired
         try {
           await verifyAuthToken();
         } catch (error) {
           console.error("Token verification failed:", error);
           toast.error("Session expired. Please login again.");
+          // Clear auth data
+          document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          localStorage.removeItem("authorizeUser");
           navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
         }
       }

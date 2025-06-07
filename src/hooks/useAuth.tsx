@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -172,13 +173,27 @@ export const useAuth = () => {
     try {
       const auth_token = getCookie('authToken');
 
+      if (!auth_token) {
+        // No token found, redirect to login
+        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+        return;
+      }
+
       const response = await authApi.verifyAuthToken(auth_token)
       if (!response.success) {
+        // Token is invalid or expired, clear auth data and redirect
+        document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        localStorage.removeItem("authorizeUser");
+        toast.error("Session expired. Please login again.");
         navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
       }
     } catch (error) {
-      console.error("Resend verification error:", error)
-      toast.error("Failed to connect please check network connection.")
+      console.error("Token verification error:", error)
+      // Clear auth data on error
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      localStorage.removeItem("authorizeUser");
+      toast.error("Failed to verify session. Please login again.")
+      navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
     }
   }
 

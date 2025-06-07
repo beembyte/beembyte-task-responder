@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import Navbar from '@/components/layout/Navbar';
 import ProgressIndicator from '@/components/ui/progress-indicator';
 import { useToast } from '@/hooks/use-toast';
 import useTask from '@/hooks/useTask';
-import { Calendar, Clock, DollarSign, User, FileText, AlertTriangle } from 'lucide-react';
+import { Calendar, Clock, DollarSign, User, FileText, AlertTriangle, Loader2 } from 'lucide-react';
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,14 +26,19 @@ const TaskDetail: React.FC = () => {
   const [attachmentName, setAttachmentName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [task, setTask] = useState<TaskInfo | null>(null);
+  const [taskNotFound, setTaskNotFound] = useState(false);
 
   useEffect(() => {
     const getTask = async () => {
       if (id) {
+        setTaskNotFound(false);
         const response = await getOneTaskById(id);
         if (response.success && response.data) {
           setTask(response.data);
+          setTaskNotFound(false);
         } else {
+          setTask(null);
+          setTaskNotFound(true);
           toast({
             title: "Error",
             description: response.message || "Failed to fetch task details",
@@ -53,13 +57,16 @@ const TaskDetail: React.FC = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-xl text-gray-600">Loading task details...</div>
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="text-xl text-gray-600">Loading task details...</span>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!task) {
+  if (taskNotFound || !task) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -444,9 +451,16 @@ const TaskDetail: React.FC = () => {
               <Button
                 onClick={handleComplete}
                 disabled={submitting}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
               >
-                {submitting ? 'Submitting...' : 'Complete Task'}
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  'Complete Task'
+                )}
               </Button>
             </CardFooter>
           </Card>

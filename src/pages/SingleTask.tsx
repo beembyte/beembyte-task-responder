@@ -1,10 +1,11 @@
+
 "use client"
 
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
@@ -25,6 +26,7 @@ const SingleTask: React.FC = () => {
   const [isAccepting, setIsAccepting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [isLoadingTask, setIsLoadingTask] = useState(true)
+  const [taskNotFound, setTaskNotFound] = useState(false)
 
   // Verify auth token on component mount
   useEffect(() => {
@@ -35,11 +37,17 @@ const SingleTask: React.FC = () => {
     const fetchTask = async () => {
       if (id) {
         setIsLoadingTask(true)
+        setTaskNotFound(false)
         const response = await getOneTaskById(id)
         if (response.success && response.data) {
           setTask(response.data)
+          setTaskNotFound(false)
         } else {
-          toast.error(response.message || "Failed to fetch task details")
+          setTask(null)
+          setTaskNotFound(true)
+          if (response.message) {
+            toast.error(response.message)
+          }
         }
         setIsLoadingTask(false)
       }
@@ -101,13 +109,16 @@ const SingleTask: React.FC = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-xl text-gray-600">Loading task details...</div>
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="text-xl text-gray-600">Loading task details...</span>
+          </div>
         </div>
       </div>
     )
   }
 
-  if (!task) {
+  if (taskNotFound || !task) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
