@@ -65,7 +65,6 @@ const SingleTask: React.FC = () => {
       const response = await acceptTask(id)
 
       if (response.success) {
-        // Refresh task data to get updated status
         const updatedResponse = await getOneTaskById(id)
         if (updatedResponse.success && updatedResponse.data) {
           setTask(updatedResponse.data)
@@ -85,7 +84,6 @@ const SingleTask: React.FC = () => {
     try {
       const response = await cancelTask(id)
       if (response.success) {
-        // Refresh task data to get updated status
         const updatedResponse = await getOneTaskById(id)
         if (updatedResponse.success && updatedResponse.data) {
           setTask(updatedResponse.data)
@@ -104,7 +102,6 @@ const SingleTask: React.FC = () => {
   }
 
   const handleTaskSubmission = () => {
-    // Refresh task data after submission
     if (id) {
       const fetchUpdatedTask = async () => {
         const response = await getOneTaskById(id)
@@ -120,7 +117,7 @@ const SingleTask: React.FC = () => {
 
   if (isLoadingTask) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="flex items-center gap-3">
@@ -134,7 +131,7 @@ const SingleTask: React.FC = () => {
 
   if (taskNotFound || !task) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -148,41 +145,43 @@ const SingleTask: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
 
-      <div className="flex-1 container mx-auto px-4 py-6">
-        {/* Back Button */}
-        <Button variant="outline" onClick={() => navigate(-1)} className="mb-6 flex items-center gap-2">
+      <div className="flex-1 container mx-auto px-4 py-4 max-w-7xl">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900">
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="lg:col-span-3 space-y-4">
             <TaskHeader task={task} />
             <TaskDescription description={task.description} />
             <TaskKeyNotes keyNotes={task.key_notes} />
             <TaskAttachments fileUrls={task.file_urls} />
 
-            {/* Task Submission Component for Accepted Tasks */}
             {isTaskAccepted && (
-              <TaskSubmission taskId={task._id} onSubmit={handleTaskSubmission} />
+              <TaskSubmission 
+                taskId={task._id} 
+                onSubmit={handleTaskSubmission}
+                onCancel={handleCancelTask}
+              />
             )}
           </div>
 
-          {/* Sidebar */}
-          <TaskSidebar
-            task={task}
-            isTaskAccepted={isTaskAccepted}
-            isAccepting={isAccepting}
-            isCancelling={isCancelling}
-            isLoading={false}
-            onAcceptTask={handleAcceptTask}
-            onCancelTask={handleCancelTask}
-            onDeclineTask={handleDeclineTask}
-          />
+          <div className="lg:col-span-1">
+            <TaskSidebar
+              task={task}
+              isTaskAccepted={isTaskAccepted}
+              isAccepting={isAccepting}
+              isCancelling={isCancelling}
+              isLoading={false}
+              onAcceptTask={handleAcceptTask}
+              onCancelTask={handleCancelTask}
+              onDeclineTask={handleDeclineTask}
+            />
+          </div>
         </div>
       </div>
     </div>
