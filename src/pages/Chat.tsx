@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import useTask from '@/hooks/useTask';
 import Navbar from '@/components/layout/Navbar';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Download, File, FileText, Image, Paperclip, Send, ArrowLeft, Hash, Users, Settings, MessageSquare } from 'lucide-react';
+import { Download, File, FileText, Upload, Paperclip, Send, ArrowLeft, Hash, Users, Settings, MessageSquare, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Message {
@@ -26,6 +25,12 @@ interface Message {
   fileType?: string;
 }
 
+interface PendingFile {
+  file: File;
+  preview?: string;
+  type: string;
+}
+
 const Chat: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -36,6 +41,7 @@ const Chat: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [taskNotFound, setTaskNotFound] = useState(false);
   const [messageText, setMessageText] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -132,44 +138,98 @@ const Chat: React.FC = () => {
     )
   }
 
+  const isValidFileType = (file: File): boolean => {
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg', 
+      'image/png',
+      'image/gif',
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/msword', // .doc
+      'text/csv',
+      'application/vnd.ms-excel', // .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
+    ];
+    
+    return allowedTypes.includes(file.type) || file.name.toLowerCase().endsWith('.csv');
+  };
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (messageText.trim() === '') return;
+    if (messageText.trim() === '' && pendingFiles.length === 0) return;
 
-    const newMessage: Message = {
-      id: Math.random().toString(36).substring(2, 9),
-      text: messageText,
-      senderId: 'responder123',
-      senderName: 'You',
-      timestamp: new Date()
-    };
-
-    setMessages([...messages, newMessage]);
-    setMessageText('');
-    toast.success("Message sent successfully!");
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const fileType = getFileType(file.type);
-      const fileUrl = URL.createObjectURL(file);
-
+    // Send text message if there's text
+    if (messageText.trim() !== '') {
       const newMessage: Message = {
         id: Math.random().toString(36).substring(2, 9),
-        text: file.name,
+        text: messageText,
+        senderId: 'responder123',
+        senderName: 'You',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, newMessage]);
+    }
+
+    // Send file messages
+    pendingFiles.forEach((pendingFile) => {
+      const fileUrl = URL.createObjectURL(pendingFile.file);
+      const newMessage: Message = {
+        id: Math.random().toString(36).substring(2, 9),
+        text: pendingFile.file.name,
         senderId: 'responder123',
         senderName: 'You',
         timestamp: new Date(),
         isFile: true,
-        fileName: file.name,
+        fileName: pendingFile.file.name,
         fileUrl: fileUrl,
-        fileType: fileType
+        fileType: pendingFile.type
       };
+      setMessages(prev => [...prev, newMessage]);
+    });
 
-      setMessages([...messages, newMessage]);
+    setMessageText('');
+    setPendingFiles([]);
+    toast.success("Message sent successfully!");
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      
+      files.forEach(file => {
+        if (!isValidFileType(file)) {
+          toast.error(`${file.name} is not a supported file type. Please upload images, PDF, DOCX, or CSV files only.`);
+          return;
+        }
+
+        const fileType = getFileType(file.type);
+        const pendingFile: PendingFile = {
+          file,
+          type: fileType
+        };
+
+        // Create preview for images
+        if (fileType === 'image') {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            pendingFile.preview = e.target?.result as string;
+            setPendingFiles(prev => [...prev, pendingFile]);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          setPendingFiles(prev => [...prev, pendingFile]);
+        }
+      });
     }
+    
+    // Reset the input
+    e.target.value = '';
+  };
+
+  const removePendingFile = (index: number) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const getFileType = (mimeType: string): string => {
@@ -177,7 +237,7 @@ const Chat: React.FC = () => {
     if (mimeType.startsWith('video/')) return 'video';
     if (mimeType === 'application/pdf') return 'pdf';
     if (mimeType.includes('document') || mimeType.includes('word')) return 'document';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'spreadsheet';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) return 'spreadsheet';
     return 'file';
   };
 
@@ -269,6 +329,51 @@ const Chat: React.FC = () => {
             <Download className="h-5 w-5" />
           </a>
         </div>
+      </div>
+    );
+  };
+
+  const renderPendingFilePreview = (pendingFile: PendingFile, index: number) => {
+    if (pendingFile.type === 'image' && pendingFile.preview) {
+      return (
+        <div key={index} className="relative inline-block mr-2 mb-2">
+          <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200">
+            <img
+              src={pendingFile.preview}
+              alt={pendingFile.file.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <button
+            onClick={() => removePendingFile(index)}
+            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+          >
+            <X className="w-3 h-3" />
+          </button>
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">
+            {pendingFile.file.name}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div key={index} className="relative inline-block mr-2 mb-2">
+        <div className="w-20 h-20 rounded-lg border-2 border-gray-200 bg-gray-50 flex flex-col items-center justify-center p-2">
+          {pendingFile.type === 'pdf' && <FileText className="w-6 h-6 text-red-500" />}
+          {pendingFile.type === 'document' && <FileText className="w-6 h-6 text-blue-500" />}
+          {(pendingFile.type === 'spreadsheet' || pendingFile.file.name.toLowerCase().endsWith('.csv')) && <File className="w-6 h-6 text-green-500" />}
+          {pendingFile.type === 'file' && <File className="w-6 h-6 text-gray-500" />}
+          <span className="text-xs text-center mt-1 truncate w-full">
+            {pendingFile.file.name.split('.').pop()?.toUpperCase()}
+          </span>
+        </div>
+        <button
+          onClick={() => removePendingFile(index)}
+          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+        >
+          <X className="w-3 h-3" />
+        </button>
       </div>
     );
   };
@@ -366,6 +471,21 @@ const Chat: React.FC = () => {
 
           {/* Message Input */}
           <div className="p-4 border-t border-gray-200 bg-white">
+            {/* Pending Files Preview */}
+            {pendingFiles.length > 0 && (
+              <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Paperclip className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Files to send:</span>
+                </div>
+                <div className="flex flex-wrap">
+                  {pendingFiles.map((pendingFile, index) => 
+                    renderPendingFilePreview(pendingFile, index)
+                  )}
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
               <Textarea
                 ref={textareaRef}
@@ -389,8 +509,10 @@ const Chat: React.FC = () => {
                     <input
                       id="file-upload"
                       type="file"
+                      multiple
+                      accept="image/*,.pdf,.doc,.docx,.csv,.xls,.xlsx"
                       className="hidden"
-                      onChange={handleFileUpload}
+                      onChange={handleFileSelect}
                     />
                   </label>
                 </div>
@@ -398,7 +520,7 @@ const Chat: React.FC = () => {
                   type="submit" 
                   size="icon" 
                   className="h-9 w-9 rounded-md"
-                  disabled={!messageText.trim()}
+                  disabled={!messageText.trim() && pendingFiles.length === 0}
                 >
                   <Send className="h-4 w-4" />
                 </Button>

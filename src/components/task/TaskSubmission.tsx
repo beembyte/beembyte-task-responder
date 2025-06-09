@@ -72,7 +72,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit }) => 
       <CardContent>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700">
+            <Button className="w-full">
               Submit Task
             </Button>
           </DialogTrigger>
