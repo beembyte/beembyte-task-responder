@@ -165,10 +165,10 @@ const SingleTask: React.FC = () => {
             <TaskDescription description={task.description} />
             <TaskKeyNotes keyNotes={task.key_notes} />
             <TaskAttachments fileUrls={task.file_urls} />
-            
+
             {/* Task Submission Component for Accepted Tasks */}
             {isTaskAccepted && (
-              <TaskSubmission taskId={task.id} onSubmit={handleTaskSubmission} />
+              <TaskSubmission taskId={task._id} onSubmit={handleTaskSubmission} />
             )}
           </div>
 

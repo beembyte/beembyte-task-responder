@@ -68,7 +68,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
   };
 
   const handleChatClick = () => {
-    navigate(`/chat/${task.id}`)
+    navigate(`/chat/${task._id}`)
   }
 
   return (
