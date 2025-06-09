@@ -12,6 +12,7 @@ import CompletedTasks from './pages/CompletedTasks';
 import TaskDetail from './pages/TaskDetail';
 import SingleTask from '@/pages/SingleTask';
 import TaskHistory from '@/pages/TaskHistory';
+import Chat from '@/pages/Chat';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import VerifyCode from '@/pages/VerifyCode';
@@ -63,6 +64,11 @@ function App() {
                 <Route path="/task/:id" element={
                   <ProtectedRoute>
                     <SingleTask />
+                  </ProtectedRoute>
+                } />
+                <Route path="/chat/:id" element={
+                  <ProtectedRoute>
+                    <Chat />
                   </ProtectedRoute>
                 } />
                 <Route path="/task-history" element={

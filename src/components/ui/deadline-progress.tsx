@@ -183,13 +183,10 @@ const DeadlineProgressBar: React.FC<DeadlineProgressBarProps> = ({ task }) => {
     const IconComponent = timeStatus.icon
 
     return (
-        <Card className={`${isOverdue ? "border-red-200 bg-red-50" : ""}`}>
-            <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                    {isOverdue ? <AlertTriangle className="w-5 h-5 text-red-500" /> : <Clock className="w-5 h-5 text-blue-500" />}
-                    Deadline Progress
-                </CardTitle>
-            </CardHeader>
+        <Card className={`${isOverdue ? "border-red-200 bg-red-50" : "py-2"}`}>
+            {/* <CardHeader className="pb-3">
+                
+            </CardHeader> */}
             <CardContent className="space-y-4">
                 {/* Progress Bar */}
                 <div className="space-y-2">
