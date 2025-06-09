@@ -117,12 +117,12 @@ const SingleTask: React.FC = () => {
 
   if (isLoadingTask) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="flex items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="text-xl text-gray-600">Loading task details...</span>
+            <span className="text-xl text-muted-foreground">Loading task details...</span>
           </div>
         </div>
       </div>
@@ -131,12 +131,12 @@ const SingleTask: React.FC = () => {
 
   if (taskNotFound || !task) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-2">Task Not Found</h1>
-            <p className="text-gray-600 mb-4">The task you're looking for doesn't exist or has been removed.</p>
+            <p className="text-muted-foreground mb-4">The task you're looking for doesn't exist or has been removed.</p>
             <Button onClick={() => navigate("/dashboard")}>Back to Dashboard</Button>
           </div>
         </div>
@@ -145,17 +145,22 @@ const SingleTask: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
       <div className="flex-1 container mx-auto px-4 py-4 max-w-7xl">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)} 
+          className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-3 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          {/* Main Content - Takes 2/3 on desktop, full width on mobile */}
+          <div className="lg:col-span-2 space-y-4">
             <TaskHeader task={task} />
             <TaskDescription description={task.description} />
             <TaskKeyNotes keyNotes={task.key_notes} />
@@ -170,7 +175,8 @@ const SingleTask: React.FC = () => {
             )}
           </div>
 
-          <div className="lg:col-span-1">
+          {/* Sidebar - Takes 1/3 on desktop, full width on mobile */}
+          <div className="lg:col-span-1 lg:sticky lg:top-4 lg:h-fit">
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}
