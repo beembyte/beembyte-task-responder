@@ -132,9 +132,6 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
       {/* Task Details */}
       <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-2 p-3 lg:p-4">
-          <CardTitle className="text-sm lg:text-base">Task Details</CardTitle>
-        </CardHeader>
         <CardContent className="space-y-3 p-3 lg:p-4 pt-0">
           <div className="flex items-start gap-2">
             <Calendar className="w-3 h-3 lg:w-4 lg:h-4 text-muted-foreground mt-0.5" />
@@ -147,7 +144,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
           <Separator />
 
           <DeadlineProgressBar task={task} />
-          
+
           <Separator />
 
           <div className="flex items-start gap-2">
