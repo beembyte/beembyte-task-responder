@@ -15,6 +15,7 @@ import TaskDescription from "@/components/task/TaskDescription"
 import TaskKeyNotes from "@/components/task/TaskKeyNotes"
 import TaskAttachments from "@/components/task/TaskAttachments"
 import TaskSidebar from "@/components/task/TaskSidebar"
+import TaskSubmission from "@/components/task/TaskSubmission"
 import { toast } from "sonner"
 
 const SingleTask: React.FC = () => {
@@ -102,6 +103,19 @@ const SingleTask: React.FC = () => {
     navigate("/dashboard")
   }
 
+  const handleTaskSubmission = () => {
+    // Refresh task data after submission
+    if (id) {
+      const fetchUpdatedTask = async () => {
+        const response = await getOneTaskById(id)
+        if (response.success && response.data) {
+          setTask(response.data)
+        }
+      }
+      fetchUpdatedTask()
+    }
+  }
+
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
   if (isLoadingTask) {
@@ -151,6 +165,11 @@ const SingleTask: React.FC = () => {
             <TaskDescription description={task.description} />
             <TaskKeyNotes keyNotes={task.key_notes} />
             <TaskAttachments fileUrls={task.file_urls} />
+            
+            {/* Task Submission Component for Accepted Tasks */}
+            {isTaskAccepted && (
+              <TaskSubmission taskId={task.id} onSubmit={handleTaskSubmission} />
+            )}
           </div>
 
           {/* Sidebar */}

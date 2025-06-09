@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, Clock, User, Loader2 } from "lucide-react"
+import { Calendar, Clock, User, Loader2, MessageCircle } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
 import DeadlineProgressBar from "../ui/deadline-progress"
 
@@ -29,6 +30,8 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
   onCancelTask,
   onDeclineTask,
 }) => {
+  const navigate = useNavigate()
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "long",
@@ -64,6 +67,10 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
     onDeclineTask();
   };
 
+  const handleChatClick = () => {
+    navigate(`/chat/${task.id}`)
+  }
+
   return (
     <div className="space-y-6">
       {/* Price Card */}
@@ -78,6 +85,21 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Chat with Client Button for Accepted Tasks */}
+      {isTaskAccepted && (
+        <Card>
+          <CardContent className="p-6">
+            <Button
+              onClick={handleChatClick}
+              className="w-full bg-teal-600 hover:bg-teal-700 h-10 flex items-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Chat with Client
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Creator Information */}
       {task.created_by && (
