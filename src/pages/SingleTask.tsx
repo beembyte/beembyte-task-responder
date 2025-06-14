@@ -166,8 +166,8 @@ const SingleTask: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
-        <div className="flex flex-col lg:flex-row gap-0 border border-muted-foreground/20 bg-card/80 overflow-hidden">
-          <div className="flex-1 px-0 py-6 lg:px-6 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
+        <div className="flex flex-col lg:flex-row gap-0 border border-muted-foreground/10 bg-card/80 overflow-hidden">
+          <div className="flex-1 px-0 py-4 lg:px-4 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
             <div className="">
               <TaskHeader task={task} />
               <TaskDescription description={task.description} />
@@ -189,7 +189,7 @@ const SingleTask: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/20">
+          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/10">
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}

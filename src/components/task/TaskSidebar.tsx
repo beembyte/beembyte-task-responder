@@ -73,7 +73,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
   return (
     <div className="space-y-3">
       {/* Price Card */}
-      <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+      <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
         <CardContent className="p-4">
           <div className="text-center">
             <div className="text-xl lg:text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
@@ -85,7 +85,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
       </Card>
 
       {/* Task Details */}
-      <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+      <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
         <CardContent className="space-y-3 p-3 lg:p-4 pt-0">
           <div className="flex items-start gap-2">
             <Calendar className="w-3 h-3 lg:w-4 lg:h-4 text-muted-foreground mt-0.5" />
@@ -113,7 +113,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
       {/* Action Buttons */}
       {task?.status === TASK_STATUS.PENDING && (
-        <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
           <CardContent className="p-3 lg:p-4">
             <div className="space-y-2">
               {!isTaskAccepted ? (
@@ -165,7 +165,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
       {/* Cancel Button for Ongoing Tasks */}
       {task?.status === TASK_STATUS.INPROGRESS && (
-        <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
           <CardContent className="p-3 lg:p-4">
             <Button
               variant="outline"

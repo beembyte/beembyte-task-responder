@@ -13,10 +13,10 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({ fileUrls }) => {
 
   return (
     <Card className="rounded-none shadow-none">
-      <CardHeader>
-        <CardTitle>Attachments</CardTitle>
+      <CardHeader className="p-4 pb-2">
+        <CardTitle className="text-lg">Attachments</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0">
         <div className="space-y-2">
           {fileUrls.map((fileUrl, index) => (
             <div key={index} className="bg-gray-50 p-3 rounded-md">

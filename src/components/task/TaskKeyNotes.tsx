@@ -15,13 +15,13 @@ const TaskKeyNotes: React.FC<TaskKeyNotesProps> = ({ keyNotes }) => {
 
   return (
     <Card className="rounded-none shadow-none">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="p-4 pb-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <AlertTriangle className="w-5 h-5" />
           Key Notes
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0">
         <div className="flex flex-wrap gap-2">
           {keyNotes.map((note: string, index: number) => (
             <Badge key={index} variant="outline" className="text-orange-600 border-orange-300">
