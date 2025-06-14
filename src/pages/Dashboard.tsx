@@ -186,7 +186,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        <h3 className="text-base font-bold text-gray-900 mb-2">
                           {dashboardStats.inProgressTask.title}
                         </h3>
                         <p className="text-sm text-blue-600 font-medium mb-2">
@@ -223,7 +223,7 @@ const Dashboard: React.FC = () => {
 
                   <div className="lg:w-64 flex flex-col justify-between">
                     <div className="text-center lg:text-right mb-6">
-                      <div className="text-2xl font-bold text-green-600 mb-1">
+                      <div className="text-xl font-bold text-green-600 mb-1">
                         {formatPayment(dashboardStats.inProgressTask.price || 0)}
                       </div>
                       <p className="text-sm text-gray-500">Fixed price</p>
