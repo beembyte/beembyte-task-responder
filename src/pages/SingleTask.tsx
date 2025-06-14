@@ -192,6 +192,15 @@ const SingleTask: React.FC = () => {
             <TaskDescription description={task.description} />
             <TaskKeyNotes keyNotes={task.key_notes} />
             <TaskAttachments fileUrls={task.file_urls} />
+            
+            {/* ------- Move submission data display HERE ------- */}
+            {submissionData && (
+              <TaskSubmissionDisplay
+                description={submissionData.description}
+                link={submissionData.link}
+                files_urls={submissionData.files_urls}
+              />
+            )}
 
             {isTaskAccepted && (
               <TaskSubmission 
@@ -204,14 +213,7 @@ const SingleTask: React.FC = () => {
 
           {/* Sidebar - Takes 1/3 on desktop, full width on mobile */}
           <div className="lg:col-span-1 lg:sticky lg:top-4 lg:h-fit">
-            {/* ---- Submission Data Display ----- */}
-            {submissionData && (
-              <TaskSubmissionDisplay
-                description={submissionData.description}
-                link={submissionData.link}
-                files_urls={submissionData.files_urls}
-              />
-            )}
+            {/* ---- REMOVE submission display from here ---- */}
 
             <TaskSidebar
               task={task}
