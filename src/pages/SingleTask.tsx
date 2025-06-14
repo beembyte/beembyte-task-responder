@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Clock, User } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
@@ -142,6 +142,38 @@ const SingleTask: React.FC = () => {
 
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
+  // Helper: Build the job stats row (like Upwork reference)
+  const JobStatsRow = () => (
+    <div className="flex flex-wrap items-center justify-between border-t border-b border-muted-foreground/20 py-4 px-4 bg-background rounded-lg shadow-sm">
+      {/* Customize these according to task properties as needed */}
+      <div className="flex items-center flex-1 min-w-[130px] justify-center gap-2 border-r border-muted-foreground/10 last:border-none">
+        <Clock className="w-5 h-5 text-muted-foreground" />
+        <div>
+          <div className="text-xs font-semibold text-foreground">Deadline</div>
+          <div className="text-sm text-muted-foreground">{task?.deadline ? new Date(task.deadline).toLocaleDateString() : "N/A"}</div>
+        </div>
+      </div>
+      <div className="flex items-center flex-1 min-w-[130px] justify-center gap-2 border-r border-muted-foreground/10 last:border-none">
+        <User className="w-5 h-5 text-muted-foreground" />
+        <div>
+          <div className="text-xs font-semibold text-foreground">Client</div>
+          <div className="text-sm text-muted-foreground truncate">{task?.created_by?.first_name} {task?.created_by?.last_name}</div>
+        </div>
+      </div>
+      <div className="flex items-center flex-1 min-w-[130px] justify-center gap-2 border-r border-muted-foreground/10 last:border-none">
+        <Loader2 className="w-5 h-5 text-muted-foreground" />
+        <div>
+          <div className="text-xs font-semibold text-foreground">Status</div>
+          <div className="text-sm text-muted-foreground">{task?.status}</div>
+        </div>
+      </div>
+      <div className="flex items-center flex-1 min-w-[130px] justify-center gap-2">
+        <span className="text-emerald-600 font-semibold">₦{task?.price?.toLocaleString("en-NG")}</span>
+        <span className="text-xs text-muted-foreground">Fixed</span>
+      </div>
+    </div>
+  )
+
   if (isLoadingTask) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
@@ -175,7 +207,7 @@ const SingleTask: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      <div className="flex-1 container mx-auto px-4 py-4 max-w-7xl">
+      <div className="flex-1 container mx-auto px-1 py-4 max-w-7xl">
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)} 
@@ -185,37 +217,42 @@ const SingleTask: React.FC = () => {
           Back
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          {/* Main Content - Takes 2/3 on desktop, full width on mobile */}
-          <div className="lg:col-span-2 space-y-4">
-            <TaskHeader task={task} />
-            <TaskDescription description={task.description} />
-            <TaskKeyNotes keyNotes={task.key_notes} />
-            <TaskAttachments fileUrls={task.file_urls} />
-            
-            {/* ------- Move submission data display HERE ------- */}
-            {submissionData && (
-              <TaskSubmissionDisplay
-                description={submissionData.description}
-                link={submissionData.link}
-                files_urls={submissionData.files_urls}
-              />
-            )}
+        {/* Outer Card Wrap */}
+        <div className="flex flex-col lg:flex-row gap-0 bg-card/80 rounded-xl border border-muted-foreground/20 shadow-sm overflow-hidden">
 
-            {/* Only show the submit area if there is NO submission */}
-            {isTaskAccepted && !submissionData && (
-              <TaskSubmission 
-                taskId={task._id} 
-                onSubmit={handleTaskSubmission}
-                onCancel={handleCancelTask}
-              />
-            )}
+          {/* Left/main content with vertical divider on large screens */}
+          <div className="flex-1 px-0 py-6 lg:px-6 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
+            <div className="space-y-4">
+
+              <TaskHeader task={task} />
+              <TaskDescription description={task.description} />
+              <TaskKeyNotes keyNotes={task.key_notes} />
+              <TaskAttachments fileUrls={task.file_urls} />
+
+              {/* Job/Task Stats Row */}
+              <JobStatsRow />
+
+              {submissionData && (
+                <TaskSubmissionDisplay
+                  description={submissionData.description}
+                  link={submissionData.link}
+                  files_urls={submissionData.files_urls}
+                />
+              )}
+
+              {/* Submit area: only if accepted but not yet submitted */}
+              {isTaskAccepted && !submissionData && (
+                <TaskSubmission 
+                  taskId={task._id} 
+                  onSubmit={handleTaskSubmission}
+                  onCancel={handleCancelTask}
+                />
+              )}
+            </div>
           </div>
 
-          {/* Sidebar - Takes 1/3 on desktop, full width on mobile */}
-          <div className="lg:col-span-1 lg:sticky lg:top-4 lg:h-fit">
-            {/* ---- REMOVE submission display from here ---- */}
-
+          {/* Sidebar: no border on bottom in desktop */}
+          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4">
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}
