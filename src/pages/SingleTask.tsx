@@ -202,7 +202,8 @@ const SingleTask: React.FC = () => {
               />
             )}
 
-            {isTaskAccepted && (
+            {/* Only show the submit area if there is NO submission */}
+            {isTaskAccepted && !submissionData && (
               <TaskSubmission 
                 taskId={task._id} 
                 onSubmit={handleTaskSubmission}
