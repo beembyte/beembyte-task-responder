@@ -16,7 +16,7 @@ const TaskKeyNotes: React.FC<TaskKeyNotesProps> = ({ keyNotes }) => {
   return (
     <Card className="rounded-none shadow-none">
       <CardHeader className="p-4 pb-2">
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-base">
           <AlertTriangle className="w-5 h-5" />
           Key Notes
         </CardTitle>

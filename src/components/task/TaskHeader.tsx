@@ -1,3 +1,4 @@
+
 import React from "react"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -41,8 +42,8 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({ task }) => {
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-2xl font-bold mb-1">{task.title}</CardTitle>
-            <p className="text-base text-blue-600 font-medium">{task.subject}</p>
+            <CardTitle className="text-xl font-bold mb-1">{task.title}</CardTitle>
+            <p className="text-sm text-blue-600 font-medium">{task.subject}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <Badge className={`${getStatusColor(task.status)}`}>{task.status}</Badge>

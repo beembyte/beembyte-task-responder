@@ -76,10 +76,10 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
       <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
         <CardContent className="p-4">
           <div className="text-center">
-            <div className="text-xl lg:text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+            <div className="text-lg lg:text-xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
               {formatPayment(task.price)}
             </div>
-            <p className="text-xs lg:text-sm text-emerald-600 dark:text-emerald-400">Fixed Price</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400">Fixed Price</p>
           </div>
         </CardContent>
       </Card>
