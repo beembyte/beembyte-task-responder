@@ -1,7 +1,7 @@
 
 import React from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Link as LinkIcon, FileText, Github, FileImage, FilePdf, FileText as FileTextIcon } from "lucide-react"
+import { Link as LinkIcon, FileText, Github, FileImage, FileText as FileTextIcon } from "lucide-react"
 import ImageModal from "./ImageModal"
 import SubmissionFileItem from "./SubmissionFileItem"
 
@@ -74,3 +74,4 @@ const TaskSubmissionDisplay: React.FC<TaskSubmissionDisplayProps> = ({
 }
 
 export default TaskSubmissionDisplay
+

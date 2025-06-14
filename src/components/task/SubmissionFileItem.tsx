@@ -1,7 +1,7 @@
 
 import React, { useState } from "react"
 import ImageModal from "./ImageModal"
-import { FileImage, FilePdf, FileText as FileTextIcon } from "lucide-react"
+import { FileImage, FileSignature, FileText as FileTextIcon } from "lucide-react"
 
 interface SubmissionFileItemProps {
   url: string
@@ -48,7 +48,7 @@ const SubmissionFileItem: React.FC<SubmissionFileItemProps> = ({ url }) => {
         title="Open PDF"
         style={{ textDecoration: "none" }}
       >
-        <FilePdf className="h-8 w-8 text-red-500 mb-1" />
+        <FileSignature className="h-8 w-8 text-red-500 mb-1" />
         <span className="text-[10px] text-muted-foreground truncate w-full">PDF</span>
       </a>
     )
@@ -87,3 +87,4 @@ const SubmissionFileItem: React.FC<SubmissionFileItemProps> = ({ url }) => {
 }
 
 export default SubmissionFileItem
+
