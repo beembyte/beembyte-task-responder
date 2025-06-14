@@ -202,78 +202,93 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
         </div>
       ) : tasks && tasks.length > 0 ? (
         <div className="space-y-6">
-          <div className="border rounded-lg overflow-hidden bg-card">
+          <div className="space-y-4">
             {tasks.map((task) => (
-              <div
+              <Card
                 key={task._id}
-                className="p-6 border-b last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
+                className="hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => handleTaskClick(task._id)}
               >
-                <div className="flex flex-col md:flex-row gap-6">
-                  {/* Main content */}
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-lg text-card-foreground hover:text-primary transition-colors flex-1 pr-4">
-                        {task.title}
-                      </h3>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap md:hidden">Posted {formatDate(task.createdAt)}</span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm mb-3">
-                      <span className="font-semibold text-green-600">{formatPayment(task.price || 0)}</span>
-                      <span className="text-gray-300 dark:text-gray-600">•</span>
-                      <Badge variant="secondary">{task.subject}</Badge>
-                      {task.difficulty && (
-                          <Badge className={`capitalize ${getDifficultyColor(task.difficulty)}`}>
+                <CardContent className="p-6">
+                  <div className="max-w-4xl">
+                    {/* Header row with title and meta info */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 pr-4">
+                        <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                          {task.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span className="font-medium text-blue-600">{task.subject}</span>
+                          <span>•</span>
+                          <span className="text-gray-500">Posted {formatDate(task.createdAt)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {task.difficulty && (
+                          <Badge className={`text-xs capitalize ${getDifficultyColor(task.difficulty)}`}>
                             {task.difficulty}
                           </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Price and type info */}
+                    <div className="mb-3">
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="font-bold text-lg text-green-600">
+                          {formatPayment(task.price || 0)}
+                        </span>
+                        <span className="text-gray-500">Fixed-price</span>
+                        <span className="text-gray-500">•</span>
+                        <span className="text-gray-500">Intermediate</span>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="mb-4">
+                      <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                        {task.description}
+                      </p>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                      {taskType === 'pending' && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9 px-4 text-sm hover:bg-red-50 hover:border-red-300 hover:text-red-600"
+                            onClick={(e) => handleDeclineTask(e, task._id)}
+                          >
+                            Decline
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
+                            onClick={(e) => handleAcceptTask(e, task._id)}
+                            disabled={acceptingTasks.has(task._id)}
+                          >
+                            {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
+                          </Button>
+                        </>
+                      )}
+                      {showCancelButton && taskType === 'ongoing' && (
+                        <CancelTaskButton
+                          taskId={task._id}
+                          onTaskCancelled={() => handleTaskCancelled(task._id)}
+                          className="h-9"
+                        />
+                      )}
+                      {taskType === 'completed' && (
+                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                          Completed
+                        </Badge>
                       )}
                     </div>
-
-                    <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
-                      {task.description}
-                    </p>
                   </div>
-
-                  {/* Actions and Meta */}
-                  <div className="flex flex-col items-start md:items-end justify-between w-full md:w-auto md:min-w-[180px]">
-                    <span className="hidden md:block text-xs text-muted-foreground mb-4">Posted {formatDate(task.createdAt)}</span>
-                    
-                    <div className="mt-auto flex items-center gap-2 w-full md:w-auto" onClick={(e) => e.stopPropagation()}>
-                        {taskType === 'pending' && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 flex-1 md:flex-initial hover:bg-red-50 hover:border-red-300 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-400"
-                              onClick={(e) => handleDeclineTask(e, task._id)}
-                            >
-                              Decline
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="h-8 flex-1 md:flex-initial bg-green-600 hover:bg-green-700"
-                              onClick={(e) => handleAcceptTask(e, task._id)}
-                              disabled={acceptingTasks.has(task._id)}
-                            >
-                              {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
-                            </Button>
-                          </>
-                        )}
-                        {showCancelButton && taskType === 'ongoing' && (
-                          <CancelTaskButton
-                            taskId={task._id}
-                            onTaskCancelled={() => handleTaskCancelled(task._id)}
-                            className="h-8 w-full md:w-auto"
-                          />
-                        )}
-                        {taskType === 'completed' && (
-                          <Badge className="bg-green-100 text-green-800 border-green-200">Completed</Badge>
-                        )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
