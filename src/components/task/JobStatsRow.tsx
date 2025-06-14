@@ -8,7 +8,7 @@ interface JobStatsRowProps {
 }
 
 const JobStatsRow: React.FC<JobStatsRowProps> = ({ task }) => (
-  <div className="flex flex-wrap items-center justify-between border-t border-b border-muted-foreground/20 py-4 px-4 bg-background rounded-lg shadow-sm">
+  <div className="flex flex-wrap items-center justify-between border-t border-b border-muted-foreground/20 py-4 px-4 bg-background">
     <div className="flex items-center flex-1 min-w-[130px] justify-center gap-2 border-r border-muted-foreground/10 last:border-none">
       <Clock className="w-5 h-5 text-muted-foreground" />
       <div>
