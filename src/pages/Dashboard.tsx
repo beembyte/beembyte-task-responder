@@ -1,15 +1,14 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
-import ProgressIndicator from '@/components/ui/progress-indicator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AVAILABILITY_STATUS, User } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import useTask, { DashStatsData } from '@/hooks/useTask';
-import CompactTaskCard from '@/components/CompactTaskCard';
-import { ArrowRight, Clock, Calendar, User as UserIcon } from 'lucide-react';
+import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const Dashboard: React.FC = () => {
@@ -265,12 +264,24 @@ const Dashboard: React.FC = () => {
           {isLoading ? (
             <div className="text-center py-8">Loading tasks...</div>
           ) : recentTasks && recentTasks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentTasks.map((task, index) => (
-                <CompactTaskCard
-                  key={task._id || index}
-                  task={task}
-                />
+            <div className="border rounded-lg overflow-hidden bg-card">
+              {recentTasks.map((task) => (
+                <Link to={`/task/${task._id}`} key={task._id} className="block p-4 border-b last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 hover:text-primary">{task.title}</h4>
+                      <p className="text-xs text-primary font-medium mt-1">{task.subject}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                       <p className="font-bold text-sm text-green-600">{formatPayment(task.price || 0)}</p>
+                       {task.difficulty && (
+                         <Badge className={`${getDifficultyColor(task.difficulty)} text-xs mt-1`} variant="default">
+                            {task.difficulty.toUpperCase()}
+                         </Badge>
+                       )}
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           ) : (

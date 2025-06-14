@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Search, Clock, Calendar, User } from 'lucide-react';
+import { Search, Clock, Calendar } from 'lucide-react';
 import useTask, { TaskResponse } from '@/hooks/useTask';
 import { getAllunAssignedTaskPayload } from '@/services/taskApi';
 import { toast } from 'sonner';
@@ -201,21 +201,22 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
         </div>
       ) : tasks && tasks.length > 0 ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tasks.map((task, index) => (
-              <Card 
-                key={task._id || index} 
-                className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-l-blue-500 h-full"
+          <div className="border rounded-lg overflow-hidden bg-card">
+            {tasks.map((task) => (
+              <div
+                key={task._id}
+                className="p-4 border-b last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
                 onClick={() => handleTaskClick(task._id)}
               >
-                <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Left side: Title, description, meta */}
                   <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-bold text-lg text-gray-900 line-clamp-2 flex-1 mr-2 hover:text-blue-600 transition-colors">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-bold text-base text-card-foreground line-clamp-2 flex-1 mr-2 hover:text-primary transition-colors">
                         {task.title}
                       </h3>
-                      <div className="flex flex-col gap-1">
-                        <Badge className={`text-xs ${getStatusColor(task.status || taskType)}`}>
+                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
+                        <Badge className={`text-xs capitalize ${getStatusColor(task.status || taskType)}`}>
                           {task.status || taskType}
                         </Badge>
                         {task.difficulty && (
@@ -226,44 +227,38 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
                       </div>
                     </div>
 
-                    <p className="text-sm text-blue-600 font-medium mb-3">
+                    <p className="text-sm text-primary font-medium mb-3">
                       {task.subject}
                     </p>
 
-                    <p className="text-gray-700 mb-4 text-sm leading-relaxed line-clamp-3">
+                    <p className="text-muted-foreground mb-4 text-xs leading-relaxed line-clamp-2">
                       {task.description}
                     </p>
 
-                    <div className="flex flex-col gap-2 text-xs text-gray-600 mb-4">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-3 h-3 text-gray-400" />
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-3 h-3" />
                         <span>Due: {formatDate(task.deadline || task.createdAt)}</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-3 h-3 text-gray-400" />
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-3 h-3" />
                         <span>Posted: {formatDate(task.createdAt)}</span>
                       </div>
-                      {task.key_notes && task.key_notes.length > 0 && (
-                        <div className="flex items-center space-x-2">
-                          <User className="w-3 h-3 text-gray-400" />
-                          <span className="line-clamp-1">{task.key_notes.join(', ')}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
-
-                  <div className="border-t pt-4 mt-auto">
-                    <div className="text-center mb-4">
-                      <div className="text-2xl font-bold text-green-600">
+                  {/* Right side: Price and Actions */}
+                  <div className="w-full sm:w-48 flex flex-col justify-between sm:items-end">
+                    <div className="text-left sm:text-right mb-4 sm:mb-2">
+                      <div className="text-xl font-bold text-green-600">
                         {formatPayment(task.price || 0)}
                       </div>
-                      <p className="text-xs text-gray-500">Fixed price</p>
+                      <p className="text-xs text-muted-foreground">Fixed price</p>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                    <div className="flex flex-col gap-2 w-full">
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="w-full h-8"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -274,16 +269,16 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
                       </Button>
                       {taskType === 'pending' && (
                         <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1 h-8 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-8 hover:bg-red-50 hover:border-red-300 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-400"
                             onClick={(e) => handleDeclineTask(e, task._id)}
                           >
                             Decline
                           </Button>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             className="flex-1 h-8 bg-green-600 hover:bg-green-700"
                             onClick={(e) => handleAcceptTask(e, task._id)}
                             disabled={acceptingTasks.has(task._id)}
@@ -301,8 +296,8 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
                       )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -345,10 +340,10 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
           )}
         </div>
       ) : (
-        <div className="text-center py-20 bg-gray-50 rounded-xl">
+        <div className="text-center py-20 bg-gray-50 rounded-xl dark:bg-gray-900/50">
           <div className="max-w-md mx-auto">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-3">No {taskType} tasks found</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-2xl font-semibold text-card-foreground mb-3">No {taskType} tasks found</h3>
+            <p className="text-muted-foreground mb-6">
               {searchTerm ? 'Try adjusting your search terms or browse all available tasks.' : `No ${taskType} tasks available at the moment. Check back later for new opportunities.`}
             </p>
             {searchTerm && (
