@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -165,7 +166,7 @@ const SingleTask: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
-        <div className="flex flex-col lg:flex-row gap-0 bg-card/80 rounded-xl border border-muted-foreground/20 shadow-sm overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-0 border border-muted-foreground/20 bg-card/80 overflow-hidden">
           <div className="flex-1 px-0 py-6 lg:px-6 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
             <div className="space-y-4">
               <TaskHeader task={task} />
@@ -189,7 +190,7 @@ const SingleTask: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4">
+          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/20">
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}
