@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,24 +44,6 @@ const Dashboard: React.FC = () => {
 
     fetchRecentTasks();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchOngoingTask = async () => {
-  //     const response = await getOngoingTasks({
-  //       limit: 1, // Only fetch one ongoing task
-  //       page: 1,
-  //       sort: 1,
-  //       title: '',
-  //       description: ''
-  //     });
-
-  //     if (response.success && response.data && response.data.items.length > 0) {
-  //       setOngoingTask(response.data.items[0]);
-  //     }
-  //   };
-
-  //   fetchOngoingTask();
-  // }, []);
 
   useEffect(() => {
     const getStats = async () => {
@@ -264,24 +245,29 @@ const Dashboard: React.FC = () => {
           {isLoading ? (
             <div className="text-center py-8">Loading tasks...</div>
           ) : recentTasks && recentTasks.length > 0 ? (
-            <div className="border rounded-lg overflow-hidden bg-card">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {recentTasks.map((task) => (
-                <Link to={`/task/${task._id}`} key={task._id} className="block p-4 border-b last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 hover:text-primary">{task.title}</h4>
-                      <p className="text-xs text-primary font-medium mt-1">{task.subject}</p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                       <p className="font-bold text-sm text-green-600">{formatPayment(task.price || 0)}</p>
-                       {task.difficulty && (
-                         <Badge className={`${getDifficultyColor(task.difficulty)} text-xs mt-1`} variant="default">
+                <Card key={task._id} className="hover:shadow-lg transition-shadow flex flex-col">
+                  <CardHeader>
+                      <CardTitle className="text-base font-bold line-clamp-2">
+                        <Link to={`/task/${task._id}`} className="hover:text-primary transition-colors">{task.title}</Link>
+                      </CardTitle>
+                      <p className="text-sm text-primary font-medium pt-1">{task.subject}</p>
+                  </CardHeader>
+                  <CardContent className="flex-grow pt-0">
+                    <p className="text-sm text-gray-600 line-clamp-3">
+                      {task.description}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50 p-4 mt-auto">
+                      <p className="font-bold text-base text-green-600">{formatPayment(task.price || 0)}</p>
+                      {task.difficulty && (
+                        <Badge className={`${getDifficultyColor(task.difficulty)}`} variant="default">
                             {task.difficulty.toUpperCase()}
-                         </Badge>
-                       )}
-                    </div>
-                  </div>
-                </Link>
+                        </Badge>
+                      )}
+                  </CardFooter>
+                </Card>
               ))}
             </div>
           ) : (

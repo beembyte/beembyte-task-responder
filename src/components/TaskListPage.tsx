@@ -205,97 +205,64 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
             {tasks.map((task) => (
               <div
                 key={task._id}
-                className="p-4 border-b last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
+                className="p-6 border-b last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer"
                 onClick={() => handleTaskClick(task._id)}
               >
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {/* Left side: Title, description, meta */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-base text-card-foreground line-clamp-2 flex-1 mr-2 hover:text-primary transition-colors">
-                        {task.title}
-                      </h3>
-                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
-                        <Badge className={`text-xs capitalize ${getStatusColor(task.status || taskType)}`}>
-                          {task.status || taskType}
+                <div className="flex justify-between items-center text-xs text-muted-foreground mb-2">
+                  <span>Posted {formatDate(task.createdAt)}</span>
+                </div>
+
+                <h3 className="font-semibold text-lg text-card-foreground hover:text-primary transition-colors mb-2">
+                  {task.title}
+                </h3>
+                
+                <p className="text-sm text-muted-foreground mb-4 font-medium">
+                  <span className="text-green-600">{formatPayment(task.price || 0)}</span>
+                  <span className="mx-2 text-gray-300 dark:text-gray-600">•</span>
+                  <span>{task.difficulty ? `${task.difficulty.charAt(0).toUpperCase() + task.difficulty.slice(1)}` : 'N/A'}</span>
+                </p>
+
+                <p className="text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-3">
+                  {task.description}
+                </p>
+                
+                <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="secondary">{task.subject}</Badge>
+                    {task.difficulty && (
+                        <Badge variant="secondary" className="capitalize">
+                          {task.difficulty}
                         </Badge>
-                        {task.difficulty && (
-                          <Badge className={`text-xs ${getDifficultyColor(task.difficulty)}`}>
-                            {task.difficulty.toUpperCase()}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-primary font-medium mb-3">
-                      {task.subject}
-                    </p>
-
-                    <p className="text-muted-foreground mb-4 text-xs leading-relaxed line-clamp-2">
-                      {task.description}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>Due: {formatDate(task.deadline || task.createdAt)}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>Posted: {formatDate(task.createdAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Right side: Price and Actions */}
-                  <div className="w-full sm:w-48 flex flex-col justify-between sm:items-end">
-                    <div className="text-left sm:text-right mb-4 sm:mb-2">
-                      <div className="text-xl font-bold text-green-600">
-                        {formatPayment(task.price || 0)}
-                      </div>
-                      <p className="text-xs text-muted-foreground">Fixed price</p>
-                    </div>
-
-                    <div className="flex flex-col gap-2 w-full">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full h-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTaskClick(task._id);
-                        }}
-                      >
-                        View Details
-                      </Button>
+                    )}
+                    
+                    <div className="flex items-center gap-2 ml-auto" onClick={(e) => e.stopPropagation()}>
                       {taskType === 'pending' && (
-                        <div className="flex gap-2">
+                        <>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 h-8 hover:bg-red-50 hover:border-red-300 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-400"
+                            className="h-8 hover:bg-red-50 hover:border-red-300 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-400"
                             onClick={(e) => handleDeclineTask(e, task._id)}
                           >
                             Decline
                           </Button>
                           <Button
                             size="sm"
-                            className="flex-1 h-8 bg-green-600 hover:bg-green-700"
+                            className="h-8 bg-green-600 hover:bg-green-700"
                             onClick={(e) => handleAcceptTask(e, task._id)}
                             disabled={acceptingTasks.has(task._id)}
                           >
                             {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
                           </Button>
-                        </div>
+                        </>
                       )}
                       {showCancelButton && taskType === 'ongoing' && (
                         <CancelTaskButton
                           taskId={task._id}
                           onTaskCancelled={() => handleTaskCancelled(task._id)}
-                          className="w-full h-8"
+                          className="h-8"
                         />
                       )}
                     </div>
-                  </div>
                 </div>
               </div>
             ))}
