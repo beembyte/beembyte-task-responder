@@ -119,7 +119,7 @@ const Dashboard: React.FC = () => {
               <AvatarFallback>{user?.first_name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900">
                 Welcome, {user?.first_name}!
               </h1>
               <div className="flex flex-col">
@@ -147,7 +147,7 @@ const Dashboard: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Available Tasks</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardStats && dashboardStats?.pendingTasksCount}</div>
+              <div className="text-xl font-bold">{dashboardStats && dashboardStats?.pendingTasksCount}</div>
               <p className="text-xs text-gray-500">Ready to apply</p>
             </CardContent>
           </Card>
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Current Task</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardStats && dashboardStats?.inProgressTask ? 1 : 0}</div>
+              <div className="text-xl font-bold">{dashboardStats && dashboardStats?.inProgressTask ? 1 : 0}</div>
               <p className="text-xs text-gray-500">In progress</p>
             </CardContent>
           </Card>
@@ -167,7 +167,7 @@ const Dashboard: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardStats && dashboardStats?.completedThisMonthCount}</div>
+              <div className="text-xl font-bold">{dashboardStats && dashboardStats?.completedThisMonthCount}</div>
               <p className="text-xs text-gray-500">This month</p>
             </CardContent>
           </Card>
@@ -176,7 +176,7 @@ const Dashboard: React.FC = () => {
         {/* Current Ongoing Task */}
         {dashboardStats?.inProgressTask && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold flex items-center mb-4">
+            <h2 className="text-lg font-semibold flex items-center mb-4">
               <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
               Current Task
             </h2>
@@ -186,7 +186,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
                           {dashboardStats.inProgressTask.title}
                         </h3>
                         <p className="text-sm text-blue-600 font-medium mb-2">
@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    <p className="text-gray-700 mb-4 text-base leading-relaxed line-clamp-2">
+                    <p className="text-gray-700 mb-4 text-sm leading-relaxed line-clamp-2">
                       {dashboardStats.inProgressTask.description}
                     </p>
 
@@ -223,7 +223,7 @@ const Dashboard: React.FC = () => {
 
                   <div className="lg:w-64 flex flex-col justify-between">
                     <div className="text-center lg:text-right mb-6">
-                      <div className="text-3xl font-bold text-green-600 mb-1">
+                      <div className="text-2xl font-bold text-green-600 mb-1">
                         {formatPayment(dashboardStats.inProgressTask.price || 0)}
                       </div>
                       <p className="text-sm text-gray-500">Fixed price</p>
@@ -250,7 +250,7 @@ const Dashboard: React.FC = () => {
         {/* Recent Available Tasks */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold flex items-center">
+            <h2 className="text-lg font-semibold flex items-center">
               <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
               Recent Available Tasks
             </h2>
@@ -285,7 +285,7 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="border-dashed border-2 hover:border-primary transition-colors">
             <CardContent className="p-6 text-center">
-              <h3 className="font-semibold mb-2">Browse Available Tasks</h3>
+              <h3 className="text-base font-semibold mb-2">Browse Available Tasks</h3>
               <p className="text-sm text-gray-600 mb-4">Find and apply for new tasks</p>
               <Link to="/pending-tasks">
                 <Button className="w-full">Browse Tasks</Button>
@@ -295,7 +295,7 @@ const Dashboard: React.FC = () => {
 
           <Card className="border-dashed border-2 hover:border-primary transition-colors">
             <CardContent className="p-6 text-center">
-              <h3 className="font-semibold mb-2">Work History</h3>
+              <h3 className="text-base font-semibold mb-2">Work History</h3>
               <p className="text-sm text-gray-600 mb-4">Review completed projects</p>
               <Link to="/completed-tasks">
                 <Button variant="outline" className="w-full">View History</Button>
