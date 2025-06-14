@@ -50,26 +50,28 @@ const CompactTaskCard: React.FC<CompactTaskCardProps> = ({ task, onClick }) => {
 
   return (
     <Card
-      className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-blue-500"
+      className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-green-500"
       onClick={handleClick}
     >
       <CardContent className="p-4">
         <div className="space-y-2">
-          <div className="flex items-start justify-between">
-            <h3 className="font-semibold text-sm line-clamp-2 flex-1 mr-2">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-semibold text-sm line-clamp-2 flex-1">
               {task.title}
             </h3>
-            <div className="flex gap-1">
-              <Badge variant="outline" className="text-xs">
-                {task.status || 'pending'}
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <Badge variant="secondary" className="text-xs">
+                Available
               </Badge>
               {task.difficulty && (
-                <Badge className={`text-xs ${getDifficultyColor(task.difficulty)}`}>
-                  {task.difficulty}
+                <Badge className={`text-xs ${getDifficultyColor(task.difficulty)} font-semibold`}>
+                  {task.difficulty.toUpperCase()}
                 </Badge>
               )}
             </div>
           </div>
+          
+          {task.subject && <p className="text-xs text-primary font-medium">{task.subject}</p>}
 
           <p className="text-xs text-gray-600 line-clamp-2">
             {task.description}
