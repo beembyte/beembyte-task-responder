@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -245,28 +246,70 @@ const Dashboard: React.FC = () => {
           {isLoading ? (
             <div className="text-center py-8">Loading tasks...</div>
           ) : recentTasks && recentTasks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="space-y-4">
               {recentTasks.map((task) => (
-                <Card key={task._id} className="hover:shadow-lg transition-shadow flex flex-col">
-                  <CardHeader>
-                      <CardTitle className="text-base font-bold line-clamp-2">
-                        <Link to={`/task/${task._id}`} className="hover:text-primary transition-colors">{task.title}</Link>
-                      </CardTitle>
-                      <p className="text-sm text-primary font-medium pt-1">{task.subject}</p>
-                  </CardHeader>
-                  <CardContent className="flex-grow pt-0">
-                    <p className="text-sm text-gray-600 line-clamp-3">
-                      {task.description}
-                    </p>
+                <Card 
+                  key={task._id} 
+                  className="border-l-4 border-l-green-500 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/task/${task._id}`)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-base font-bold text-gray-900 mb-2 hover:text-primary transition-colors">
+                              {task.title}
+                            </h3>
+                            <p className="text-sm text-primary font-medium mb-2">
+                              {task.subject}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge variant="secondary">
+                              Available
+                            </Badge>
+                            {task.difficulty && (
+                              <Badge className={`${getDifficultyColor(task.difficulty)} font-semibold`}>
+                                {task.difficulty.toUpperCase()}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className="text-gray-700 mb-4 text-sm leading-relaxed line-clamp-2">
+                          {task.description}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span>Posted: {formatDate(String(task.createdAt))}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="lg:w-64 flex flex-col justify-between">
+                        <div className="text-center lg:text-right mb-6">
+                          <div className="text-xl font-bold text-green-600 mb-1">
+                            {formatPayment(task.price || 0)}
+                          </div>
+                          <p className="text-sm text-gray-500">Fixed price</p>
+                        </div>
+
+                        <Button
+                          size="lg"
+                          className="w-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/task/${task._id}`);
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
-                  <CardFooter className="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50 p-4 mt-auto">
-                      <p className="font-bold text-base text-green-600">{formatPayment(task.price || 0)}</p>
-                      {task.difficulty && (
-                        <Badge className={`${getDifficultyColor(task.difficulty)}`} variant="default">
-                            {task.difficulty.toUpperCase()}
-                        </Badge>
-                      )}
-                  </CardFooter>
                 </Card>
               ))}
             </div>
