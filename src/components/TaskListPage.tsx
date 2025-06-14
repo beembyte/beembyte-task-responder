@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Search, Clock, Calendar } from 'lucide-react';
+import { Search } from 'lucide-react';
 import useTask, { TaskResponse } from '@/hooks/useTask';
 import { getAllunAssignedTaskPayload } from '@/services/taskApi';
 import { toast } from 'sonner';
@@ -61,6 +62,7 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
 
   useEffect(() => {
     fetchTasks(currentPage, searchTerm);
+    // eslint-disable-next-line
   }, [currentPage, taskType]);
 
   const handleSearch = () => {
@@ -111,9 +113,9 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
 
   const handleAcceptTask = async (e: React.MouseEvent, taskId: string) => {
     e.stopPropagation();
-    
+
     setAcceptingTasks(prev => new Set(prev).add(taskId));
-    
+
     try {
       const response = await acceptTask(taskId);
       if (response.success) {
@@ -196,92 +198,83 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
           <div className="text-xl text-gray-600">Loading tasks...</div>
         </div>
       ) : tasks && tasks.length > 0 ? (
-        <div className="space-y-0">
-          <div className="border rounded-lg overflow-hidden">
-            {tasks.map((task, index) => (
-              <div
-                key={task._id}
-                className={`p-6 hover:bg-gray-50 transition-colors cursor-pointer ${
-                  index !== tasks.length - 1 ? 'border-b border-gray-200' : ''
-                }`}
-                onClick={() => handleTaskClick(task._id)}
-              >
-                <div className="max-w-4xl">
-                  {/* Header row with title and price */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1 pr-4">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                        {task.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+        <div className="space-y-7">
+          {tasks.map((task, index) => (
+            <div
+              key={task._id}
+              className="rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md cursor-pointer max-w-3xl mx-auto px-0"
+              onClick={() => handleTaskClick(task._id)}
+            >
+              <div className="p-6 flex flex-col gap-3">
+                {/* Title & Meta */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-0.5 line-clamp-2">
+                      {task.title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                      {task.subject && (
                         <span className="font-medium text-blue-600">{task.subject}</span>
-                        <span>•</span>
-                        <span className="text-gray-500">Posted {formatDate(task.createdAt)}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-lg text-green-600 mb-1">
-                        {formatPayment(task.price || 0)}
-                      </div>
-                      <div className="text-sm text-gray-500">Fixed-price</div>
+                      )}
+                      {task.subject && <span>•</span>}
+                      <span className="text-gray-500">Posted {formatDate(task.createdAt)}</span>
                     </div>
                   </div>
-
-                  {/* Description */}
-                  <div className="mb-3">
-                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
-                      {task.description}
-                    </p>
-                  </div>
-
-                  {/* Complexity directly below description */}
-                  <div className="mb-4">
-                    {task.difficulty && (
-                      <Badge className={`text-xs capitalize ${getDifficultyColor(task.difficulty)}`}>
-                        {task.difficulty}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                    {taskType === 'pending' && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-9 px-4 text-sm hover:bg-red-50 hover:border-red-300 hover:text-red-600"
-                          onClick={(e) => handleDeclineTask(e, task._id)}
-                        >
-                          Decline
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
-                          onClick={(e) => handleAcceptTask(e, task._id)}
-                          disabled={acceptingTasks.has(task._id)}
-                        >
-                          {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
-                        </Button>
-                      </>
-                    )}
-                    {showCancelButton && taskType === 'ongoing' && (
-                      <CancelTaskButton
-                        taskId={task._id}
-                        onTaskCancelled={() => handleTaskCancelled(task._id)}
-                        className="h-9"
-                      />
-                    )}
-                    {taskType === 'completed' && (
-                      <Badge className="bg-green-100 text-green-800 border-green-200">
-                        Completed
-                      </Badge>
-                    )}
+                  <div className="flex flex-col items-end shrink-0 mt-2 sm:mt-0">
+                    <span className="font-bold text-base text-green-600 mb-0.5">
+                      {formatPayment(task.price || 0)}
+                    </span>
+                    <span className="text-xs text-gray-500">Fixed-price</span>
                   </div>
                 </div>
+                {/* Description */}
+                <div className="text-gray-700 text-sm leading-relaxed line-clamp-3 mb-0">
+                  {task.description}
+                </div>
+                {/* Complexity Badge directly under description */}
+                {task.difficulty && (
+                  <Badge className={`w-fit text-xs capitalize mt-1 ${getDifficultyColor(task.difficulty)}`}>
+                    {task.difficulty}
+                  </Badge>
+                )}
+                {/* Actions */}
+                <div className="flex flex-row items-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
+                  {taskType === 'pending' && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-4 text-sm hover:bg-red-50 hover:border-red-300 hover:text-red-600"
+                        onClick={(e) => handleDeclineTask(e, task._id)}
+                      >
+                        Decline
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
+                        onClick={(e) => handleAcceptTask(e, task._id)}
+                        disabled={acceptingTasks.has(task._id)}
+                      >
+                        {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
+                      </Button>
+                    </>
+                  )}
+                  {showCancelButton && taskType === 'ongoing' && (
+                    <CancelTaskButton
+                      taskId={task._id}
+                      onTaskCancelled={() => handleTaskCancelled(task._id)}
+                      className="h-9"
+                    />
+                  )}
+                  {taskType === 'completed' && (
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      Completed
+                    </Badge>
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
 
           {/* Pagination */}
           {totalPages > 1 && (
