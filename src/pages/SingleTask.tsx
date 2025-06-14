@@ -158,9 +158,9 @@ const SingleTask: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <div className="flex-1 container mx-auto px-1 py-4 max-w-7xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate(-1)} 
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -173,7 +173,6 @@ const SingleTask: React.FC = () => {
               <TaskDescription description={task.description} />
               <TaskKeyNotes keyNotes={task.key_notes} />
               <TaskAttachments fileUrls={task.file_urls} />
-              <JobStatsRow task={task} />
               {submissionData && (
                 <TaskSubmissionDisplay
                   description={submissionData.description}
@@ -182,8 +181,8 @@ const SingleTask: React.FC = () => {
                 />
               )}
               {isTaskAccepted && !submissionData && (
-                <TaskSubmission 
-                  taskId={task._id} 
+                <TaskSubmission
+                  taskId={task._id}
                   onSubmit={handleTaskSubmission}
                   onCancel={handleCancelTask}
                 />
