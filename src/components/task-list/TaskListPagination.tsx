@@ -1,13 +1,5 @@
 
 import React from 'react';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 
 interface TaskListPaginationProps {
   totalPages: number;
@@ -15,45 +7,40 @@ interface TaskListPaginationProps {
   onChange: (page: number) => void;
 }
 
-const TaskListPagination: React.FC<TaskListPaginationProps> = ({
-  totalPages,
-  currentPage,
-  onChange,
-}) => {
+const TaskListPagination: React.FC<TaskListPaginationProps> = ({ totalPages, currentPage, onChange }) => {
+  if (totalPages <= 1) return null;
+
+  const handlePrev = () => {
+    if (currentPage > 1) onChange(currentPage - 1);
+  };
+  const handleNext = () => {
+    if (currentPage < totalPages) onChange(currentPage + 1);
+  };
+
   return (
-    <div className="mt-12 flex justify-center">
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => currentPage > 1 && onChange(currentPage - 1)}
-              className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-            />
-          </PaginationItem>
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            const pageNum = i + 1;
-            return (
-              <PaginationItem key={pageNum}>
-                <PaginationLink
-                  onClick={() => onChange(pageNum)}
-                  isActive={currentPage === pageNum}
-                  className="cursor-pointer"
-                >
-                  {pageNum}
-                </PaginationLink>
-              </PaginationItem>
-            );
-          })}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => currentPage < totalPages && onChange(currentPage + 1)}
-              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+    <div className="flex items-center justify-center py-4 gap-2">
+      <button
+        onClick={handlePrev}
+        disabled={currentPage === 1}
+        className="px-3 py-1 text-sm rounded bg-muted hover:bg-primary/10 disabled:opacity-50"
+        aria-label="Previous"
+      >
+        Prev
+      </button>
+      <span className="text-sm">
+        Page {currentPage} of {totalPages}
+      </span>
+      <button
+        onClick={handleNext}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1 text-sm rounded bg-muted hover:bg-primary/10 disabled:opacity-50"
+        aria-label="Next"
+      >
+        Next
+      </button>
     </div>
   );
 };
 
 export default TaskListPagination;
+

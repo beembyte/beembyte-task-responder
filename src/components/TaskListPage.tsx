@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTask, { TaskResponse } from '@/hooks/useTask';
@@ -6,8 +5,8 @@ import { getAllunAssignedTaskPayload } from '@/services/taskApi';
 import { toast } from 'sonner';
 import TaskListHeader from './task-list/TaskListHeader';
 import TaskListSearch from './task-list/TaskListSearch';
-import TaskCard from './task-list/TaskCard';
 import TaskListPagination from './task-list/TaskListPagination';
+import TaskList from './task-list/TaskList';
 import CancelTaskButton from '@/components/task/CancelTaskButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -135,20 +134,17 @@ const TaskListPage: React.FC<TaskListPageProps> = ({
           <div className="text-xl text-gray-600">Loading tasks...</div>
         </div>
       ) : tasks && tasks.length > 0 ? (
-        <div className="space-y-7">
-          {tasks.map((task) => (
-            <TaskCard
-              key={task._id}
-              task={task}
-              taskType={taskType}
-              acceptingTasks={acceptingTasks}
-              onTaskClick={handleTaskClick}
-              onAcceptTask={handleAcceptTask}
-              onDeclineTask={handleDeclineTask}
-              showCancelButton={showCancelButton}
-              onTaskCancelled={() => handleTaskCancelled(task._id)}
-            />
-          ))}
+        <>
+          <TaskList
+            tasks={tasks}
+            taskType={taskType}
+            acceptingTasks={acceptingTasks}
+            onTaskClick={handleTaskClick}
+            onAcceptTask={handleAcceptTask}
+            onDeclineTask={handleDeclineTask}
+            showCancelButton={showCancelButton}
+            onTaskCancelled={handleTaskCancelled}
+          />
           {totalPages > 1 &&
             <TaskListPagination
               totalPages={totalPages}
@@ -156,7 +152,7 @@ const TaskListPage: React.FC<TaskListPageProps> = ({
               onChange={setCurrentPage}
             />
           }
-        </div>
+        </>
       ) : (
         <div className="text-center py-20 bg-gray-50 rounded-xl dark:bg-gray-900/50">
           <div className="max-w-md mx-auto">
