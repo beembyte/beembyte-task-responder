@@ -226,6 +226,45 @@ const useTask = () => {
         }
     }
 
+    // --- Add submitTask to hook ---
+    const submitTask = async ({
+        task_id,
+        description,
+        link,
+        files_urls,
+    }: {
+        task_id: string
+        description: string
+        link?: string
+        files_urls: string[]
+    }) => {
+        try {
+            const response = await taskApi.submitTask({
+                task_id,
+                description,
+                link,
+                files_urls,
+            });
+            if (response && response.success) {
+                toast.success(response.message || "Task submitted successfully!");
+                return response;
+            } else {
+                toast.error(response.message || "Failed to submit task.");
+                return {
+                    success: false,
+                    message: response?.message || "Failed to submit task",
+                };
+            }
+        } catch (error) {
+            console.error("Submit task error:", error);
+            toast.error("An unexpected error occurred while submitting your task.");
+            return {
+                success: false,
+                message: "An unexpected error occurred.",
+            };
+        }
+    };
+
     return {
         isLoading,
         pendingTasks,
@@ -237,7 +276,8 @@ const useTask = () => {
         getDashboardStats,
         getOneTaskById,
         acceptTask,
-        cancelTask
+        cancelTask,
+        submitTask
     }
 }
 
