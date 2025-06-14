@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -120,7 +118,6 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
       const response = await acceptTask(taskId);
       if (response.success) {
         toast.success('Task accepted successfully!');
-        // Remove the accepted task from the list
         setTasks(prev => prev.filter(task => task._id !== taskId));
       } else {
         toast.error(response.message || 'Failed to accept task');
@@ -140,12 +137,10 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
   const handleDeclineTask = (e: React.MouseEvent, taskId: string) => {
     e.stopPropagation();
     toast.success('Task declined');
-    // Remove the declined task from the list
     setTasks(prev => prev.filter(task => task._id !== taskId));
   };
 
   const handleTaskCancelled = (taskId: string) => {
-    // Remove the cancelled task from the list
     setTasks(prev => prev.filter(task => task._id !== taskId));
     toast.success('Task cancelled successfully!');
   };
@@ -195,100 +190,96 @@ const TaskListPage: React.FC<TaskListPageProps> = ({ title, taskType, showCancel
         </div>
       </div>
 
-      {/* Tasks Grid */}
+      {/* Tasks List */}
       {isLoading ? (
         <div className="text-center py-12">
           <div className="text-xl text-gray-600">Loading tasks...</div>
         </div>
       ) : tasks && tasks.length > 0 ? (
-        <div className="space-y-6">
-          <div className="space-y-4">
-            {tasks.map((task) => (
-              <Card
+        <div className="space-y-0">
+          <div className="border rounded-lg overflow-hidden">
+            {tasks.map((task, index) => (
+              <div
                 key={task._id}
-                className="hover:shadow-md transition-shadow cursor-pointer"
+                className={`p-6 hover:bg-gray-50 transition-colors cursor-pointer ${
+                  index !== tasks.length - 1 ? 'border-b border-gray-200' : ''
+                }`}
                 onClick={() => handleTaskClick(task._id)}
               >
-                <CardContent className="p-6">
-                  <div className="max-w-4xl">
-                    {/* Header row with title and meta info */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1 pr-4">
-                        <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                          {task.title}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span className="font-medium text-blue-600">{task.subject}</span>
-                          <span>•</span>
-                          <span className="text-gray-500">Posted {formatDate(task.createdAt)}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {task.difficulty && (
-                          <Badge className={`text-xs capitalize ${getDifficultyColor(task.difficulty)}`}>
-                            {task.difficulty}
-                          </Badge>
-                        )}
+                <div className="max-w-4xl">
+                  {/* Header row with title and price */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 pr-4">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                        {task.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                        <span className="font-medium text-blue-600">{task.subject}</span>
+                        <span>•</span>
+                        <span className="text-gray-500">Posted {formatDate(task.createdAt)}</span>
                       </div>
                     </div>
-
-                    {/* Price and type info */}
-                    <div className="mb-3">
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="font-bold text-lg text-green-600">
-                          {formatPayment(task.price || 0)}
-                        </span>
-                        <span className="text-gray-500">Fixed-price</span>
-                        <span className="text-gray-500">•</span>
-                        <span className="text-gray-500">Intermediate</span>
+                    <div className="text-right">
+                      <div className="font-bold text-lg text-green-600 mb-1">
+                        {formatPayment(task.price || 0)}
                       </div>
-                    </div>
-
-                    {/* Description */}
-                    <div className="mb-4">
-                      <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
-                        {task.description}
-                      </p>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                      {taskType === 'pending' && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-9 px-4 text-sm hover:bg-red-50 hover:border-red-300 hover:text-red-600"
-                            onClick={(e) => handleDeclineTask(e, task._id)}
-                          >
-                            Decline
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
-                            onClick={(e) => handleAcceptTask(e, task._id)}
-                            disabled={acceptingTasks.has(task._id)}
-                          >
-                            {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
-                          </Button>
-                        </>
-                      )}
-                      {showCancelButton && taskType === 'ongoing' && (
-                        <CancelTaskButton
-                          taskId={task._id}
-                          onTaskCancelled={() => handleTaskCancelled(task._id)}
-                          className="h-9"
-                        />
-                      )}
-                      {taskType === 'completed' && (
-                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                          Completed
-                        </Badge>
-                      )}
+                      <div className="text-sm text-gray-500">Fixed-price</div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Description */}
+                  <div className="mb-3">
+                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                      {task.description}
+                    </p>
+                  </div>
+
+                  {/* Complexity directly below description */}
+                  <div className="mb-4">
+                    {task.difficulty && (
+                      <Badge className={`text-xs capitalize ${getDifficultyColor(task.difficulty)}`}>
+                        {task.difficulty}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                    {taskType === 'pending' && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-9 px-4 text-sm hover:bg-red-50 hover:border-red-300 hover:text-red-600"
+                          onClick={(e) => handleDeclineTask(e, task._id)}
+                        >
+                          Decline
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
+                          onClick={(e) => handleAcceptTask(e, task._id)}
+                          disabled={acceptingTasks.has(task._id)}
+                        >
+                          {acceptingTasks.has(task._id) ? 'Accepting...' : 'Accept'}
+                        </Button>
+                      </>
+                    )}
+                    {showCancelButton && taskType === 'ongoing' && (
+                      <CancelTaskButton
+                        taskId={task._id}
+                        onTaskCancelled={() => handleTaskCancelled(task._id)}
+                        className="h-9"
+                      />
+                    )}
+                    {taskType === 'completed' && (
+                      <Badge className="bg-green-100 text-green-800 border-green-200">
+                        Completed
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
 
