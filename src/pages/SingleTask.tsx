@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -16,6 +15,7 @@ import TaskKeyNotes from "@/components/task/TaskKeyNotes"
 import TaskAttachments from "@/components/task/TaskAttachments"
 import TaskSidebar from "@/components/task/TaskSidebar"
 import TaskSubmission from "@/components/task/TaskSubmission"
+import TaskSubmissionDisplay from "@/components/task/TaskSubmissionDisplay"
 import { toast } from "sonner"
 
 const SingleTask: React.FC = () => {
@@ -28,6 +28,11 @@ const SingleTask: React.FC = () => {
   const [isCancelling, setIsCancelling] = useState(false)
   const [isLoadingTask, setIsLoadingTask] = useState(true)
   const [taskNotFound, setTaskNotFound] = useState(false)
+  const [submissionData, setSubmissionData] = useState<{
+    description?: string;
+    link?: string;
+    files_urls?: string[];
+  } | null>(null);
 
   // Verify auth token on component mount
   useEffect(() => {
@@ -56,6 +61,19 @@ const SingleTask: React.FC = () => {
 
     fetchTask()
   }, [id])
+
+  // Update submission data if task has submission in its data
+  useEffect(() => {
+    if (task && task.submit) {
+      setSubmissionData({
+        description: task.submit.description,
+        link: task.submit.link,
+        files_urls: task.submit.files_urls,
+      })
+    } else {
+      setSubmissionData(null)
+    }
+  }, [task])
 
   const handleAcceptTask = async () => {
     if (!id) return
@@ -101,10 +119,19 @@ const SingleTask: React.FC = () => {
     navigate("/dashboard")
   }
 
-  const handleTaskSubmission = () => {
-    if (id) {
+  const handleTaskSubmission = (updatedTaskData?: any) => {
+    // updatedTaskData is passed by TaskSubmission component after submission
+    if (updatedTaskData && updatedTaskData.submit) {
+      setSubmissionData({
+        description: updatedTaskData.submit.description,
+        link: updatedTaskData.submit.link,
+        files_urls: updatedTaskData.submit.files_urls,
+      })
+      setTask(updatedTaskData)
+    } else if (typeof updatedTaskData === "undefined" && task?._id) {
+      // fallback: Refetch task
       const fetchUpdatedTask = async () => {
-        const response = await getOneTaskById(id)
+        const response = await getOneTaskById(task._id)
         if (response.success && response.data) {
           setTask(response.data)
         }
@@ -177,6 +204,15 @@ const SingleTask: React.FC = () => {
 
           {/* Sidebar - Takes 1/3 on desktop, full width on mobile */}
           <div className="lg:col-span-1 lg:sticky lg:top-4 lg:h-fit">
+            {/* ---- Submission Data Display ----- */}
+            {submissionData && (
+              <TaskSubmissionDisplay
+                description={submissionData.description}
+                link={submissionData.link}
+                files_urls={submissionData.files_urls}
+              />
+            )}
+
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}

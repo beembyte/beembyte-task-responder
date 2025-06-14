@@ -1,4 +1,3 @@
-
 import React, { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,10 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Upload, Link, FileText, Send, X } from "lucide-react"
 import { toast } from "sonner"
+import useTask from "@/hooks/useTask"
 
 interface TaskSubmissionProps {
   taskId: string
-  onSubmit?: () => void
+  onSubmit?: (data: any) => void
   onCancel?: () => void
 }
 
@@ -22,6 +22,15 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
   const [submissionLink, setSubmissionLink] = useState("")
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { submitTask } = useTask();
+
+  // For simulating file uploads, generate URLs (in production, files would be uploaded to storage)
+  const simulateFileUpload = async (files: File[]) => {
+    // Replace with real upload logic if needed.
+    // For now, just return the names as URLs:
+    return files.map(f => "https://test.jpg")
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -41,18 +50,24 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
     }
 
     setIsSubmitting(true)
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      toast.success("Task submitted successfully!")
-      setIsOpen(false)
-      setSubmissionText("")
-      setSubmissionLink("")
-      setSelectedFiles([])
-      
-      if (onSubmit) {
-        onSubmit()
+      const filesUrls = await simulateFileUpload(selectedFiles)
+      const response = await submitTask({
+        task_id: taskId,
+        description: submissionText,
+        link: submissionLink,
+        files_urls: filesUrls,
+      })
+      if (response && response.success) {
+        setIsOpen(false)
+        setSubmissionText("")
+        setSubmissionLink("")
+        setSelectedFiles([])
+
+        if (onSubmit) {
+          onSubmit(response.data) // Pass task data so parent can refresh or display submission
+        }
       }
     } catch (error) {
       toast.error("Failed to submit task. Please try again.")
