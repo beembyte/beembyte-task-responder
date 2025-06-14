@@ -2,7 +2,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, CheckCircle, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // Utility that formats "NGN" payments
@@ -96,11 +96,20 @@ const HistoryStyleTaskList: React.FC<HistoryStyleTaskListProps> = ({
                 <div className="space-y-5">
                   {groupedTasks[group].map((task: any) => (
                     <div key={task._id} className="flex items-start space-x-4 border rounded-lg bg-background p-4 shadow-sm hover:shadow-md">
-                      <div className="rounded-md bg-green-100 p-2 flex items-center justify-center shrink-0" aria-label="Task icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
-                          <path d="M9 11l3 3l8-8"></path>
-                          <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9s4.03-9 9-9c1.51 0 2.93 0.37 4.18 1.03"></path>
-                        </svg>
+                      {/* ICON CHANGES: */}
+                      <div
+                        className={
+                          type === "completed"
+                            ? "rounded-md bg-green-100 p-2 flex items-center justify-center shrink-0"
+                            : "rounded-md bg-yellow-100 p-2 flex items-center justify-center shrink-0"
+                        }
+                        aria-label={type === "completed" ? "Completed task" : "Pending task"}
+                      >
+                        {type === "completed" ? (
+                          <CheckCircle size={24} className="text-green-600" aria-hidden="true" />
+                        ) : (
+                          <Clock size={24} className="text-yellow-600" aria-hidden="true" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
