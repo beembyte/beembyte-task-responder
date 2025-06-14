@@ -1,4 +1,3 @@
-
 import React from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Link as LinkIcon, FileText, Github, FileImage, FileText as FileTextIcon } from "lucide-react"
@@ -29,7 +28,7 @@ const TaskSubmissionDisplay: React.FC<TaskSubmissionDisplayProps> = ({
   if (!description && !link && (!files_urls || files_urls.length === 0)) return null
 
   return (
-    <Card className="mb-4 border-emerald-200 shadow">
+    <Card className="border-emerald-200 rounded-none shadow-none">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base text-emerald-700 font-semibold">
           <FileText className="w-5 h-5 text-emerald-500" />
@@ -74,4 +73,3 @@ const TaskSubmissionDisplay: React.FC<TaskSubmissionDisplayProps> = ({
 }
 
 export default TaskSubmissionDisplay
-

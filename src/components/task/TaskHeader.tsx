@@ -38,7 +38,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({ task }) => {
   }
 
   return (
-    <Card>
+    <Card className="rounded-none shadow-none">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">

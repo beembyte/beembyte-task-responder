@@ -12,7 +12,7 @@ const TaskAttachments: React.FC<TaskAttachmentsProps> = ({ fileUrls }) => {
   }
 
   return (
-    <Card>
+    <Card className="rounded-none shadow-none">
       <CardHeader>
         <CardTitle>Attachments</CardTitle>
       </CardHeader>

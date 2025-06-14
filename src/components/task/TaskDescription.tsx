@@ -9,7 +9,7 @@ interface TaskDescriptionProps {
 
 const TaskDescription: React.FC<TaskDescriptionProps> = ({ description }) => {
   return (
-    <Card>
+    <Card className="rounded-none shadow-none">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
