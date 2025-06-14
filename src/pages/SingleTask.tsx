@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Clock, User } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
@@ -17,6 +17,9 @@ import TaskSidebar from "@/components/task/TaskSidebar"
 import TaskSubmission from "@/components/task/TaskSubmission"
 import TaskSubmissionDisplay from "@/components/task/TaskSubmissionDisplay"
 import { toast } from "sonner"
+import JobStatsRow from "@/components/task/JobStatsRow"
+import TaskLoading from "@/components/task/TaskLoading"
+import TaskNotFoundState from "@/components/task/TaskNotFoundState"
 
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -143,39 +146,17 @@ const SingleTask: React.FC = () => {
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
   if (isLoadingTask) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="text-xl text-muted-foreground">Loading task details...</span>
-          </div>
-        </div>
-      </div>
-    )
+    return <TaskLoading />
   }
 
   if (taskNotFound || !task) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-2">Task Not Found</h1>
-            <p className="text-muted-foreground mb-4">The task you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={() => navigate("/dashboard")}>Back to Dashboard</Button>
-          </div>
-        </div>
-      </div>
-    )
+    return <TaskNotFoundState />
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-
-      <div className="flex-1 container mx-auto px-4 py-4 max-w-7xl">
+      <div className="flex-1 container mx-auto px-1 py-4 max-w-7xl">
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)} 
@@ -184,38 +165,31 @@ const SingleTask: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          {/* Main Content - Takes 2/3 on desktop, full width on mobile */}
-          <div className="lg:col-span-2 space-y-4">
-            <TaskHeader task={task} />
-            <TaskDescription description={task.description} />
-            <TaskKeyNotes keyNotes={task.key_notes} />
-            <TaskAttachments fileUrls={task.file_urls} />
-            
-            {/* ------- Move submission data display HERE ------- */}
-            {submissionData && (
-              <TaskSubmissionDisplay
-                description={submissionData.description}
-                link={submissionData.link}
-                files_urls={submissionData.files_urls}
-              />
-            )}
-
-            {/* Only show the submit area if there is NO submission */}
-            {isTaskAccepted && !submissionData && (
-              <TaskSubmission 
-                taskId={task._id} 
-                onSubmit={handleTaskSubmission}
-                onCancel={handleCancelTask}
-              />
-            )}
+        <div className="flex flex-col lg:flex-row gap-0 bg-card/80 rounded-xl border border-muted-foreground/20 shadow-sm overflow-hidden">
+          <div className="flex-1 px-0 py-6 lg:px-6 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
+            <div className="space-y-4">
+              <TaskHeader task={task} />
+              <TaskDescription description={task.description} />
+              <TaskKeyNotes keyNotes={task.key_notes} />
+              <TaskAttachments fileUrls={task.file_urls} />
+              <JobStatsRow task={task} />
+              {submissionData && (
+                <TaskSubmissionDisplay
+                  description={submissionData.description}
+                  link={submissionData.link}
+                  files_urls={submissionData.files_urls}
+                />
+              )}
+              {isTaskAccepted && !submissionData && (
+                <TaskSubmission 
+                  taskId={task._id} 
+                  onSubmit={handleTaskSubmission}
+                  onCancel={handleCancelTask}
+                />
+              )}
+            </div>
           </div>
-
-          {/* Sidebar - Takes 1/3 on desktop, full width on mobile */}
-          <div className="lg:col-span-1 lg:sticky lg:top-4 lg:h-fit">
-            {/* ---- REMOVE submission display from here ---- */}
-
+          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4">
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}
