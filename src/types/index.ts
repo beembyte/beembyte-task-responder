@@ -119,4 +119,9 @@ export type TaskInfo = {
   progress_percentage: number;
   createdAt: Date;
   updatedAt: Date;
+  submit?: {
+    description?: string;
+    link?: string;
+    files_urls?: string[];
+  };
 };
