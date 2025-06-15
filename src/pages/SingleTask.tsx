@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -211,16 +210,17 @@ const SingleTask: React.FC = () => {
           <div className="flex-1 px-0 py-4 lg:px-4 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
             <div className="">
               <TaskHeader task={task} />
-              <TaskDescription description={task.description} />
+              <TaskDescription description={task.description}>
+                {submissionData && (
+                  <TaskSubmissionDisplay
+                    description={submissionData.description}
+                    link={submissionData.link}
+                    files_urls={submissionData.files_urls}
+                  />
+                )}
+              </TaskDescription>
               <TaskKeyNotes keyNotes={task.key_notes} />
               <TaskAttachments fileUrls={task.file_urls} />
-              {submissionData && (
-                <TaskSubmissionDisplay
-                  description={submissionData.description}
-                  link={submissionData.link}
-                  files_urls={submissionData.files_urls}
-                />
-              )}
               {isTaskAccepted && task.responder_final_decision !== RESPONDER_FINAL_DECISION.FINISHED && (
                 <TaskSubmission
                   taskId={task._id}

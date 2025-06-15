@@ -5,9 +5,10 @@ import { FileText } from "lucide-react"
 
 interface TaskDescriptionProps {
   description: string
+  children?: React.ReactNode
 }
 
-const TaskDescription: React.FC<TaskDescriptionProps> = ({ description }) => {
+const TaskDescription: React.FC<TaskDescriptionProps> = ({ description, children }) => {
   return (
     <Card className="rounded-none shadow-none">
       <CardHeader className="p-4 pb-2">
@@ -17,7 +18,8 @@ const TaskDescription: React.FC<TaskDescriptionProps> = ({ description }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <p className="text-muted-foreground leading-relaxed text-xs">{description}</p>
+        <p className="text-muted-foreground leading-relaxed text-xs whitespace-pre-wrap">{description}</p>
+        {children}
       </CardContent>
     </Card>
   )
