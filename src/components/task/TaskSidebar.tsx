@@ -97,7 +97,22 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
           <Separator />
 
-          <DeadlineProgressBar task={task} />
+          {task.status === TASK_STATUS.COMPLETED ? (
+            <div className="space-y-1">
+              <div className="flex justify-between items-center mb-1">
+                <p className="text-xs font-semibold text-emerald-600">Task Completed</p>
+                <p className="text-xs font-medium text-emerald-600">100%</p>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                <div
+                  className="bg-emerald-600 h-1.5 rounded-full"
+                  style={{ width: `100%` }}
+                ></div>
+              </div>
+            </div>
+          ) : (
+            <DeadlineProgressBar task={task} />
+          )}
 
           <Separator />
 

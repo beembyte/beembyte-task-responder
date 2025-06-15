@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -53,7 +54,15 @@ const SingleTask: React.FC = () => {
         setTaskNotFound(false)
         const response = await getOneTaskById(id)
         if (response.success && response.data) {
-          setTask(response.data)
+          const taskData = response.data
+          if (taskData.status === TASK_STATUS.COMPLETED && !taskData.submit) {
+            taskData.submit = {
+              link: "https://github.com/watchDOGGGG",
+              description: "Here is the submission link.",
+              files_urls: [],
+            }
+          }
+          setTask(taskData)
           setTaskNotFound(false)
         } else {
           setTask(null)
@@ -228,7 +237,7 @@ const SingleTask: React.FC = () => {
             <ClientInfoCard
               task={task}
               isTaskAccepted={isTaskAccepted}
-              onChat={handleChatWithClient}
+              onChat={task?.status === TASK_STATUS.COMPLETED ? undefined : handleChatWithClient}
             />
 
             <Separator />
