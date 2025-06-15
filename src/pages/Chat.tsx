@@ -35,6 +35,7 @@ const Chat = () => {
 
   const [showSidebar, setShowSidebar] = useState(false)
 
+  // Show recipient as the client
   const recipient = {
     name: task?.created_by?.first_name || "Client",
     avatar: "https://robohash.org/client.png?set=set4",
@@ -94,7 +95,7 @@ const Chat = () => {
         `}
           style={{ minWidth: 320, maxWidth: 360 }}
         >
-          <ChatSidebar task={task} responder={user} onChat={closeSidebar} />
+          <ChatSidebar task={task} responder={task?.created_by || null} onChat={closeSidebar} />
         </div>
         {isMobile && showSidebar && (
           <div className="fixed inset-0 z-20 bg-white flex flex-col h-full w-full animate-in slide-in-from-right-32 duration-200">
@@ -105,7 +106,7 @@ const Chat = () => {
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              <ChatSidebar task={task} responder={user} onChat={closeSidebar} />
+              <ChatSidebar task={task} responder={task?.created_by || null} onChat={closeSidebar} />
             </div>
           </div>
         )}

@@ -8,23 +8,37 @@ interface ResponderInfoCardProps {
   responder: UserType | null;
 }
 
+// Generate RoboHash set3 avatar (set3 = cute monsters/avatars)
 const getRoboHashUrl = (name: string) => {
-  const base = name ? name.trim() : "responder";
-  return `https://robohash.org/${encodeURIComponent(base)}.png?set=set4&size=80x80`;
+  const base = name ? name.trim() : "client";
+  return `https://robohash.org/${encodeURIComponent(base)}.png?set=set3&size=80x80`;
 };
 
 const ResponderInfoCard: React.FC<ResponderInfoCardProps> = ({ responder }) => {
-  const responderName = responder ? `${responder.first_name} ${responder.last_name}` : "Responder";
+  // Show first and last name, fallback to "Client" if data missing
+  const responderName = responder ? `${responder.first_name} ${responder.last_name}` : "Client";
+  // Example join date (could take from responder.last_login or omit if unavailable)
+  const joinDate =
+    responder && responder.last_login
+      ? new Date(responder.last_login).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "—";
+
   return (
     <Card className="border-none shadow-none">
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage
-              src={getRoboHashUrl(responder?.first_name || "responder")}
+              src={getRoboHashUrl(responder?.first_name || "client")}
               alt={responderName}
             />
-            <AvatarFallback>{(responder?.first_name || "R").charAt(0)}</AvatarFallback>
+            <AvatarFallback>
+              {(responder?.first_name || "C").charAt(0)}
+            </AvatarFallback>
           </Avatar>
           <div>
             <div className="font-semibold text-lg text-foreground">
@@ -37,14 +51,18 @@ const ResponderInfoCard: React.FC<ResponderInfoCardProps> = ({ responder }) => {
           </div>
         </div>
         <div className="mt-4 space-y-3 text-sm">
-            <div>
-                <p className="text-muted-foreground">About Me</p>
-                <p className="text-foreground font-medium">Ready to help with your tasks efficiently and professionally.</p>
-            </div>
-            <div>
-                <p className="text-muted-foreground">Member Since</p>
-                <p className="text-foreground font-medium">Jan 15, 2024</p>
-            </div>
+          <div>
+            <p className="text-muted-foreground">About Client</p>
+            <p className="text-foreground font-medium">
+              {responder && responder.email
+                ? `Contact: ${responder.email}`
+                : "A valued client using our platform."}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Member Since</p>
+            <p className="text-foreground font-medium">{joinDate}</p>
+          </div>
         </div>
       </CardContent>
     </Card>
