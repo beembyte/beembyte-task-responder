@@ -38,7 +38,8 @@ const Chat = () => {
     isOnline: false,
   });
   const [showSidebar, setShowSidebar] = useState(false);
-  
+  const [task, setTask] = useState<TaskInfo | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -103,7 +104,9 @@ const Chat = () => {
     // Demo task info fetch (replace with real fetch in your project)
     setTask({
       _id: id || "id",
-      status: "active",
+      title: "Sample Task Title", // required
+      subject: "Sample Subject",
+      description: "A sample description for the mock task.",
       deadline: new Date(Date.now() + 3600 * 1000 * 24).toISOString(),
       price: 15000,
       created_by: {
@@ -114,9 +117,25 @@ const Chat = () => {
         email: "jane@client.com",
         phone_number: "08061234567",
         tasks_count: 5,
+        password: "",
+        role: "user",
+        last_login: new Date(),
       },
-      createdAt: new Date().toISOString(),
-    } as TaskInfo);
+      // ---- Add missing required fields to match TaskInfo ----
+      file_urls: [],
+      key_notes: [],
+      difficulty: "EASY",
+      assigned_status: "ASSIGNED",
+      user_final_decision: "APPROVED",
+      status: "in_progress",
+      responder_final_decision: "FINISHED",
+      progress_percentage: 50,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      responder: undefined,
+      files: [],
+      submit: undefined,
+    });
   }, [id, loggedInUser]);
 
   // --- Sidebar open/close helpers ---
