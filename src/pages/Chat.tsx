@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { User } from '@/types';
+import ChatSidebar from "@/components/chat/ChatSidebar";
+import { MoreHorizontal } from "lucide-react";
+import { TaskInfo } from "@/types";
 
 interface Message {
   id: string;
@@ -35,6 +37,7 @@ const Chat = () => {
     avatar: 'https://robohash.org/client.png?set=set4',
     isOnline: false,
   });
+  const [showSidebar, setShowSidebar] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +99,30 @@ const Chat = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    // Demo task info fetch (replace with real fetch in your project)
+    setTask({
+      _id: id || "id",
+      status: "active",
+      deadline: new Date(Date.now() + 3600 * 1000 * 24).toISOString(),
+      price: 15000,
+      created_by: {
+        first_name: "Jane",
+        last_name: "Doe",
+        status: "active",
+        is_verified: true,
+        email: "jane@client.com",
+        phone_number: "08061234567",
+        tasks_count: 5,
+      },
+      createdAt: new Date().toISOString(),
+    } as TaskInfo);
+  }, [id, loggedInUser]);
+
+  // --- Sidebar open/close helpers ---
+  const openSidebar = () => setShowSidebar(true);
+  const closeSidebar = () => setShowSidebar(false);
+
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
     const message: Message = {
@@ -139,113 +166,187 @@ const Chat = () => {
     navigate(-1);
   };
 
+  // Responsive: show sidebar always on desktop, toggle on mobile
+  const isDesktop = !isMobile;
+
+  // --- Layout ---
   return (
-    <div className="flex flex-col h-[100dvh] bg-white md:rounded-lg overflow-hidden shadow md:w-3/5 mx-auto border md:mt-8 w-full max-w-full
-      px-0 md:px-6 transition-all duration-300">
-      {/* Chat Header */}
-      <div className="flex items-center px-3 sm:px-4 py-2 sm:py-3 border-b bg-gray-50">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={goBack}
-          className="mr-2"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+    <div className="h-[100dvh] md:h-screen w-full bg-gray-100 flex justify-center items-stretch">
+      {/* "Box" shadowed wide container, flex with 2 sides */}
+      <div className="flex flex-col md:flex-row bg-white w-full md:w-4/5 max-w-5xl h-full rounded-none md:rounded-xl shadow-lg overflow-hidden border">
         
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={recipient.avatar} alt={recipient.name} />
-          <AvatarFallback>
-            {recipient.name.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
-        
-        <div className="ml-3 flex-1 min-w-0">
-          <div className="font-medium text-sm sm:text-base truncate">{recipient.name}</div>
-          <div className="text-xs text-gray-500 flex items-center">
-            <span className={`w-2 h-2 rounded-full mr-1 ${recipient.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-            {recipient.isOnline ? 'Online' : 'Offline'}
-          </div>
-        </div>
-        
-        <div className="text-xs text-gray-500 text-right whitespace-nowrap pl-2">
-          Task #{id}
-        </div>
-      </div>
-      
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-1 sm:px-2 py-2 sm:py-4 md:px-4 md:py-5 bg-gray-50">
-        {messages.map((message) => (
-          <div 
-            key={message.id} 
-            className={`flex mb-3 sm:mb-4 ${message.sender === 'responder' ? 'justify-end' : 'justify-start'}`}
-          >
-            {message.sender !== 'responder' && (
-              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 mt-1 mr-2">
-                <AvatarImage src={recipient.avatar} alt={recipient.name} />
-                <AvatarFallback>{recipient.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-            )}
-            <div 
-              className={`max-w-[80vw] sm:max-w-[75%] px-3 sm:px-4 py-2 rounded-lg break-words ${
-                message.sender === 'responder' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white border text-gray-800'
-              }`}
+        {/* --- Left: Chat Panel (always visible) --- */}
+        <div className={`
+          flex-1 flex flex-col h-full relative transition-transform
+          ${isMobile && showSidebar ? '-translate-x-full absolute inset-0 z-10 bg-white' : 'relative'}
+        `}>
+          {/* --- Chat Header --- */}
+          <div className="flex items-center px-4 py-2 border-b bg-gray-50 relative z-20">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goBack}
+              className="mr-2"
             >
-              <div className="text-sm">{message.text}</div>
-              <div className={`text-xs mt-1 ${message.sender === 'responder' ? 'text-blue-100' : 'text-gray-500'}`}>
-                {format(new Date(message.timestamp), 'h:mm a')}
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={recipient.avatar} alt={recipient.name} />
+              <AvatarFallback>
+                {recipient.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="ml-3 flex-1 min-w-0">
+              <div className="font-medium text-sm sm:text-base truncate">{recipient.name}</div>
+              <div className="text-xs text-gray-500 flex items-center">
+                <span className={`w-2 h-2 rounded-full mr-1 ${recipient.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                {recipient.isOnline ? 'Online' : 'Offline'}
               </div>
             </div>
-            {message.sender === 'responder' && (
-              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 mt-1 ml-2">
-                <AvatarImage 
-                  src={`https://robohash.org/${user?.first_name || 'responder'}.png?set=set4`} 
-                  alt={user?.first_name || 'You'} 
-                />
-                <AvatarFallback>{(user?.first_name || 'Y').charAt(0)}</AvatarFallback>
-              </Avatar>
+
+            <div className="text-xs text-gray-500 text-right whitespace-nowrap pl-2">
+              Task #{id}
+            </div>
+            {/* More/Sidebar Toggle Icon (mobile only) */}
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={openSidebar}
+                className="ml-2"
+                aria-label="Show Task Info"
+              >
+                <MoreHorizontal className="h-5 w-5 text-gray-600" />
+              </Button>
             )}
           </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      
-      {/* Input Area */}
-      <div className="px-1 sm:px-2 md:px-4 pb-1 sm:pb-2 md:pb-4 border-t bg-white">
-        <div className="flex items-center gap-2 mt-2">
-          <div className="flex-1 relative">
-            <Input
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type a message..."
-              className="pr-10 py-3 text-sm"
-            />
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute right-2 top-1/2 -translate-y-1/2"
-              onClick={handleAttachFile}
-            >
-              <Paperclip className="h-5 w-5 text-gray-500" />
-            </Button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              onChange={handleFileChange}
-            />
+
+          {/* --- Messages Area --- */}
+          <div className="flex-1 overflow-y-auto px-2 py-4 bg-gray-50">
+            {messages.length === 0 ? (
+              // Empty state
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="bg-blue-50 rounded-full p-4 mb-2">
+                  <Send className="w-9 h-9 text-blue-500" />
+                </div>
+                <div className="text-lg font-semibold text-gray-700 mb-1">
+                  No messages yet
+                </div>
+                <div className="text-sm text-gray-500">Start a conversation with your client.</div>
+              </div>
+            ) : (
+              messages.map((message) => (
+                <div 
+                  key={message.id} 
+                  className={`flex mb-4 ${message.sender === 'responder' ? 'justify-end' : 'justify-start'}`}
+                >
+                  {message.sender !== 'responder' && (
+                    <Avatar className="h-7 w-7 mt-1 mr-2">
+                      <AvatarImage src={recipient.avatar} alt={recipient.name} />
+                      <AvatarFallback>{recipient.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div 
+                    className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${message.sender === 'responder'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white border border-gray-200 text-gray-800'
+                    }`}
+                  >
+                    <div className="text-sm">{message.text}</div>
+                    <div className={`text-xs mt-1 ${message.sender === 'responder' ? 'text-blue-100' : 'text-gray-500'}`}>
+                      {format(new Date(message.timestamp), 'h:mm a')}
+                    </div>
+                  </div>
+                  {message.sender === 'responder' && (
+                    <Avatar className="h-7 w-7 mt-1 ml-2">
+                      <AvatarImage 
+                        src={`https://robohash.org/${user?.first_name || 'responder'}.png?set=set4`} 
+                        alt={user?.first_name || 'You'} 
+                      />
+                      <AvatarFallback>{(user?.first_name || 'Y').charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
           </div>
-          <Button 
-            onClick={handleSendMessage} 
-            size="icon" 
-            className="h-10 w-10 rounded-full"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+
+          {/* --- Input Area --- */}
+          <div className="px-4 py-2 border-t bg-white">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Input
+                  value={newMessage}
+                  onChange={e => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type a message..."
+                  className="pr-10 py-3 text-sm"
+                />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={handleAttachFile}
+                >
+                  <Paperclip className="h-5 w-5 text-gray-500" />
+                </Button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  onChange={handleFileChange}
+                />
+              </div>
+              <Button 
+                onClick={handleSendMessage} 
+                size="icon" 
+                className="h-10 w-10 rounded-full"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
         </div>
+        
+        {/* --- Right: Sidebar (info) --- */}
+        <div className={`
+          hidden md:block h-full
+          bg-white border-l
+        `} style={{ minWidth: 320, maxWidth: 400 }}>
+          <ChatSidebar
+            task={task}
+            client={task?.created_by || null}
+            onChat={closeSidebar}
+            isTaskAccepted={true}
+          />
+        </div>
+        {/* --- Mobile Sidebar Drawer --- */}
+        {isMobile && showSidebar && (
+          <div className="fixed inset-0 z-20 bg-white flex flex-col h-full w-full animate-in slide-in-from-right-32 duration-200">
+            <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
+              <div className="font-medium text-base">Task Info</div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeSidebar}
+                aria-label="Close Info"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <ChatSidebar
+                task={task}
+                client={task?.created_by || null}
+                onChat={closeSidebar}
+                isTaskAccepted={true}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
