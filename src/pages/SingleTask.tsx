@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -21,6 +20,9 @@ import { toast } from "sonner"
 import JobStatsRow from "@/components/task/JobStatsRow"
 import TaskLoading from "@/components/task/TaskLoading"
 import TaskNotFoundState from "@/components/task/TaskNotFoundState"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -146,6 +148,20 @@ const SingleTask: React.FC = () => {
 
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
+  // Helper to get client initials
+  function getInitials(name: string) {
+    const parts = name.trim().split(" ")
+    if (parts.length === 1) return parts[0][0]
+    return parts[0][0] + parts[parts.length - 1][0]
+  }
+
+  // Add handler for chat, using client user id (created_by)
+  const handleChatWithClient = () => {
+    if (task?.created_by?._id) {
+      navigate(`/chat/${task.created_by._id}`);
+    }
+  };
+
   if (isLoadingTask) {
     return <TaskLoading />
   }
@@ -189,7 +205,65 @@ const SingleTask: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/10">
+          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/10 flex flex-col gap-4">
+            {/* Client/User Info Card */}
+            <Card className="border border-muted-foreground/10 shadow-none">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <User className="w-5 h-5" />
+                  Client
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    {task.created_by?.photo_url ? (
+                      <AvatarImage src={task.created_by.photo_url} alt={task.created_by.first_name} />
+                    ) : (
+                      <AvatarFallback>
+                        {getInitials(
+                          [
+                            task.created_by?.first_name ?? "",
+                            task.created_by?.last_name ?? "",
+                          ].join(" ")
+                        )}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <div className="font-semibold text-foreground text-sm">
+                      {task.created_by?.first_name} {task.created_by?.last_name}
+                    </div>
+                    {/* If wanted, add email or username here */}
+                    {/* <div className="text-xs text-muted-foreground">{task.created_by?.email}</div> */}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  {/* Optional: fake or real stats, if provided */}
+                  <span className="text-xs text-muted-foreground">Rating:</span>
+                  <span className="text-yellow-500 text-xs">★</span>
+                  <span className="text-xs text-foreground font-medium">
+                    {typeof task.created_by?.rating === "number" ? task.created_by.rating : "5"}
+                  </span>
+                  <span className="mx-1 text-xs text-muted-foreground">|</span>
+                  <span className="text-xs text-muted-foreground">Tasks: {task.created_by?.tasks_count ?? "—"}</span>
+                </div>
+                {/* Chat with Client Button */}
+                <Button
+                  className="mt-3 w-full flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
+                  onClick={handleChatWithClient}
+                  variant="default"
+                  size="sm"
+                >
+                  <User className="w-4 h-4" />
+                  Chat with Client
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Divider */}
+            <Separator />
+
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}
