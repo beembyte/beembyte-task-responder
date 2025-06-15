@@ -148,11 +148,11 @@ const SingleTask: React.FC = () => {
 
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
-  // Helper to get client initials
-  function getInitials(name: string) {
-    const parts = name.trim().split(" ")
-    if (parts.length === 1) return parts[0][0]
-    return parts[0][0] + parts[parts.length - 1][0]
+  // Helper to generate robohash avatar URL from first name
+  function getRoboHashUrl(name: string) {
+    // Fallback if first_name is missing
+    const base = name ? name.trim() : "client";
+    return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set4`;
   }
 
   // Add handler for chat, using client user id (created_by)
@@ -217,36 +217,26 @@ const SingleTask: React.FC = () => {
               <CardContent>
                 <div className="flex items-center gap-3">
                   <Avatar>
-                    {task.created_by?.photo_url ? (
-                      <AvatarImage src={task.created_by.photo_url} alt={task.created_by.first_name} />
-                    ) : (
-                      <AvatarFallback>
-                        {getInitials(
-                          [
-                            task.created_by?.first_name ?? "",
-                            task.created_by?.last_name ?? "",
-                          ].join(" ")
-                        )}
-                      </AvatarFallback>
-                    )}
+                    <AvatarImage
+                      src={getRoboHashUrl(task.created_by?.first_name || "client")}
+                      alt={task.created_by?.first_name || "Client"}
+                    />
+                    <AvatarFallback>
+                      {/* If robohash fails, fallback to "?" */}
+                      ?
+                    </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-semibold text-foreground text-sm">
                       {task.created_by?.first_name} {task.created_by?.last_name}
                     </div>
-                    {/* If wanted, add email or username here */}
-                    {/* <div className="text-xs text-muted-foreground">{task.created_by?.email}</div> */}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  {/* Optional: fake or real stats, if provided */}
-                  <span className="text-xs text-muted-foreground">Rating:</span>
-                  <span className="text-yellow-500 text-xs">★</span>
+                  <span className="text-xs text-muted-foreground">Tasks:</span>
                   <span className="text-xs text-foreground font-medium">
-                    {typeof task.created_by?.rating === "number" ? task.created_by.rating : "5"}
+                    {typeof task.created_by?.tasks_count === "number" ? task.created_by.tasks_count : "—"}
                   </span>
-                  <span className="mx-1 text-xs text-muted-foreground">|</span>
-                  <span className="text-xs text-muted-foreground">Tasks: {task.created_by?.tasks_count ?? "—"}</span>
                 </div>
                 {/* Chat with Client Button */}
                 <Button
