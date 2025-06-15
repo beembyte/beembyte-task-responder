@@ -9,10 +9,19 @@ import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
-import { User } from '@/types';
+import {
+  USER_STATUS,
+  USER_ROLES,
+  TASK_DIFFICULTY,
+  ASSIGNED_STATUS,
+  USER_FINAL_DECISION,
+  TASK_STATUS,
+  RESPONDER_FINAL_DECISION,
+  User,
+  TaskInfo,
+} from "@/types";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import { MoreHorizontal } from "lucide-react";
-import { TaskInfo } from "@/types";
 
 interface Message {
   id: string;
