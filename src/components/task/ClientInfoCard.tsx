@@ -77,14 +77,6 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
             <span className="text-muted-foreground">{client?.phone_number || "—"}</span>
           </div>
           <div>
-            <span className="font-medium text-foreground">Role:</span>{" "}
-            <span className="text-muted-foreground capitalize">{client?.role || "—"}</span>
-          </div>
-          <div>
-            <span className="font-medium text-foreground">User ID:</span>{" "}
-            <span className="text-muted-foreground">{client?._id || "—"}</span>
-          </div>
-          <div>
             <span className="font-medium text-foreground">Tasks:</span>{" "}
             <span className="text-foreground font-medium">
               {typeof client?.tasks_count === "number" ? client.tasks_count : "—"}

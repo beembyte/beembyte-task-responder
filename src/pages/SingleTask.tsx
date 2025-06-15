@@ -8,7 +8,7 @@ import { ArrowLeft, Loader2, Clock, User } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
-import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
+import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS, RESPONDER_FINAL_DECISION } from "@/types"
 import TaskHeader from "@/components/task/TaskHeader"
 import TaskDescription from "@/components/task/TaskDescription"
 import TaskKeyNotes from "@/components/task/TaskKeyNotes"
@@ -212,13 +212,14 @@ const SingleTask: React.FC = () => {
                   files_urls={submissionData.files_urls}
                 />
               )}
-              {isTaskAccepted && !submissionData && (
+              {isTaskAccepted && task.responder_final_decision !== RESPONDER_FINAL_DECISION.FINISHED && (
                 <TaskSubmission
                   taskId={task._id}
                   onSubmit={handleTaskSubmission}
                   onCancel={handleCancelTask}
                 />
               )}
+
             </div>
           </div>
           {/* Sidebar */}
