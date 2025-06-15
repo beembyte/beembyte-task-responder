@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,7 +73,7 @@ const HistoryStyleTaskList: React.FC<HistoryStyleTaskListProps> = ({
   // grouping applies for completed tasks, not strictly for pending
   const groupedTasks = type === "completed" ? groupTasksByMonthYear(tasks) : { "Active": tasks };
   // descending by month order (for completed)
-  const sortedGroups = type === "completed" 
+  const sortedGroups = type === "completed"
     ? Object.keys(groupedTasks).sort((a, b) => {
         const dateA = new Date(a);
         const dateB = new Date(b);
@@ -95,7 +94,19 @@ const HistoryStyleTaskList: React.FC<HistoryStyleTaskListProps> = ({
                 <h2 className="text-xl font-bold">{group}</h2>
                 <div className="space-y-5">
                   {groupedTasks[group].map((task: any) => (
-                    <div key={task._id} className="flex items-start space-x-4 border rounded-lg bg-background p-4 shadow-sm hover:shadow-md">
+                    <div
+                      key={task._id}
+                      className="flex items-start space-x-4 border rounded-lg bg-background p-4 shadow-sm hover:shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 group"
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`View details for ${task.title}`}
+                      onClick={() => navigate(`/task/${task._id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          navigate(`/task/${task._id}`);
+                        }
+                      }}
+                    >
                       {/* ICON CHANGES: */}
                       <div
                         className={
@@ -137,7 +148,11 @@ const HistoryStyleTaskList: React.FC<HistoryStyleTaskListProps> = ({
                         </div>
                       </div>
                       {/* Actions on the far right */}
-                      <div className="flex flex-col items-end self-stretch justify-between ml-4 min-w-[54px]">
+                      <div
+                        className="flex flex-col items-end self-stretch justify-between ml-4 min-w-[54px]"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
                         {type === "completed" ? (
                           <Button variant="ghost" size="icon" onClick={() => navigate(`/task/${task._id}`)} aria-label="View details">
                             <RefreshCw size={18} className="text-gray-500" />
