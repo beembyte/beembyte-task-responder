@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
@@ -14,21 +14,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isChecking, setIsChecking] = useState(true);
 
+  // Use useCallback to avoid triggering useEffect too often
+  const getUser = useCallback(() => loggedInUser(), [loggedInUser]);
+
   useEffect(() => {
+    let isMounted = true;
     const checkAuth = async () => {
       try {
-        const currentUser = await loggedInUser();
-        setUser(currentUser);
+        const currentUser = await getUser();
+        if (isMounted) setUser(currentUser);
       } catch (error) {
         console.error('Auth check error:', error);
-        setUser(null);
+        if (isMounted) setUser(null);
       } finally {
-        setIsChecking(false);
+        if (isMounted) setIsChecking(false);
       }
     };
 
     checkAuth();
-  }, [loggedInUser]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [getUser]);
 
   // Show loading state while checking authentication
   if (isChecking) {
@@ -48,7 +56,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     .find(row => row.startsWith('authToken='));
 
   if (!isAuthenticated) {
-    // Redirect to login with the current location so we can redirect back after login
     return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
