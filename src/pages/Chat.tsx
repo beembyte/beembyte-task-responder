@@ -26,14 +26,6 @@ import ChatHeader from "@/components/chat/ChatHeader";
 import ChatMessageList, { Message } from "@/components/chat/ChatMessageList";
 import ChatInputBox from "@/components/chat/ChatInputBox";
 
-interface Message {
-  id: string;
-  text: string;
-  sender: string;
-  timestamp: Date;
-  isRead: boolean;
-}
-
 const Chat = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
