@@ -222,7 +222,7 @@ export const taskApi = {
       const response = await fetch(
         `${API_BASE_URL}/responder/task/submit-task`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
