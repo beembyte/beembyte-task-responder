@@ -50,8 +50,8 @@ const Chat = () => {
   const closeSidebar = () => setShowSidebar(false);
 
   return (
-    <div className="h-[100dvh] md:h-screen w-full bg-gray-100 flex justify-center items-stretch p-0 md:p-4">
-      <div className="flex flex-col md:flex-row bg-white w-full md:max-w-7xl h-full md:rounded-xl overflow-hidden">
+    <div className="h-[100dvh] md:h-screen w-full bg-gray-100 flex">
+      <div className="flex flex-col md:flex-row w-full h-full overflow-hidden">
         <div className={`
           flex-1 flex flex-col h-full
           ${isMobile && showSidebar ? 'hidden' : 'relative'}
@@ -117,3 +117,4 @@ const Chat = () => {
 };
 
 export default Chat;
+
