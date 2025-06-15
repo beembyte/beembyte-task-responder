@@ -57,12 +57,12 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recip
             )}
             <div 
               className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${message.sender === 'responder'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary text-primary-foreground'
                 : 'bg-white border border-gray-200 text-gray-800'
               }`}
             >
               <div className="text-sm">{message.text}</div>
-              <div className={`text-xs mt-1 ${message.sender === 'responder' ? 'text-blue-100' : 'text-gray-500'}`}>
+              <div className={`text-xs mt-1 ${message.sender === 'responder' ? 'text-primary-foreground/80' : 'text-gray-500'}`}>
                 {format(new Date(message.timestamp), 'h:mm a')}
               </div>
             </div>

@@ -32,6 +32,8 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
     if (onAttachFile && files && files.length > 0) {
       onAttachFile(files);
     }
+    // Reset file input to allow selecting the same file again
+    if(e.target) e.target.value = "";
   };
 
   return (
@@ -58,6 +60,8 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
             ref={fileInputRef} 
             className="hidden" 
             onChange={handleFileChange}
+            multiple
+            accept="image/*,application/pdf,.doc,.docx,text/csv"
           />
         </div>
         <Button 

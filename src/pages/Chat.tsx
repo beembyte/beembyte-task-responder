@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatHeader from "@/components/chat/ChatHeader";
@@ -11,11 +10,11 @@ import ChatMessageList from "@/components/chat/ChatMessageList";
 import ChatInputBox from "@/components/chat/ChatInputBox";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useTaskInfo } from "@/hooks/useTaskInfo";
+import FileUploadPreview from "@/components/chat/FileUploadPreview";
 
 const Chat = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const {
@@ -25,23 +24,24 @@ const Chat = () => {
     setNewMessage,
     sendMessage,
     onKeyPress,
+    filesToSend,
+    addFiles,
+    removeFile,
   } = useChatMessages(id);
 
   const { task } = useTaskInfo(id);
 
   const [showSidebar, setShowSidebar] = useState(false);
+  
   const recipient = {
-    name: 'Client',
+    name: task?.created_by?.first_name || 'Client',
     avatar: 'https://robohash.org/client.png?set=set4',
     isOnline: false,
   };
 
-  const handleAttachFile = (files: FileList) => {
-    if (files.length > 0) {
-      toast({
-        title: "File attached",
-        description: `${files[0].name} ready to send`,
-      });
+  const handleAttachFile = (newFiles: FileList) => {
+    if (newFiles.length > 0) {
+      addFiles(Array.from(newFiles));
     }
   };
 
@@ -51,7 +51,7 @@ const Chat = () => {
 
   return (
     <div className="h-[100dvh] md:h-screen w-full bg-gray-100 flex justify-center items-stretch p-0 md:p-4">
-      <div className="flex flex-col md:flex-row bg-white w-full md:max-w-7xl h-full rounded-none md:rounded-xl shadow-lg overflow-hidden border">
+      <div className="flex flex-col md:flex-row bg-white w-full md:max-w-7xl h-full md:rounded-xl overflow-hidden">
         <div className={`
           flex-1 flex flex-col h-full
           ${isMobile && showSidebar ? 'hidden' : 'relative'}
@@ -68,6 +68,7 @@ const Chat = () => {
             recipient={recipient}
             task={task}
           />
+          <FileUploadPreview files={filesToSend} onRemoveFile={removeFile} />
           <ChatInputBox
             value={newMessage}
             onChange={setNewMessage}
