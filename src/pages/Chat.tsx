@@ -112,23 +112,22 @@ const Chat = () => {
       created_by: {
         first_name: "Jane",
         last_name: "Doe",
-        status: "active",
+        status: USER_STATUS.ACTIVE, // Fixed: use enum
         is_verified: true,
         email: "jane@client.com",
         phone_number: "08061234567",
         tasks_count: 5,
         password: "",
-        role: "user",
+        role: USER_ROLES.USER, // Fixed: use enum
         last_login: new Date(),
       },
-      // ---- Add missing required fields to match TaskInfo ----
       file_urls: [],
       key_notes: [],
-      difficulty: "EASY",
-      assigned_status: "ASSIGNED",
-      user_final_decision: "APPROVED",
-      status: "in_progress",
-      responder_final_decision: "FINISHED",
+      difficulty: TASK_DIFFICULTY.EASY, // Fixed: use enum
+      assigned_status: ASSIGNED_STATUS.ASSIGNED, // Fixed: use enum
+      user_final_decision: USER_FINAL_DECISION.APPROVED, // Fixed: use enum
+      status: TASK_STATUS.INPROGRESS, // Fixed: use enum
+      responder_final_decision: RESPONDER_FINAL_DECISION.FINISHED, // Fixed: use enum
       progress_percentage: 50,
       createdAt: new Date(),
       updatedAt: new Date(),
