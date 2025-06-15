@@ -126,6 +126,22 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
         </CardContent>
       </Card>
 
+      {/* Chat with Client Button */}
+      {isTaskAccepted && task.status !== TASK_STATUS.COMPLETED && (
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
+          <CardContent className="p-3 lg:p-4">
+            <Button
+              variant="outline"
+              className="w-full h-8 lg:h-9 text-xs rounded-none"
+              onClick={handleChatClick}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Chat with Client
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Action Buttons */}
       {task?.status === TASK_STATUS.PENDING && (
         <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">

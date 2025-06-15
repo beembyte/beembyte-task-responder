@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -179,13 +180,6 @@ const SingleTask: React.FC = () => {
     );
   };
 
-  // Add handler for chat, using client user id (created_by)
-  const handleChatWithClient = () => {
-    if (task?.created_by?._id) {
-      navigate(`/chat/${id}`);
-    }
-  };
-
   if (isLoadingTask) {
     return <TaskLoading />
   }
@@ -237,7 +231,6 @@ const SingleTask: React.FC = () => {
             <ClientInfoCard
               task={task}
               isTaskAccepted={isTaskAccepted}
-              onChat={task?.status === TASK_STATUS.COMPLETED ? undefined : handleChatWithClient}
             />
 
             <Separator />
