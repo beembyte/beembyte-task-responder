@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { useAutosizeTextarea } from "./useAutosizeTextarea";
 
 interface ChatInputBoxProps {
   value: string;
@@ -22,6 +23,10 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
   recipientName,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Make textarea auto-resize up to 4 lines
+  useAutosizeTextarea(textareaRef, value, { minRows: 1, maxRows: 4 });
 
   const handleAttach = () => {
     fileInputRef.current?.click();
@@ -40,16 +45,19 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
       <div className="flex items-center gap-3">
         <div className="flex-1 relative">
           <Textarea
+            ref={textareaRef}
             value={value}
             onChange={e => onChange(e.target.value)}
             onKeyPress={onKeyPress}
             placeholder={`Message ${recipientName || '...'}`}
-            className="bg-gray-100 border-none rounded-2xl pr-10 py-3 text-sm min-h-[44px] max-h-32 h-auto resize-none pl-4 focus-visible:ring-1 focus-visible:ring-primary"
-            rows={1}
+            className="bg-gray-100 border-none rounded-2xl pr-10 py-3 text-sm resize-none pl-4 focus-visible:ring-1 focus-visible:ring-primary"
             style={{
               lineHeight: "1.4rem",
-              overflowY: "auto"
+              maxHeight: "7.5rem", // ~4-5 lines tall for most font sizes
+              minHeight: "2.5rem", // ~1 line tall
+              overflowY: "auto",
             }}
+            rows={1}
           />
           <Button 
             variant="ghost" 
@@ -83,4 +91,3 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
 };
 
 export default ChatInputBox;
-
