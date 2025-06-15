@@ -44,7 +44,9 @@ const ChatMessageText: React.FC<ChatMessageTextProps> = ({ text, isResponder }) 
   while ((match = regex.exec(text)) !== null) {
     // Push preceding text
     if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index))
+      parts.push(
+        <span key={`text-${lastIndex}`} className="text-sm">{text.slice(lastIndex, match.index)}</span>
+      )
     }
     // Push the link part, always start with http(s).
     const url = match[0].startsWith("http") ? match[0] : "https://" + match[0]
@@ -54,7 +56,7 @@ const ChatMessageText: React.FC<ChatMessageTextProps> = ({ text, isResponder }) 
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className={`underline font-medium ${
+        className={`underline font-medium text-sm ${
           isResponder
             ? "text-white hover:text-blue-200"
             : "text-blue-700 hover:text-blue-900"
@@ -74,14 +76,16 @@ const ChatMessageText: React.FC<ChatMessageTextProps> = ({ text, isResponder }) 
   }
   // Push any remaining text
   if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex))
+    parts.push(
+      <span key={`text-rest`} className="text-sm">{text.slice(lastIndex)}</span>
+    )
   }
 
   // Show link preview for first link only
   const firstUrl = extractFirstUrl(text)
 
   return (
-    <span>
+    <span className="text-sm">
       {parts}
       {firstUrl && <LinkPreview url={firstUrl} />}
     </span>
@@ -89,3 +93,4 @@ const ChatMessageText: React.FC<ChatMessageTextProps> = ({ text, isResponder }) 
 }
 
 export default ChatMessageText
+

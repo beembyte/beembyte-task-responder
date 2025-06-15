@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MessageSquare, Loader2, Trash2 } from "lucide-react"
@@ -88,7 +89,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
             )}
 
             <div
-              className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${
+              className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words text-sm ${
                 message.sender === "responder"
                   ? "bg-primary text-primary-foreground"
                   : "bg-white border border-gray-200 text-gray-800"
@@ -135,3 +136,4 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
 }
 
 export default ChatMessageList
+
