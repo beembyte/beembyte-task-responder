@@ -23,6 +23,7 @@ import TaskNotFoundState from "@/components/task/TaskNotFoundState"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import ClientInfoCard from "@/components/task/ClientInfoCard"
 
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -223,81 +224,13 @@ const SingleTask: React.FC = () => {
           {/* Sidebar */}
           <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/10 flex flex-col gap-4">
             {/* Client/User Info Card */}
-            <Card className="border border-muted-foreground/10 shadow-none">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <User className="w-5 h-5" />
-                  Client
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage
-                      src={getRoboHashUrl(task.created_by?.first_name || "client")}
-                      alt={task.created_by?.first_name || "Client"}
-                    />
-                    <AvatarFallback>
-                      ?
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-foreground text-sm">
-                      {task.created_by?.first_name} {task.created_by?.last_name}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      {renderStatusBadge(task.created_by?.status)}
-                      {task.created_by?.is_verified && (
-                        <span className="text-emerald-600 bg-emerald-50 rounded px-1 py-0.5 text-[10px] font-semibold ml-2">
-                          Verified
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {/* More client info fields */}
-                <div className="mt-4 text-xs text-muted-foreground space-y-1">
-                  <div>
-                    <span className="font-medium text-foreground">Email:</span>{" "}
-                    <span className="text-muted-foreground">{task.created_by?.email || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground">Phone:</span>{" "}
-                    <span className="text-muted-foreground">{task.created_by?.phone_number || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground">Role:</span>{" "}
-                    <span className="text-muted-foreground capitalize">{task.created_by?.role || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground">User ID:</span>{" "}
-                    <span className="text-muted-foreground">{task.created_by?._id || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground">Tasks:</span>{" "}
-                    <span className="text-foreground font-medium">
-                      {typeof task.created_by?.tasks_count === "number" ? task.created_by.tasks_count : "—"}
-                    </span>
-                  </div>
-                </div>
-                {/* Chat with Client Button - only if accepted */}
-                {isTaskAccepted && (
-                  <Button
-                    className="mt-3 w-full flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
-                    onClick={handleChatWithClient}
-                    variant="default"
-                    size="sm"
-                  >
-                    <User className="w-4 h-4" />
-                    Chat with Client
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+            <ClientInfoCard
+              task={task}
+              isTaskAccepted={isTaskAccepted}
+              onChat={handleChatWithClient}
+            />
 
-            {/* Divider */}
             <Separator />
-            {/* TaskSidebar */}
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}
