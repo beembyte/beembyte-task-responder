@@ -36,7 +36,7 @@ const Chat: React.FC = () => {
   const navigate = useNavigate();
   const { verifyAuthToken } = useAuth();
   const { getOneTaskById } = useTask();
-  
+
   const [task, setTask] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [taskNotFound, setTaskNotFound] = useState(false);
@@ -141,7 +141,7 @@ const Chat: React.FC = () => {
   const isValidFileType = (file: File): boolean => {
     const allowedTypes = [
       'image/jpeg',
-      'image/jpg', 
+      'image/jpg',
       'image/png',
       'image/gif',
       'application/pdf',
@@ -151,7 +151,7 @@ const Chat: React.FC = () => {
       'application/vnd.ms-excel', // .xls
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
     ];
-    
+
     return allowedTypes.includes(file.type) || file.name.toLowerCase().endsWith('.csv');
   };
 
@@ -197,7 +197,7 @@ const Chat: React.FC = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      
+
       files.forEach(file => {
         if (!isValidFileType(file)) {
           toast.error(`${file.name} is not a supported file type. Please upload images, PDF, DOCX, or CSV files only.`);
@@ -223,7 +223,7 @@ const Chat: React.FC = () => {
         }
       });
     }
-    
+
     // Reset the input
     e.target.value = '';
   };
@@ -421,11 +421,10 @@ const Chat: React.FC = () => {
                       className={`flex ${message.senderId === 'responder123' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[75%] rounded-lg px-4 py-2 ${
-                          message.senderId === 'responder123'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
+                        className={`max-w-[75%] rounded-lg px-4 py-2 ${message.senderId === 'responder123'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-gray-100 text-gray-800'
+                          }`}
                       >
                         {message.isFile ? (
                           <>
@@ -439,11 +438,10 @@ const Chat: React.FC = () => {
                           <p>{message.text}</p>
                         )}
                         <div
-                          className={`text-xs mt-1 ${
-                            message.senderId === 'responder123'
-                              ? 'text-primary-foreground/70'
-                              : 'text-gray-500'
-                          }`}
+                          className={`text-xs mt-1 ${message.senderId === 'responder123'
+                            ? 'text-primary-foreground/70'
+                            : 'text-gray-500'
+                            }`}
                         >
                           {formatMessageTime(message.timestamp)}
                         </div>
@@ -479,7 +477,7 @@ const Chat: React.FC = () => {
                   <span className="text-sm text-gray-600">Files to send:</span>
                 </div>
                 <div className="flex flex-wrap">
-                  {pendingFiles.map((pendingFile, index) => 
+                  {pendingFiles.map((pendingFile, index) =>
                     renderPendingFilePreview(pendingFile, index)
                   )}
                 </div>
@@ -516,9 +514,9 @@ const Chat: React.FC = () => {
                     />
                   </label>
                 </div>
-                <Button 
-                  type="submit" 
-                  size="icon" 
+                <Button
+                  type="submit"
+                  size="icon"
                   className="h-9 w-9 rounded-md"
                   disabled={!messageText.trim() && pendingFiles.length === 0}
                 >
@@ -596,11 +594,10 @@ const Chat: React.FC = () => {
 
             <div>
               <span className="text-gray-500 block mb-1">Status</span>
-              <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                task.status === 'INPROGRESS' ? 'bg-blue-100 text-blue-700' :
+              <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${task.status === 'INPROGRESS' ? 'bg-blue-100 text-blue-700' :
                 task.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                'bg-yellow-100 text-yellow-700'
-              }`}>
+                  'bg-yellow-100 text-yellow-700'
+                }`}>
                 {task.status === 'INPROGRESS' ? 'IN PROGRESS' : task.status}
               </span>
             </div>

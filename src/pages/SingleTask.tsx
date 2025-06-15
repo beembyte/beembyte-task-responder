@@ -152,13 +152,13 @@ const SingleTask: React.FC = () => {
   function getRoboHashUrl(name: string) {
     // Fallback if first_name is missing
     const base = name ? name.trim() : "client";
-    return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set4`;
+    return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set1`;
   }
 
   // Add handler for chat, using client user id (created_by)
   const handleChatWithClient = () => {
     if (task?.created_by?._id) {
-      navigate(`/chat/${task.created_by._id}`);
+      navigate(`/chat/${id}`);
     }
   };
 

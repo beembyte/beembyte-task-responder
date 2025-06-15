@@ -212,10 +212,10 @@ export const taskApi = {
     link,
     files_urls,
   }: {
-    task_id: string
-    description: string
-    link?: string
-    files_urls: string[]
+    task_id: string;
+    description: string;
+    link?: string;
+    files_urls: string[];
   }) => {
     try {
       const token = getAuthToken();
