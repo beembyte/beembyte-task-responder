@@ -1,30 +1,28 @@
 
+```tsx
 import React from "react";
-import ClientInfoCard from "@/components/task/ClientInfoCard";
-import JobStatsRow from "@/components/task/JobStatsRow";
+import ResponderInfoCard from "./ResponderInfoCard";
+import TaskDetailsCard from "./TaskDetailsCard";
 import { Card } from "@/components/ui/card";
 import { TaskInfo, User } from "@/types";
 
 interface ChatSidebarProps {
   task: TaskInfo | null;
-  client: User | null;
+  responder: User | null;
   onChat: () => void;
-  isTaskAccepted: boolean;
 }
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({ task, client, onChat, isTaskAccepted }) => {
+const ChatSidebar: React.FC<ChatSidebarProps> = ({ task, responder }) => {
   return (
-    <aside className="w-full max-w-md min-w-[280px] flex flex-col gap-6 p-4 md:border-l bg-white h-full shadow-none">
-      {task && (
+    <aside className="w-full max-w-md min-w-[280px] flex flex-col bg-white h-full shadow-none divide-y">
+      {task && responder ? (
         <>
-          <JobStatsRow task={task} />
-          <ClientInfoCard task={task} isTaskAccepted={isTaskAccepted} onChat={onChat} />
-          {/* You can add more info below if desired */}
+          <ResponderInfoCard responder={responder} />
+          <TaskDetailsCard task={task} />
         </>
-      )}
-      {!task && (
-        <Card className="p-5">
-          <div className="text-center text-muted-foreground text-sm">No task information available.</div>
+      ) : (
+        <Card className="p-5 border-none shadow-none">
+          <div className="text-center text-muted-foreground text-sm">Loading information...</div>
         </Card>
       )}
     </aside>
@@ -32,3 +30,4 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ task, client, onChat, isTaskA
 };
 
 export default ChatSidebar;
+```

@@ -1,4 +1,6 @@
-import React, { useRef, useState } from 'react';
+
+```tsx
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -17,7 +19,6 @@ const Chat = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Moved logic out to custom hooks
   const {
     messages,
     user,
@@ -29,7 +30,6 @@ const Chat = () => {
 
   const { task } = useTaskInfo(id);
 
-  // Sidebar & recipient (keep as before)
   const [showSidebar, setShowSidebar] = useState(false);
   const recipient = {
     name: 'Client',
@@ -46,34 +46,28 @@ const Chat = () => {
     }
   };
 
-  const goBack = () => {
-    navigate(-1);
-  };
-
+  const goBack = () => navigate(-1);
   const openSidebar = () => setShowSidebar(true);
   const closeSidebar = () => setShowSidebar(false);
 
-  const isDesktop = !isMobile;
-
   return (
-    <div className="h-[100dvh] md:h-screen w-full bg-gray-100 flex justify-center items-stretch">
-      <div className="flex flex-col md:flex-row bg-white w-full md:w-4/5 max-w-5xl h-full rounded-none md:rounded-xl shadow-lg overflow-hidden border">
+    <div className="h-[100dvh] md:h-screen w-full bg-gray-100 flex justify-center items-stretch p-0 md:p-4">
+      <div className="flex flex-col md:flex-row bg-white w-full md:max-w-7xl h-full rounded-none md:rounded-xl shadow-lg overflow-hidden border">
         <div className={`
-          flex-1 flex flex-col h-full relative transition-transform
-          ${isMobile && showSidebar ? '-translate-x-full absolute inset-0 z-10 bg-white' : 'relative'}
+          flex-1 flex flex-col h-full
+          ${isMobile && showSidebar ? 'hidden' : 'relative'}
         `}>
           <ChatHeader
-            recipient={recipient}
-            user={user}
             onBack={goBack}
             onSidebarOpen={isMobile ? openSidebar : undefined}
             isMobile={isMobile}
-            taskId={id}
+            taskTitle={task?.title}
           />
           <ChatMessageList
             messages={messages}
             user={user}
             recipient={recipient}
+            task={task}
           />
           <ChatInputBox
             value={newMessage}
@@ -81,24 +75,24 @@ const Chat = () => {
             onSend={sendMessage}
             onAttachFile={handleAttachFile}
             onKeyPress={onKeyPress}
+            recipientName={recipient.name}
           />
         </div>
 
         <div className={`
-          hidden md:block h-full
+          hidden md:block h-full overflow-y-auto
           bg-white border-l
-        `} style={{ minWidth: 320, maxWidth: 400 }}>
+        `} style={{ minWidth: 320, maxWidth: 360 }}>
           <ChatSidebar
             task={task}
-            client={task?.created_by || null}
+            responder={user}
             onChat={closeSidebar}
-            isTaskAccepted={true}
           />
         </div>
         {isMobile && showSidebar && (
           <div className="fixed inset-0 z-20 bg-white flex flex-col h-full w-full animate-in slide-in-from-right-32 duration-200">
-            <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
-              <div className="font-medium text-base">Task Info</div>
+            <div className="flex items-center justify-between px-4 py-3 border-b bg-white">
+              <div className="font-medium text-base">Details</div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -111,9 +105,8 @@ const Chat = () => {
             <div className="flex-1 overflow-y-auto">
               <ChatSidebar
                 task={task}
-                client={task?.created_by || null}
+                responder={user}
                 onChat={closeSidebar}
-                isTaskAccepted={true}
               />
             </div>
           </div>
@@ -124,3 +117,4 @@ const Chat = () => {
 };
 
 export default Chat;
+```

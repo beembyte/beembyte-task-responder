@@ -1,4 +1,5 @@
 
+```ts
 import { useEffect, useState } from "react";
 import {
   USER_STATUS,
@@ -15,14 +16,14 @@ export function useTaskInfo(taskId: string | undefined) {
   const [task, setTask] = useState<TaskInfo | null>(null);
 
   useEffect(() => {
-    // Demo: fetch mock data only!
+    // Demo: fetch mock data to match screenshot
     setTask({
-      _id: taskId || "id",
-      title: "Sample Task Title",
-      subject: "Sample Subject",
-      description: "A sample description for the mock task.",
+      _id: taskId || "68442a2e1d11cc6b328b6a5c",
+      title: "research science",
+      subject: "Lab tech",
+      description: "research about types of blood",
       deadline: new Date(Date.now() + 3600 * 1000 * 24).toISOString(),
-      price: 15000,
+      price: 782390, // In cents, to be formatted as $7823.90
       created_by: {
         first_name: "Jane",
         last_name: "Doe",
@@ -43,7 +44,7 @@ export function useTaskInfo(taskId: string | undefined) {
       status: TASK_STATUS.INPROGRESS,
       responder_final_decision: RESPONDER_FINAL_DECISION.FINISHED,
       progress_percentage: 50,
-      createdAt: new Date(),
+      createdAt: new Date("2025-06-07T13:01:00"),
       updatedAt: new Date(),
       responder: undefined,
       files: [],
@@ -53,3 +54,4 @@ export function useTaskInfo(taskId: string | undefined) {
 
   return { task };
 }
+```

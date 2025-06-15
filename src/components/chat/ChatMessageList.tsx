@@ -1,9 +1,10 @@
 
+```tsx
 import React, { useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { format } from "date-fns";
-import { User } from "@/types";
+import { User, TaskInfo } from "@/types";
 
 export interface Message {
   id: string;
@@ -17,9 +18,10 @@ interface ChatMessageListProps {
   messages: Message[];
   user?: User | null;
   recipient: { name: string; avatar: string; isOnline: boolean };
+  task: TaskInfo | null;
 }
 
-const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recipient }) => {
+const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recipient, task }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,16 +29,20 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recip
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-2 py-4 bg-gray-50">
+    <div className="flex-1 overflow-y-auto p-6 bg-white">
       {messages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full">
-          <div className="bg-blue-50 rounded-full p-4 mb-2">
-            <Send className="w-9 h-9 text-blue-500" />
+        <div className="flex flex-col items-center justify-center h-full text-center">
+          <div className="bg-gray-100 rounded-full p-4 mb-4">
+            <MessageSquare className="w-10 h-10 text-gray-500" />
           </div>
-          <div className="text-lg font-semibold text-gray-700 mb-1">
-            No messages yet
+          <div className="text-xl font-semibold text-gray-800 mb-1">
+            Start the conversation
           </div>
-          <div className="text-sm text-gray-500">Start a conversation with your client.</div>
+          <div className="text-sm text-gray-500 max-w-sm">
+            This is the beginning of your conversation about{" "}
+            <span className="font-semibold text-gray-700">"{task?.title || 'the task'}"</span>.
+            Send your first message to get started!
+          </div>
         </div>
       ) : (
         messages.map((message) => (
@@ -45,7 +51,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recip
             className={`flex mb-4 ${message.sender === 'responder' ? 'justify-end' : 'justify-start'}`}
           >
             {message.sender !== 'responder' && (
-              <Avatar className="h-7 w-7 mt-1 mr-2">
+              <Avatar className="h-7 w-7 mt-1 mr-2 flex-shrink-0">
                 <AvatarImage src={recipient.avatar} alt={recipient.name} />
                 <AvatarFallback>{recipient.name.charAt(0)}</AvatarFallback>
               </Avatar>
@@ -62,7 +68,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recip
               </div>
             </div>
             {message.sender === 'responder' && (
-              <Avatar className="h-7 w-7 mt-1 ml-2">
+              <Avatar className="h-7 w-7 mt-1 ml-2 flex-shrink-0">
                 <AvatarImage 
                   src={`https://robohash.org/${user?.first_name || 'responder'}.png?set=set4`} 
                   alt={user?.first_name || 'You'} 
@@ -79,3 +85,4 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recip
 };
 
 export default ChatMessageList;
+```
