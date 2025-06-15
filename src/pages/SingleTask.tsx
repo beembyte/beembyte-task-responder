@@ -155,6 +155,21 @@ const SingleTask: React.FC = () => {
     return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set1`;
   }
 
+  // Helper to present client status as a styled badge
+  const renderStatusBadge = (status?: string) => {
+    if (!status) return null;
+    // Green for active, gray for other
+    const color =
+      status.toLowerCase() === "active"
+        ? "bg-emerald-100 text-emerald-700"
+        : "bg-gray-100 text-gray-500";
+    return (
+      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
+        {status}
+      </span>
+    );
+  };
+
   // Add handler for chat, using client user id (created_by)
   const handleChatWithClient = () => {
     if (task?.created_by?._id) {
@@ -205,6 +220,7 @@ const SingleTask: React.FC = () => {
               )}
             </div>
           </div>
+          {/* Sidebar */}
           <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/10 flex flex-col gap-4">
             {/* Client/User Info Card */}
             <Card className="border border-muted-foreground/10 shadow-none">
@@ -222,7 +238,6 @@ const SingleTask: React.FC = () => {
                       alt={task.created_by?.first_name || "Client"}
                     />
                     <AvatarFallback>
-                      {/* If robohash fails, fallback to "?" */}
                       ?
                     </AvatarFallback>
                   </Avatar>
@@ -230,30 +245,59 @@ const SingleTask: React.FC = () => {
                     <div className="font-semibold text-foreground text-sm">
                       {task.created_by?.first_name} {task.created_by?.last_name}
                     </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {renderStatusBadge(task.created_by?.status)}
+                      {task.created_by?.is_verified && (
+                        <span className="text-emerald-600 bg-emerald-50 rounded px-1 py-0.5 text-[10px] font-semibold ml-2">
+                          Verified
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs text-muted-foreground">Tasks:</span>
-                  <span className="text-xs text-foreground font-medium">
-                    {typeof task.created_by?.tasks_count === "number" ? task.created_by.tasks_count : "—"}
-                  </span>
+                {/* More client info fields */}
+                <div className="mt-4 text-xs text-muted-foreground space-y-1">
+                  <div>
+                    <span className="font-medium text-foreground">Email:</span>{" "}
+                    <span className="text-muted-foreground">{task.created_by?.email || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Phone:</span>{" "}
+                    <span className="text-muted-foreground">{task.created_by?.phone_number || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Role:</span>{" "}
+                    <span className="text-muted-foreground capitalize">{task.created_by?.role || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">User ID:</span>{" "}
+                    <span className="text-muted-foreground">{task.created_by?.user_id || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Tasks:</span>{" "}
+                    <span className="text-foreground font-medium">
+                      {typeof task.created_by?.tasks_count === "number" ? task.created_by.tasks_count : "—"}
+                    </span>
+                  </div>
                 </div>
-                {/* Chat with Client Button */}
-                <Button
-                  className="mt-3 w-full flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
-                  onClick={handleChatWithClient}
-                  variant="default"
-                  size="sm"
-                >
-                  <User className="w-4 h-4" />
-                  Chat with Client
-                </Button>
+                {/* Chat with Client Button - only if accepted */}
+                {isTaskAccepted && (
+                  <Button
+                    className="mt-3 w-full flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
+                    onClick={handleChatWithClient}
+                    variant="default"
+                    size="sm"
+                  >
+                    <User className="w-4 h-4" />
+                    Chat with Client
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
             {/* Divider */}
             <Separator />
-
+            {/* TaskSidebar */}
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}
