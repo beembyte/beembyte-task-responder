@@ -28,6 +28,7 @@ const Chat = () => {
     addFiles,
     removeFile,
     isLoadingMessages,
+    deleteMessage,
   } = useChatMessages(id)
 
   const { task } = useTaskInfo(id)
@@ -71,6 +72,7 @@ const Chat = () => {
             recipient={recipient}
             task={task}
             isLoading={isLoadingMessages}
+            onDeleteMessage={deleteMessage}
           />
           <div className="border-t bg-white">
             <FileUploadPreview files={filesToSend} onRemoveFile={removeFile} />

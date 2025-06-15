@@ -148,6 +148,27 @@ export function useChatMessages(chatId: string | undefined) {
     }
   }, [newMessage, filesToSend, chatId, user, isSending])
 
+  const deleteMessage = useCallback(
+    async (messageId: string) => {
+      const originalMessages = messages
+
+      // Optimistic update
+      setMessages((prev) => prev.filter((msg) => msg.id !== messageId))
+
+      try {
+        const response = await chatApi.deleteMessage(messageId)
+        if (!response.success) {
+          toast.error(response.message || "Failed to delete message.")
+          setMessages(originalMessages) // Revert on failure
+        }
+      } catch (error) {
+        toast.error("An error occurred while deleting the message.")
+        setMessages(originalMessages) // Revert on error
+      }
+    },
+    [messages]
+  )
+
   const onKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -168,5 +189,6 @@ export function useChatMessages(chatId: string | undefined) {
     removeFile,
     isLoadingMessages,
     isSending,
+    deleteMessage,
   }
 }

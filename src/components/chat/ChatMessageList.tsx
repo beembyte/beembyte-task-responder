@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageSquare, Loader2 } from "lucide-react"
+import { MessageSquare, Loader2, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { User, TaskInfo } from "@/types"
 import SubmissionFileItem from "@/components/task/SubmissionFileItem"
@@ -21,6 +21,7 @@ interface ChatMessageListProps {
   recipient: { name: string; avatar: string; isOnline: boolean }
   task: TaskInfo | null
   isLoading?: boolean
+  onDeleteMessage?: (messageId: string) => void
 }
 
 const ChatMessageList: React.FC<ChatMessageListProps> = ({
@@ -29,6 +30,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
   recipient,
   task,
   isLoading,
+  onDeleteMessage,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -62,7 +64,9 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
         messages.map((message) => (
           <div
             key={message.id}
-            className={`flex mb-4 ${message.sender === "responder" ? "justify-end" : "justify-start"}`}
+            className={`group flex items-start mb-4 ${
+              message.sender === "responder" ? "justify-end" : "justify-start"
+            }`}
           >
             {message.sender !== "responder" && (
               <Avatar className="h-7 w-7 mt-1 mr-2 flex-shrink-0">
@@ -70,6 +74,17 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
                 <AvatarFallback>{recipient.name.charAt(0)}</AvatarFallback>
               </Avatar>
             )}
+
+            {message.sender === "responder" && onDeleteMessage && (
+              <button
+                onClick={() => onDeleteMessage(message.id)}
+                className="mr-2 mt-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Delete message"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+
             <div
               className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${
                 message.sender === "responder"
