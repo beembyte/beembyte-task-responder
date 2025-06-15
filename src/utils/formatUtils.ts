@@ -1,5 +1,11 @@
 import { longFormatters } from "date-fns";
 
+// Format price to currency (₦Naira)
+export const formatNaira = (amount: number): string => {
+  // Show as ₦ and with no decimal places by default
+  return `₦${(amount || 0).toLocaleString("en-NG", { minimumFractionDigits: 0 })}`;
+};
+
 // Format price to currency
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("en-US", {

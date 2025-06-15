@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
+import { formatNaira } from "@/utils/formatUtils";
 
 interface CompactTaskCardProps {
   task: any;
@@ -80,7 +80,7 @@ const CompactTaskCard: React.FC<CompactTaskCardProps> = ({ task, onClick }) => {
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center space-x-1">
               <span className="font-medium text-green-600">
-                {formatPayment(task.price || 0)}
+                {formatNaira(task.price)}
               </span>
             </div>
             <div className="flex items-center space-x-1">

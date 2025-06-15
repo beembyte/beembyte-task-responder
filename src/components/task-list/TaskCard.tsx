@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import CancelTaskButton from '@/components/task/CancelTaskButton';
+import { formatNaira } from "@/utils/formatUtils";
 
 interface TaskCardProps {
   task: any;
@@ -74,7 +74,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </div>
         <div className="flex flex-col items-end shrink-0 mt-2 sm:mt-0">
           <span className="font-bold text-base text-green-600 mb-0.5">
-            {formatPayment(task.price || 0)}
+            {formatNaira(task.price)}
           </span>
           <span className="text-xs text-gray-500">Fixed-price</span>
         </div>
