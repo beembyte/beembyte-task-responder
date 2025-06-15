@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Send, Paperclip, Image, File, X } from 'lucide-react';
 import { socket } from '@/services/socket';
@@ -113,11 +114,11 @@ const Chat = () => {
     setMessages(prev => [...prev, message]);
     setNewMessage('');
     
-    // Emit message to socket
+    // Emit message to socket, use _id instead of user_id
     socket.emit('send_message', {
       chat_id: id,
       message: newMessage,
-      sender_id: user?.user_id,
+      sender_id: user?._id,
     });
   };
 
@@ -226,13 +227,13 @@ const Chat = () => {
       <div className="px-2 pb-2 md:px-4 md:pb-4 border-t bg-white">
         <div className="flex items-end gap-2 mt-2">
           <div className="flex-1 relative">
-            <Input
+            <Textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
-              className="pr-10 py-3 min-h-[50px]"
-              multiline="true"
+              className="pr-10 py-3 min-h-[50px] resize-none"
+              rows={2}
             />
             <Button 
               variant="ghost" 
