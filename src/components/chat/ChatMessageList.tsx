@@ -64,13 +64,12 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
         messages.map((message) => (
           <div
             key={message.id}
-            className={`group flex items-start mb-4 ${
-              message.sender === "responder" ? "justify-end" : "justify-start"
-            }`}
+            className={`group flex items-start mb-4 ${message.sender === "responder" ? "justify-end" : "justify-start"
+              }`}
           >
             {message.sender !== "responder" && (
               <Avatar className="h-7 w-7 mt-1 mr-2 flex-shrink-0">
-                <AvatarImage src={recipient.avatar} alt={recipient.name} />
+                <AvatarImage src={`https://robohash.org/${user?.first_name || "responder"}.png?set=set3`} alt={recipient.name} />
                 <AvatarFallback>{recipient.name.charAt(0)}</AvatarFallback>
               </Avatar>
             )}
@@ -86,11 +85,10 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
             )}
 
             <div
-              className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${
-                message.sender === "responder"
+              className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${message.sender === "responder"
                   ? "bg-primary text-primary-foreground"
                   : "bg-white border border-gray-200 text-gray-800"
-              }`}
+                }`}
             >
               {message.text && <div className="text-sm">{message.text}</div>}
               {message.file_urls && message.file_urls.length > 0 && (
@@ -101,9 +99,8 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
                 </div>
               )}
               <div
-                className={`text-xs mt-1 ${
-                  message.sender === "responder" ? "text-primary-foreground/80" : "text-gray-500"
-                }`}
+                className={`text-xs mt-1 ${message.sender === "responder" ? "text-primary-foreground/80" : "text-gray-500"
+                  }`}
               >
                 {format(new Date(message.timestamp), "h:mm a")}
               </div>

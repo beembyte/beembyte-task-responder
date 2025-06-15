@@ -11,7 +11,7 @@ interface ClientInfoCardProps {
 
 const getRoboHashUrl = (name: string) => {
   const base = name ? name.trim() : "client";
-  return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set1`;
+  return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set3`;
 };
 
 const renderStatusBadge = (status?: string) => {
