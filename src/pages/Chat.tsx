@@ -68,15 +68,17 @@ const Chat = () => {
             recipient={recipient}
             task={task}
           />
-          <FileUploadPreview files={filesToSend} onRemoveFile={removeFile} />
-          <ChatInputBox
-            value={newMessage}
-            onChange={setNewMessage}
-            onSend={sendMessage}
-            onAttachFile={handleAttachFile}
-            onKeyPress={onKeyPress}
-            recipientName={recipient.name}
-          />
+          <div className="border-t bg-white">
+            <FileUploadPreview files={filesToSend} onRemoveFile={removeFile} />
+            <ChatInputBox
+              value={newMessage}
+              onChange={setNewMessage}
+              onSend={sendMessage}
+              onAttachFile={handleAttachFile}
+              onKeyPress={onKeyPress}
+              recipientName={recipient.name}
+            />
+          </div>
         </div>
 
         <div className={`
@@ -117,4 +119,3 @@ const Chat = () => {
 };
 
 export default Chat;
-

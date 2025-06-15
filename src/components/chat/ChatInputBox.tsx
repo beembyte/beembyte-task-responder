@@ -37,7 +37,7 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
   };
 
   return (
-    <div className="px-4 py-3 border-t bg-white">
+    <div className="px-4 py-3 bg-white">
       <div className="flex items-center gap-3">
         <div className="flex-1 relative">
           <Input
@@ -61,7 +61,7 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
             className="hidden" 
             onChange={handleFileChange}
             multiple
-            accept="image/*,application/pdf,.doc,.docx,text/csv"
+            accept="image/*,application/pdf,.doc,.docx,text/csv,.xlsx,.xls"
           />
         </div>
         <Button 
