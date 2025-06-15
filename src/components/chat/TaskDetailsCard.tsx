@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TaskInfo } from "@/types";
+import { TaskInfo, TASK_STATUS } from "@/types";
 import { format } from "date-fns";
 
 interface TaskDetailsCardProps {
@@ -25,8 +25,12 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
       currency: "USD",
     }).format(amount / 100); 
   };
+  
+  const formatStatus = (status: TASK_STATUS) => {
+    return status.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  }
 
-  const statusColor = task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
+  const statusColor = task.status === TASK_STATUS.INPROGRESS ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
 
   return (
     <Card className="border-none shadow-none">
@@ -42,7 +46,7 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
           label="Status" 
           value={
             <span className={`px-2 py-0.5 text-xs font-semibold rounded-md inline-block ${statusColor}`}>
-              {task.status}
+              {formatStatus(task.status)}
             </span>
           }
         />

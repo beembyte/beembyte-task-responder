@@ -1,5 +1,4 @@
 
-```ts
 import { useEffect, useState } from "react";
 import {
   USER_STATUS,
@@ -54,4 +53,3 @@ export function useTaskInfo(taskId: string | undefined) {
 
   return { task };
 }
-```
