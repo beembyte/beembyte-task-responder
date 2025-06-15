@@ -57,6 +57,7 @@ export type Task = {
   createdAt: Date;
   deadline: Date;
   status: TaskStatus;
+  price?: number;   // <-- Added for compatibility with component usage.
   payment?: number;
   responder?: User;
   notes?: string;
