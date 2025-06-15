@@ -1,5 +1,4 @@
 
-```tsx
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,4 +73,3 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
 };
 
 export default ChatInputBox;
-```

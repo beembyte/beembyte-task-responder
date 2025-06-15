@@ -1,5 +1,4 @@
 
-```tsx
 import React, { useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare } from "lucide-react";
@@ -85,4 +84,3 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, user, recip
 };
 
 export default ChatMessageList;
-```

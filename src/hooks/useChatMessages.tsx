@@ -1,14 +1,15 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { socket } from "@/services/socket";
 import { useAuth } from "@/hooks/useAuth";
 import { Message } from "@/components/chat/ChatMessageList";
+import { User } from "@/types";
 
 export function useChatMessages(chatId: string | undefined) {
   const { loggedInUser } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [user, setUser] = useState<any>(null); // keep for source compatibility
+  const [user, setUser] = useState<User | null>(null);
 
   // Get current user
   useEffect(() => {

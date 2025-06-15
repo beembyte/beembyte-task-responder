@@ -1,5 +1,4 @@
 
-```tsx
 import React from "react";
 import ResponderInfoCard from "./ResponderInfoCard";
 import TaskDetailsCard from "./TaskDetailsCard";
@@ -30,4 +29,3 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ task, responder }) => {
 };
 
 export default ChatSidebar;
-```

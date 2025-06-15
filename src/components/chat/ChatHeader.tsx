@@ -1,5 +1,4 @@
 
-```tsx
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, Settings } from "lucide-react";
@@ -64,4 +63,3 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 );
 
 export default ChatHeader;
-```

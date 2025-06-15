@@ -1,5 +1,4 @@
 
-```tsx
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TaskInfo } from "@/types";
@@ -27,7 +26,7 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
     }).format(amount / 100); 
   };
 
-  const statusColor = task.status === 'INPROGRESS' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
+  const statusColor = task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
 
   return (
     <Card className="border-none shadow-none">
@@ -54,4 +53,3 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
 };
 
 export default TaskDetailsCard;
-```
