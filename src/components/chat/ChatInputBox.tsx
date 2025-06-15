@@ -1,8 +1,8 @@
 
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Paperclip, Send } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChatInputBoxProps {
   value: string;
@@ -32,7 +32,6 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
     if (onAttachFile && files && files.length > 0) {
       onAttachFile(files);
     }
-    // Reset file input to allow selecting the same file again
     if(e.target) e.target.value = "";
   };
 
@@ -40,18 +39,25 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
     <div className="px-4 py-3 bg-white">
       <div className="flex items-center gap-3">
         <div className="flex-1 relative">
-          <Input
+          <Textarea
             value={value}
             onChange={e => onChange(e.target.value)}
             onKeyPress={onKeyPress}
             placeholder={`Message ${recipientName || '...'}`}
-            className="bg-gray-100 border-none rounded-full pr-10 py-3 text-sm h-11 pl-4 focus-visible:ring-1 focus-visible:ring-primary"
+            className="bg-gray-100 border-none rounded-2xl pr-10 py-3 text-sm min-h-[44px] max-h-32 h-auto resize-none pl-4 focus-visible:ring-1 focus-visible:ring-primary"
+            rows={1}
+            style={{
+              lineHeight: "1.4rem",
+              overflowY: "auto"
+            }}
           />
           <Button 
             variant="ghost" 
             size="icon" 
             className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
             onClick={handleAttach}
+            tabIndex={-1}
+            type="button"
           >
             <Paperclip className="h-5 w-5 text-gray-500" />
           </Button>
@@ -77,3 +83,4 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
 };
 
 export default ChatInputBox;
+
