@@ -271,7 +271,7 @@ const SingleTask: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-medium text-foreground">User ID:</span>{" "}
-                    <span className="text-muted-foreground">{task.created_by?.user_id || "—"}</span>
+                    <span className="text-muted-foreground">{task.created_by?._id || "—"}</span>
                   </div>
                   <div>
                     <span className="font-medium text-foreground">Tasks:</span>{" "}
