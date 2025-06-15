@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Send, Paperclip, Image, File, X } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip } from 'lucide-react';
 import { socket } from '@/services/socket';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -86,14 +86,10 @@ const Chat = () => {
           isRead: true,
         },
       ];
-      
       setMessages(mockMessages);
-      
-      // Listen for new messages
       socket.on('new_message', (message: Message) => {
         setMessages(prev => [...prev, message]);
       });
-      
       return () => {
         socket.off('new_message');
       };
@@ -102,7 +98,6 @@ const Chat = () => {
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
-    
     const message: Message = {
       id: Date.now().toString(),
       text: newMessage,
@@ -110,11 +105,8 @@ const Chat = () => {
       timestamp: new Date(),
       isRead: false,
     };
-    
     setMessages(prev => [...prev, message]);
     setNewMessage('');
-    
-    // Emit message to socket, use _id instead of user_id
     socket.emit('send_message', {
       chat_id: id,
       message: newMessage,
@@ -136,7 +128,6 @@ const Chat = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      // Handle file upload
       toast({
         title: "File attached",
         description: `${files[0].name} ready to send`,
@@ -149,10 +140,10 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white md:rounded-lg overflow-hidden shadow md:w-3/5 mx-auto border md:mt-8 transition-all duration-300
-      w-full max-w-full px-0 md:px-6">
+    <div className="flex flex-col h-[100dvh] bg-white md:rounded-lg overflow-hidden shadow md:w-3/5 mx-auto border md:mt-8 w-full max-w-full
+      px-0 md:px-6 transition-all duration-300">
       {/* Chat Header */}
-      <div className="flex items-center px-4 py-3 border-b bg-gray-50">
+      <div className="flex items-center px-3 sm:px-4 py-2 sm:py-3 border-b bg-gray-50">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -169,48 +160,46 @@ const Chat = () => {
           </AvatarFallback>
         </Avatar>
         
-        <div className="ml-3 flex-1">
-          <div className="font-medium">{recipient.name}</div>
+        <div className="ml-3 flex-1 min-w-0">
+          <div className="font-medium text-sm sm:text-base truncate">{recipient.name}</div>
           <div className="text-xs text-gray-500 flex items-center">
             <span className={`w-2 h-2 rounded-full mr-1 ${recipient.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></span>
             {recipient.isOnline ? 'Online' : 'Offline'}
           </div>
         </div>
         
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 text-right whitespace-nowrap pl-2">
           Task #{id}
         </div>
       </div>
       
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-2 py-3 md:px-4 md:py-5 bg-gray-50">
+      <div className="flex-1 overflow-y-auto px-1 sm:px-2 py-2 sm:py-4 md:px-4 md:py-5 bg-gray-50">
         {messages.map((message) => (
           <div 
             key={message.id} 
-            className={`flex mb-4 ${message.sender === 'responder' ? 'justify-end' : 'justify-start'}`}
+            className={`flex mb-3 sm:mb-4 ${message.sender === 'responder' ? 'justify-end' : 'justify-start'}`}
           >
             {message.sender !== 'responder' && (
-              <Avatar className="h-8 w-8 mt-1 mr-2">
+              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 mt-1 mr-2">
                 <AvatarImage src={recipient.avatar} alt={recipient.name} />
                 <AvatarFallback>{recipient.name.charAt(0)}</AvatarFallback>
               </Avatar>
             )}
-            
             <div 
-              className={`max-w-[75%] px-4 py-2 rounded-lg ${
+              className={`max-w-[80vw] sm:max-w-[75%] px-3 sm:px-4 py-2 rounded-lg break-words ${
                 message.sender === 'responder' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-white border text-gray-800'
               }`}
             >
-              <div>{message.text}</div>
+              <div className="text-sm">{message.text}</div>
               <div className={`text-xs mt-1 ${message.sender === 'responder' ? 'text-blue-100' : 'text-gray-500'}`}>
                 {format(new Date(message.timestamp), 'h:mm a')}
               </div>
             </div>
-            
             {message.sender === 'responder' && (
-              <Avatar className="h-8 w-8 mt-1 ml-2">
+              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 mt-1 ml-2">
                 <AvatarImage 
                   src={`https://robohash.org/${user?.first_name || 'responder'}.png?set=set4`} 
                   alt={user?.first_name || 'You'} 
@@ -224,21 +213,20 @@ const Chat = () => {
       </div>
       
       {/* Input Area */}
-      <div className="px-2 pb-2 md:px-4 md:pb-4 border-t bg-white">
-        <div className="flex items-end gap-2 mt-2">
+      <div className="px-1 sm:px-2 md:px-4 pb-1 sm:pb-2 md:pb-4 border-t bg-white">
+        <div className="flex items-center gap-2 mt-2">
           <div className="flex-1 relative">
-            <Textarea
+            <Input
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={e => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
-              className="pr-10 py-3 min-h-[50px] resize-none"
-              rows={2}
+              className="pr-10 py-3 text-sm"
             />
             <Button 
               variant="ghost" 
               size="icon" 
-              className="absolute right-2 bottom-1/2 transform translate-y-1/2"
+              className="absolute right-2 top-1/2 -translate-y-1/2"
               onClick={handleAttachFile}
             >
               <Paperclip className="h-5 w-5 text-gray-500" />
