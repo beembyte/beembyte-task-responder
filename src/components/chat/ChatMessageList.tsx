@@ -1,10 +1,10 @@
-
 import React, { useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MessageSquare, Loader2, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { User, TaskInfo } from "@/types"
 import SubmissionFileItem from "@/components/task/SubmissionFileItem"
+import ChatMessageText from "./ChatMessageText"
 
 export interface Message {
   id: string
@@ -64,8 +64,11 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
         messages.map((message) => (
           <div
             key={message.id}
-            className={`group flex items-start mb-4 ${message.sender === "responder" ? "justify-end" : "justify-start"
-              }`}
+            className={`group flex items-start mb-4 ${
+              message.sender === "responder"
+                ? "justify-end"
+                : "justify-start"
+            }`}
           >
             {message.sender !== "responder" && (
               <Avatar className="h-7 w-7 mt-1 mr-2 flex-shrink-0">
@@ -85,12 +88,18 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
             )}
 
             <div
-              className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${message.sender === "responder"
+              className={`max-w-[80vw] md:max-w-md px-4 py-2 rounded-xl break-words ${
+                message.sender === "responder"
                   ? "bg-primary text-primary-foreground"
                   : "bg-white border border-gray-200 text-gray-800"
-                }`}
+              }`}
             >
-              {message.text && <div className="text-sm">{message.text}</div>}
+              {message.text && (
+                <ChatMessageText
+                  text={message.text}
+                  isResponder={message.sender === "responder"}
+                />
+              )}
               {message.file_urls && message.file_urls.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {message.file_urls.map((url, i) => (
@@ -99,8 +108,11 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
                 </div>
               )}
               <div
-                className={`text-xs mt-1 ${message.sender === "responder" ? "text-primary-foreground/80" : "text-gray-500"
-                  }`}
+                className={`text-xs mt-1 ${
+                  message.sender === "responder"
+                    ? "text-primary-foreground/80"
+                    : "text-gray-500"
+                }`}
               >
                 {format(new Date(message.timestamp), "h:mm a")}
               </div>
