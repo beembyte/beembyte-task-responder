@@ -1,11 +1,10 @@
-
 "use client"
 
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Loader2, Clock, User } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
@@ -18,11 +17,8 @@ import TaskSidebar from "@/components/task/TaskSidebar"
 import TaskSubmission from "@/components/task/TaskSubmission"
 import TaskSubmissionDisplay from "@/components/task/TaskSubmissionDisplay"
 import { toast } from "sonner"
-import JobStatsRow from "@/components/task/JobStatsRow"
 import TaskLoading from "@/components/task/TaskLoading"
 import TaskNotFoundState from "@/components/task/TaskNotFoundState"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import ClientInfoCard from "@/components/task/ClientInfoCard"
 
@@ -158,28 +154,6 @@ const SingleTask: React.FC = () => {
 
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
-  // Helper to generate robohash avatar URL from first name
-  function getRoboHashUrl(name: string) {
-    // Fallback if first_name is missing
-    const base = name ? name.trim() : "client";
-    return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set1`;
-  }
-
-  // Helper to present client status as a styled badge
-  const renderStatusBadge = (status?: string) => {
-    if (!status) return null;
-    // Green for active, gray for other
-    const color =
-      status.toLowerCase() === "active"
-        ? "bg-emerald-100 text-emerald-700"
-        : "bg-gray-100 text-gray-500";
-    return (
-      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
-        {status}
-      </span>
-    );
-  };
-
   if (isLoadingTask) {
     return <TaskLoading />
   }
@@ -230,7 +204,6 @@ const SingleTask: React.FC = () => {
             {/* Client/User Info Card */}
             <ClientInfoCard
               task={task}
-              isTaskAccepted={isTaskAccepted}
             />
 
             <Separator />

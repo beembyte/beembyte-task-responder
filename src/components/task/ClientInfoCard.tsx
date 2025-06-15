@@ -1,21 +1,19 @@
 
 import React from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
 import { User } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { type TaskInfo, ASSIGNED_STATUS, TASK_STATUS } from "@/types"
+import { type TaskInfo } from "@/types"
 
 interface ClientInfoCardProps {
   task: TaskInfo
-  isTaskAccepted: boolean
-  onChat: () => void
 }
+
 const getRoboHashUrl = (name: string) => {
   const base = name ? name.trim() : "client";
   return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set1`;
 };
+
 const renderStatusBadge = (status?: string) => {
   if (!status) return null;
   const color =
@@ -30,9 +28,7 @@ const renderStatusBadge = (status?: string) => {
 };
 
 const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
-  task,
-  isTaskAccepted,
-  onChat,
+  task
 }) => {
   const client = task.created_by;
 
@@ -83,17 +79,6 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
             </span>
           </div>
         </div>
-        {isTaskAccepted && (
-          <Button
-            className="mt-3 w-full flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
-            onClick={onChat}
-            variant="default"
-            size="sm"
-          >
-            <User className="w-4 h-4" />
-            Chat with Client
-          </Button>
-        )}
       </CardContent>
     </Card>
   )
