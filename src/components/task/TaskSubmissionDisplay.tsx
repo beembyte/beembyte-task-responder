@@ -1,6 +1,6 @@
 
 import React from "react"
-import { Link as LinkIcon, Github } from "lucide-react"
+import { Link as LinkIcon, Github, Linkedin, Facebook, Youtube, Folder } from "lucide-react"
 import SubmissionFileItem from "./SubmissionFileItem"
 
 interface TaskSubmissionDisplayProps {
@@ -12,7 +12,14 @@ interface TaskSubmissionDisplayProps {
 const getLinkIcon = (url: string) => {
   try {
     const parsed = new URL(url)
-    if (/github\.com/.test(parsed.hostname)) return <Github className="w-5 h-5 text-gray-700" />
+    const { hostname } = parsed
+
+    if (/github\.com/.test(hostname)) return <Github className="w-5 h-5 text-gray-900" />
+    if (/linkedin\.com/.test(hostname)) return <Linkedin className="w-5 h-5 text-blue-700" />
+    if (/facebook\.com/.test(hostname)) return <Facebook className="w-5 h-5 text-blue-800" />
+    if (/youtube\.com|youtu\.be/.test(hostname)) return <Youtube className="w-5 h-5 text-red-600" />
+    if (/drive\.google\.com/.test(hostname)) return <Folder className="w-5 h-5 text-yellow-500" />
+
     return <LinkIcon className="w-5 h-5 text-gray-700" />
   } catch {
     return <LinkIcon className="w-5 h-5 text-gray-700" />
