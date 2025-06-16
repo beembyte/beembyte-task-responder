@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTask, { TaskResponse } from '@/hooks/useTask';
+import { useRealTimeTaskUpdates } from '@/hooks/useRealTimeTaskUpdates';
 import { getAllunAssignedTaskPayload } from '@/services/taskApi';
 import { toast } from 'sonner';
 import TaskListHeader from './task-list/TaskListHeader';
@@ -31,6 +32,46 @@ const TaskListPage: React.FC<TaskListPageProps> = ({
   const [totalTasks, setTotalTasks] = useState(0);
   const [acceptingTasks, setAcceptingTasks] = useState<Set<string>>(new Set());
   const itemsPerPage = 12;
+
+  // Set up real-time task updates based on task type
+  useRealTimeTaskUpdates({
+    onNewTask: (newTask) => {
+      if (taskType === 'pending') {
+        setTasks((prevTasks) => {
+          const taskExists = prevTasks.some(task => task._id === newTask._id);
+          if (!taskExists) {
+            setTotalTasks(prev => prev + 1);
+            return [newTask, ...prevTasks];
+          }
+          return prevTasks;
+        });
+      }
+    },
+    onTaskStatusChange: (taskId, status) => {
+      // Remove task from current list if status doesn't match current type
+      const shouldRemove = 
+        (taskType === 'pending' && status !== 'pending') ||
+        (taskType === 'ongoing' && status !== 'in_progress') ||
+        (taskType === 'completed' && status !== 'completed');
+      
+      if (shouldRemove) {
+        setTasks((prevTasks) => {
+          const filteredTasks = prevTasks.filter(task => task._id !== taskId);
+          if (filteredTasks.length !== prevTasks.length) {
+            setTotalTasks(prev => Math.max(0, prev - 1));
+          }
+          return filteredTasks;
+        });
+      }
+    },
+    onTaskUpdate: (updatedTask) => {
+      setTasks((prevTasks) => 
+        prevTasks.map(task => 
+          task._id === updatedTask._id ? updatedTask : task
+        )
+      );
+    }
+  });
 
   const fetchTasks = async (page: number = 1, search: string = '') => {
     const payload: getAllunAssignedTaskPayload = {
