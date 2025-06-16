@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import useTask from "@/hooks/useTask";
+import { useRealTimeTaskUpdates } from "@/hooks/useRealTimeTaskUpdates";
 import HistoryStyleTaskList from "@/components/task-list/HistoryStyleTaskList";
 import { toast } from "sonner";
 
@@ -9,6 +10,26 @@ const PendingTasks: React.FC = () => {
   const { getPendingUnassignedTask, acceptTask } = useTask();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Set up real-time task updates
+  useRealTimeTaskUpdates({
+    onNewTask: (newTask) => {
+      setTasks((prevTasks) => {
+        // Check if task already exists to avoid duplicates
+        const taskExists = prevTasks.some(task => task._id === newTask._id);
+        if (!taskExists) {
+          return [newTask, ...prevTasks];
+        }
+        return prevTasks;
+      });
+    },
+    onTaskStatusChange: (taskId, status) => {
+      if (status !== 'pending') {
+        // Remove task from pending list if status changed
+        setTasks((prevTasks) => prevTasks.filter(task => task._id !== taskId));
+      }
+    }
+  });
 
   useEffect(() => {
     const fetchPendingTasks = async () => {
