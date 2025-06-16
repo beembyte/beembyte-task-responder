@@ -73,19 +73,19 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
   return (
     <div className="space-y-3">
       {/* Price Card */}
-      <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+      <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
         <CardContent className="p-4">
           <div className="text-center">
-            <div className="text-xl lg:text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+            <div className="text-lg lg:text-xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
               {formatPayment(task.price)}
             </div>
-            <p className="text-xs lg:text-sm text-emerald-600 dark:text-emerald-400">Fixed Price</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400">Fixed Price</p>
           </div>
         </CardContent>
       </Card>
 
       {/* Task Details */}
-      <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+      <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
         <CardContent className="space-y-3 p-3 lg:p-4 pt-0">
           <div className="flex items-start gap-2">
             <Calendar className="w-3 h-3 lg:w-4 lg:h-4 text-muted-foreground mt-0.5" />
@@ -97,7 +97,22 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
           <Separator />
 
-          <DeadlineProgressBar task={task} />
+          {task.status === TASK_STATUS.COMPLETED ? (
+            <div className="space-y-1">
+              <div className="flex justify-between items-center mb-1">
+                <p className="text-xs font-semibold text-emerald-600">Task Completed</p>
+                <p className="text-xs font-medium text-emerald-600">100%</p>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                <div
+                  className="bg-emerald-600 h-1.5 rounded-full"
+                  style={{ width: `100%` }}
+                ></div>
+              </div>
+            </div>
+          ) : (
+            <DeadlineProgressBar task={task} />
+          )}
 
           <Separator />
 
@@ -111,9 +126,25 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
         </CardContent>
       </Card>
 
+      {/* Chat with Client Button */}
+      {isTaskAccepted && task.status !== TASK_STATUS.COMPLETED && (
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
+          <CardContent className="p-3 lg:p-4">
+            <Button
+              variant="outline"
+              className="w-full h-8 lg:h-9 text-xs rounded-none"
+              onClick={handleChatClick}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Chat with Client
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Action Buttons */}
       {task?.status === TASK_STATUS.PENDING && (
-        <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
           <CardContent className="p-3 lg:p-4">
             <div className="space-y-2">
               {!isTaskAccepted ? (
@@ -165,7 +196,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
       {/* Cancel Button for Ongoing Tasks */}
       {task?.status === TASK_STATUS.INPROGRESS && (
-        <Card className="border border-muted-foreground/20 bg-background rounded-none shadow-none">
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
           <CardContent className="p-3 lg:p-4">
             <Button
               variant="outline"

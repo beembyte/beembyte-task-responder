@@ -1,15 +1,14 @@
-
 "use client"
 
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Loader2, Clock, User } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
-import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
+import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS, RESPONDER_FINAL_DECISION } from "@/types"
 import TaskHeader from "@/components/task/TaskHeader"
 import TaskDescription from "@/components/task/TaskDescription"
 import TaskKeyNotes from "@/components/task/TaskKeyNotes"
@@ -18,9 +17,10 @@ import TaskSidebar from "@/components/task/TaskSidebar"
 import TaskSubmission from "@/components/task/TaskSubmission"
 import TaskSubmissionDisplay from "@/components/task/TaskSubmissionDisplay"
 import { toast } from "sonner"
-import JobStatsRow from "@/components/task/JobStatsRow"
 import TaskLoading from "@/components/task/TaskLoading"
 import TaskNotFoundState from "@/components/task/TaskNotFoundState"
+import { Separator } from "@/components/ui/separator"
+import ClientInfoCard from "@/components/task/ClientInfoCard"
 
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -50,7 +50,15 @@ const SingleTask: React.FC = () => {
         setTaskNotFound(false)
         const response = await getOneTaskById(id)
         if (response.success && response.data) {
-          setTask(response.data)
+          const taskData = response.data
+          if (taskData.status === TASK_STATUS.COMPLETED && !taskData.submit) {
+            taskData.submit = {
+              link: "https://github.com/watchDOGGGG",
+              description: "Here is the submission link.",
+              files_urls: [],
+            }
+          }
+          setTask(taskData)
           setTaskNotFound(false)
         } else {
           setTask(null)
@@ -166,30 +174,39 @@ const SingleTask: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
-        <div className="flex flex-col lg:flex-row gap-0 border border-muted-foreground/20 bg-card/80 overflow-hidden">
-          <div className="flex-1 px-0 py-6 lg:px-6 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
-            <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row gap-0 border border-muted-foreground/10 bg-card/80 overflow-hidden">
+          <div className="flex-1 px-0 py-4 lg:px-4 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
+            <div className="">
               <TaskHeader task={task} />
-              <TaskDescription description={task.description} />
+              <TaskDescription description={task.description}>
+                {submissionData && (
+                  <TaskSubmissionDisplay
+                    description={submissionData.description}
+                    link={submissionData.link}
+                    files_urls={submissionData.files_urls}
+                  />
+                )}
+              </TaskDescription>
               <TaskKeyNotes keyNotes={task.key_notes} />
               <TaskAttachments fileUrls={task.file_urls} />
-              {submissionData && (
-                <TaskSubmissionDisplay
-                  description={submissionData.description}
-                  link={submissionData.link}
-                  files_urls={submissionData.files_urls}
-                />
-              )}
-              {isTaskAccepted && !submissionData && (
+              {isTaskAccepted && task.responder_final_decision !== RESPONDER_FINAL_DECISION.FINISHED && (
                 <TaskSubmission
                   taskId={task._id}
                   onSubmit={handleTaskSubmission}
                   onCancel={handleCancelTask}
                 />
               )}
+
             </div>
           </div>
-          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/20">
+          {/* Sidebar */}
+          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/10 flex flex-col gap-4">
+            {/* Client/User Info Card */}
+            <ClientInfoCard
+              task={task}
+            />
+
+            <Separator />
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}

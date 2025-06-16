@@ -1,3 +1,4 @@
+
 export enum USER_ROLES {
   USER = "user",
   RESPONSER = "responder",
@@ -40,6 +41,10 @@ export type User = {
   status?: USER_STATUS;
   responder_id?: string;
   availability_status?: AVAILABILITY_STATUS;
+  // Added optional fields for SingleTask UI
+  photo_url?: string;
+  rating?: number;
+  tasks_count?: number;
 };
 
 export type TaskStatus = "pending" | "accepted" | "rejected" | "completed";
@@ -52,6 +57,7 @@ export type Task = {
   createdAt: Date;
   deadline: Date;
   status: TaskStatus;
+  price?: number;   // <-- Added for compatibility with component usage.
   payment?: number;
   responder?: User;
   notes?: string;
@@ -125,3 +131,4 @@ export type TaskInfo = {
     files_urls?: string[];
   };
 };
+

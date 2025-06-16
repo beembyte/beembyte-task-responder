@@ -212,17 +212,17 @@ export const taskApi = {
     link,
     files_urls,
   }: {
-    task_id: string
-    description: string
-    link?: string
-    files_urls: string[]
+    task_id: string;
+    description: string;
+    link?: string;
+    files_urls: string[];
   }) => {
     try {
       const token = getAuthToken();
       const response = await fetch(
         `${API_BASE_URL}/responder/task/submit-task`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,

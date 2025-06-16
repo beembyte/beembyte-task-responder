@@ -1,0 +1,91 @@
+
+import { API_BASE_URL } from "@/config/env"
+
+const getAuthToken = () => {
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("authToken="))
+    ?.split("=")[1]
+}
+
+export interface SendMessagePayload {
+  task_id: string
+  message: string
+  file_urls: string[]
+  sender_type: "responder" | "user"
+}
+
+export const chatApi = {
+  getMessages: async (taskId: string) => {
+    try {
+      const token = getAuthToken()
+      if (!token) throw new Error("Authentication token not found.")
+      const response = await fetch(`${API_BASE_URL}/responder/chat/${taskId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`)
+      }
+      return await response.json()
+    } catch (error) {
+      console.error("Fetch chat messages error:", error)
+      return {
+        success: false,
+        message: "Failed to fetch messages. Please try again later.",
+      }
+    }
+  },
+
+  sendMessage: async (payload: SendMessagePayload) => {
+    try {
+      const token = getAuthToken()
+      if (!token) throw new Error("Authentication token not found.")
+      const response = await fetch(`${API_BASE_URL}/responder/chat/send-message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      })
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`)
+      }
+      return await response.json()
+    } catch (error) {
+      console.error("Send message error:", error)
+      return {
+        success: false,
+        message: "Failed to send message. Please try again later.",
+      }
+    }
+  },
+
+  deleteMessage: async (messageId: string) => {
+    try {
+      const token = getAuthToken()
+      if (!token) throw new Error("Authentication token not found.")
+      const response = await fetch(`${API_BASE_URL}/responder/chat/delete/${messageId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`)
+      }
+      return await response.json()
+    } catch (error) {
+      console.error("Delete message error:", error)
+      return {
+        success: false,
+        message: "Failed to delete message. Please try again later.",
+      }
+    }
+  },
+}
