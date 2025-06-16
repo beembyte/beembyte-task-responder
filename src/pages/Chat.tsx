@@ -1,5 +1,6 @@
+"use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
@@ -29,6 +30,8 @@ const Chat = () => {
     removeFile,
     isLoadingMessages,
     deleteMessage,
+    refreshMessages,
+    isPolling,
   } = useChatMessages(id)
 
   const { task } = useTaskInfo(id)
@@ -66,6 +69,8 @@ const Chat = () => {
             onSidebarOpen={isMobile ? openSidebar : undefined}
             isMobile={isMobile}
             taskTitle={task?.title}
+            onRefresh={refreshMessages}
+            isPolling={isPolling}
           />
           <ChatMessageList
             messages={messages}
