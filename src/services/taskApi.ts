@@ -205,4 +205,44 @@ export const taskApi = {
       };
     }
   },
+
+  submitTask: async ({
+    task_id,
+    description,
+    link,
+    files_urls,
+  }: {
+    task_id: string;
+    description: string;
+    link?: string;
+    files_urls: string[];
+  }) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `${API_BASE_URL}/responder/task/submit-task`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            task_id,
+            description,
+            link,
+            files_urls,
+          }),
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Submit task error:", error);
+      return {
+        success: false,
+        message: "Failed to submit task. Please try again later.",
+      };
+    }
+  },
 };

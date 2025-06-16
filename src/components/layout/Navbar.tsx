@@ -31,7 +31,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="border-b border-gray-200 bg-white px-4 py-3">
+    <nav className="sticky top-0 z-50 border-b bg-background px-4 py-3">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <Logo />
 
@@ -39,26 +39,26 @@ const Navbar: React.FC = () => {
           <div className="flex items-center space-x-4">
             <Link
               to="/dashboard"
-              className={`${location.pathname === '/dashboard' ? 'text-primary font-medium' : 'text-gray-600'} hidden sm:block hover:text-primary`}
+              className={`${location.pathname === '/dashboard' ? 'text-primary font-medium' : 'text-muted-foreground'} hidden sm:block hover:text-primary`}
             >
               Dashboard
             </Link>
             <Link
               to="/wallet"
-              className={`${location.pathname === '/wallet' ? 'text-primary font-medium' : 'text-gray-600'} hidden sm:block hover:text-primary`}
+              className={`${location.pathname === '/wallet' ? 'text-primary font-medium' : 'text-muted-foreground'} hidden sm:block hover:text-primary`}
             >
               Wallet
             </Link>
             <Link
               to="/task-history"
-              className={`${location.pathname === '/task-history' ? 'text-primary font-medium' : 'text-gray-600'} hidden sm:block hover:text-primary`}
+              className={`${location.pathname === '/task-history' ? 'text-primary font-medium' : 'text-muted-foreground'} hidden sm:block hover:text-primary`}
             >
               History
             </Link>
 
             <div className="relative">
               <Link to="/notifications">
-                <Bell className="h-5 w-5 text-gray-600 hover:text-primary" />
+                <Bell className="h-5 w-5 text-muted-foreground hover:text-primary" />
                 <NotificationBadge count={2} />
               </Link>
             </div>
@@ -73,7 +73,7 @@ const Navbar: React.FC = () => {
           <div className="flex items-center space-x-4">
             <Link
               to="/login"
-              className="text-gray-600 hover:text-primary"
+              className="text-muted-foreground hover:text-primary"
             >
               Login
             </Link>

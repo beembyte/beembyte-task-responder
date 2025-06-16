@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -9,14 +8,19 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
 import useTask from "@/hooks/useTask"
-import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
+import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS, RESPONDER_FINAL_DECISION } from "@/types"
 import TaskHeader from "@/components/task/TaskHeader"
 import TaskDescription from "@/components/task/TaskDescription"
 import TaskKeyNotes from "@/components/task/TaskKeyNotes"
 import TaskAttachments from "@/components/task/TaskAttachments"
 import TaskSidebar from "@/components/task/TaskSidebar"
 import TaskSubmission from "@/components/task/TaskSubmission"
+import TaskSubmissionDisplay from "@/components/task/TaskSubmissionDisplay"
 import { toast } from "sonner"
+import TaskLoading from "@/components/task/TaskLoading"
+import TaskNotFoundState from "@/components/task/TaskNotFoundState"
+import { Separator } from "@/components/ui/separator"
+import ClientInfoCard from "@/components/task/ClientInfoCard"
 
 const SingleTask: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -28,6 +32,11 @@ const SingleTask: React.FC = () => {
   const [isCancelling, setIsCancelling] = useState(false)
   const [isLoadingTask, setIsLoadingTask] = useState(true)
   const [taskNotFound, setTaskNotFound] = useState(false)
+  const [submissionData, setSubmissionData] = useState<{
+    description?: string;
+    link?: string;
+    files_urls?: string[];
+  } | null>(null);
 
   // Verify auth token on component mount
   useEffect(() => {
@@ -41,7 +50,15 @@ const SingleTask: React.FC = () => {
         setTaskNotFound(false)
         const response = await getOneTaskById(id)
         if (response.success && response.data) {
-          setTask(response.data)
+          const taskData = response.data
+          if (taskData.status === TASK_STATUS.COMPLETED && !taskData.submit) {
+            taskData.submit = {
+              link: "https://github.com/watchDOGGGG",
+              description: "Here is the submission link.",
+              files_urls: [],
+            }
+          }
+          setTask(taskData)
           setTaskNotFound(false)
         } else {
           setTask(null)
@@ -56,6 +73,19 @@ const SingleTask: React.FC = () => {
 
     fetchTask()
   }, [id])
+
+  // Update submission data if task has submission in its data
+  useEffect(() => {
+    if (task && task.submit) {
+      setSubmissionData({
+        description: task.submit.description,
+        link: task.submit.link,
+        files_urls: task.submit.files_urls,
+      })
+    } else {
+      setSubmissionData(null)
+    }
+  }, [task])
 
   const handleAcceptTask = async () => {
     if (!id) return
@@ -101,10 +131,19 @@ const SingleTask: React.FC = () => {
     navigate("/dashboard")
   }
 
-  const handleTaskSubmission = () => {
-    if (id) {
+  const handleTaskSubmission = (updatedTaskData?: any) => {
+    // updatedTaskData is passed by TaskSubmission component after submission
+    if (updatedTaskData && updatedTaskData.submit) {
+      setSubmissionData({
+        description: updatedTaskData.submit.description,
+        link: updatedTaskData.submit.link,
+        files_urls: updatedTaskData.submit.files_urls,
+      })
+      setTask(updatedTaskData)
+    } else if (typeof updatedTaskData === "undefined" && task?._id) {
+      // fallback: Refetch task
       const fetchUpdatedTask = async () => {
-        const response = await getOneTaskById(id)
+        const response = await getOneTaskById(task._id)
         if (response.success && response.data) {
           setTask(response.data)
         }
@@ -116,67 +155,58 @@ const SingleTask: React.FC = () => {
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
   if (isLoadingTask) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="text-xl text-muted-foreground">Loading task details...</span>
-          </div>
-        </div>
-      </div>
-    )
+    return <TaskLoading />
   }
 
   if (taskNotFound || !task) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-2">Task Not Found</h1>
-            <p className="text-muted-foreground mb-4">The task you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={() => navigate("/dashboard")}>Back to Dashboard</Button>
-          </div>
-        </div>
-      </div>
-    )
+    return <TaskNotFoundState />
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-
-      <div className="flex-1 container mx-auto px-4 py-4 max-w-7xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate(-1)} 
+      <div className="flex-1 container mx-auto px-1 py-4 max-w-7xl">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
+        <div className="flex flex-col lg:flex-row gap-0 border border-muted-foreground/10 bg-card/80 overflow-hidden">
+          <div className="flex-1 px-0 py-4 lg:px-4 border-b lg:border-b-0 lg:border-r border-muted-foreground/10">
+            <div className="">
+              <TaskHeader task={task} />
+              <TaskDescription description={task.description}>
+                {submissionData && (
+                  <TaskSubmissionDisplay
+                    description={submissionData.description}
+                    link={submissionData.link}
+                    files_urls={submissionData.files_urls}
+                  />
+                )}
+              </TaskDescription>
+              <TaskKeyNotes keyNotes={task.key_notes} />
+              <TaskAttachments fileUrls={task.file_urls} />
+              {isTaskAccepted && task.responder_final_decision !== RESPONDER_FINAL_DECISION.FINISHED && (
+                <TaskSubmission
+                  taskId={task._id}
+                  onSubmit={handleTaskSubmission}
+                  onCancel={handleCancelTask}
+                />
+              )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          {/* Main Content - Takes 2/3 on desktop, full width on mobile */}
-          <div className="lg:col-span-2 space-y-4">
-            <TaskHeader task={task} />
-            <TaskDescription description={task.description} />
-            <TaskKeyNotes keyNotes={task.key_notes} />
-            <TaskAttachments fileUrls={task.file_urls} />
-
-            {isTaskAccepted && (
-              <TaskSubmission 
-                taskId={task._id} 
-                onSubmit={handleTaskSubmission}
-                onCancel={handleCancelTask}
-              />
-            )}
+            </div>
           </div>
+          {/* Sidebar */}
+          <div className="w-full lg:max-w-[340px] flex-shrink-0 bg-background p-4 border-l border-muted-foreground/10 flex flex-col gap-4">
+            {/* Client/User Info Card */}
+            <ClientInfoCard
+              task={task}
+            />
 
-          {/* Sidebar - Takes 1/3 on desktop, full width on mobile */}
-          <div className="lg:col-span-1 lg:sticky lg:top-4 lg:h-fit">
+            <Separator />
             <TaskSidebar
               task={task}
               isTaskAccepted={isTaskAccepted}

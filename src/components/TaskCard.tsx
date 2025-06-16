@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Task } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ProgressIndicator from './ui/progress-indicator';
+import { formatNaira } from "@/utils/formatUtils";
 
 interface TaskCardProps {
   task: Task;
@@ -85,6 +85,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {getDaysLeft()}
             </span>
           </div>
+          
+          {/* Price row added below for visual clarity */}
+          <div className="mt-2 text-green-600 font-bold text-lg">{formatNaira(task.price)}</div>
           
           {(isAccepted || isCompleted) && (
             <ProgressIndicator 

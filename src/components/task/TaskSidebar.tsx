@@ -1,9 +1,9 @@
+
 import React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, Clock, User, Loader2, MessageCircle } from "lucide-react"
+import { Calendar, Clock, Loader2, MessageCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { type TaskInfo, TASK_STATUS, ASSIGNED_STATUS } from "@/types"
 import DeadlineProgressBar from "../ui/deadline-progress"
@@ -73,65 +73,19 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
   return (
     <div className="space-y-3">
       {/* Price Card */}
-      <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950">
+      <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
         <CardContent className="p-4">
           <div className="text-center">
-            <div className="text-xl lg:text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+            <div className="text-lg lg:text-xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
               {formatPayment(task.price)}
             </div>
-            <p className="text-xs lg:text-sm text-emerald-600 dark:text-emerald-400">Fixed Price</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400">Fixed Price</p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Creator Information */}
-      {task.created_by && (
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-2 p-3 lg:p-4">
-            <CardTitle className="flex items-center gap-2 text-sm lg:text-base">
-              <User className="w-3 h-3 lg:w-4 lg:h-4" />
-              Task Creator
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 p-3 lg:p-4 pt-0">
-            <div className="flex items-center gap-2 lg:gap-3">
-              <Avatar className="h-8 w-8 lg:h-10 lg:w-10">
-                <AvatarImage
-                  src={`https://robohash.org/${task.created_by.first_name}?set=set4`}
-                  alt={`${task.created_by.first_name} ${task.created_by.last_name}`}
-                />
-                <AvatarFallback className="text-xs">
-                  {task.created_by.first_name?.charAt(0)}
-                  {task.created_by.last_name?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-xs lg:text-sm text-foreground truncate">
-                  {task.created_by.first_name} {task.created_by.last_name}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">{task.created_by.email}</p>
-              </div>
-            </div>
-
-            {isTaskAccepted && (
-              <>
-                <Separator />
-                <Button
-                  onClick={handleChatClick}
-                  size="sm"
-                  className="w-full bg-teal-600 hover:bg-teal-700 h-7 lg:h-8 text-xs"
-                >
-                  <MessageCircle className="w-3 h-3 mr-1" />
-                  Chat with Client
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Task Details */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
         <CardContent className="space-y-3 p-3 lg:p-4 pt-0">
           <div className="flex items-start gap-2">
             <Calendar className="w-3 h-3 lg:w-4 lg:h-4 text-muted-foreground mt-0.5" />
@@ -143,7 +97,22 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
           <Separator />
 
-          <DeadlineProgressBar task={task} />
+          {task.status === TASK_STATUS.COMPLETED ? (
+            <div className="space-y-1">
+              <div className="flex justify-between items-center mb-1">
+                <p className="text-xs font-semibold text-emerald-600">Task Completed</p>
+                <p className="text-xs font-medium text-emerald-600">100%</p>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                <div
+                  className="bg-emerald-600 h-1.5 rounded-full"
+                  style={{ width: `100%` }}
+                ></div>
+              </div>
+            </div>
+          ) : (
+            <DeadlineProgressBar task={task} />
+          )}
 
           <Separator />
 
@@ -157,15 +126,31 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
         </CardContent>
       </Card>
 
+      {/* Chat with Client Button */}
+      {isTaskAccepted && task.status !== TASK_STATUS.COMPLETED && (
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
+          <CardContent className="p-3 lg:p-4">
+            <Button
+              variant="outline"
+              className="w-full h-8 lg:h-9 text-xs rounded-none"
+              onClick={handleChatClick}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Chat with Client
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Action Buttons */}
       {task?.status === TASK_STATUS.PENDING && (
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
           <CardContent className="p-3 lg:p-4">
             <div className="space-y-2">
               {!isTaskAccepted ? (
                 <>
                   <Button
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 h-8 lg:h-9 text-xs"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 h-8 lg:h-9 text-xs rounded-none"
                     onClick={handleAcceptClick}
                     disabled={isAccepting || isLoading}
                   >
@@ -180,7 +165,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full hover:bg-destructive/10 hover:border-destructive hover:text-destructive h-8 lg:h-9 text-xs"
+                    className="w-full hover:bg-destructive/10 hover:border-destructive hover:text-destructive h-8 lg:h-9 text-xs rounded-none"
                     onClick={handleDeclineClick}
                     disabled={isAccepting}
                   >
@@ -190,7 +175,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
               ) : (
                 <Button
                   variant="outline"
-                  className="w-full hover:bg-destructive/10 hover:border-destructive hover:text-destructive h-8 lg:h-9 text-xs"
+                  className="w-full hover:bg-destructive/10 hover:border-destructive hover:text-destructive h-8 lg:h-9 text-xs rounded-none"
                   onClick={handleCancelClick}
                   disabled={isCancelling || isLoading}
                 >
@@ -211,11 +196,11 @@ const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
       {/* Cancel Button for Ongoing Tasks */}
       {task?.status === TASK_STATUS.INPROGRESS && (
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-muted-foreground/10 bg-background rounded-none shadow-none">
           <CardContent className="p-3 lg:p-4">
             <Button
               variant="outline"
-              className="w-full hover:bg-destructive/10 hover:border-destructive hover:text-destructive h-8 lg:h-9 text-xs"
+              className="w-full hover:bg-destructive/10 hover:border-destructive hover:text-destructive h-8 lg:h-9 text-xs rounded-none"
               onClick={handleCancelClick}
               disabled={isCancelling || isLoading}
             >

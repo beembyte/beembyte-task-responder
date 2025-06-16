@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import useTask from '@/hooks/useTask';
 import { Calendar, Clock, DollarSign, User, FileText, AlertTriangle, Loader2 } from 'lucide-react';
 import DeadlineProgressBar from '@/components/ui/deadline-progress';
+import { formatNaira } from "@/utils/formatUtils";
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -126,10 +127,7 @@ const TaskDetail: React.FC = () => {
   };
 
   const formatPayment = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN'
-    }).format(amount);
+    return formatNaira(amount);
   };
 
   const getDifficultyColor = (difficulty: TASK_DIFFICULTY) => {
