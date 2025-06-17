@@ -21,7 +21,6 @@ export interface LoginRequest {
 }
 
 export interface VerifyCodeRequest {
-  email: string;
   code: string;
 }
 
@@ -135,7 +134,7 @@ export const authApi = {
   ): Promise<AuthResponse> => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/resonder/resend-signup-verification`,
+        `${API_BASE_URL}/responder/resend-signup-verification`,
         {
           method: "POST",
           headers: {
