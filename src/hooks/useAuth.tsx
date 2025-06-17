@@ -92,8 +92,7 @@ export const useAuth = () => {
   const verifyCode = async (code: string) => {
     setIsLoading(true)
     try {
-      const email = localStorage.getItem("authEmail")
-      const verifyData: VerifyCodeRequest = { email, code }
+      const verifyData: VerifyCodeRequest = { code }
       const response = await authApi.verifyCode(verifyData)
 
       if (response.success) {
