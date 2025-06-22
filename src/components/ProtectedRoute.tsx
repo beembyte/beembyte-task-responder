@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
@@ -9,23 +8,26 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { loggedInUser } = useAuth();
+  const { user, loggedInUser } = useAuth();
   const location = useLocation();
-  const [user, setUser] = useState(null);
   const [isChecking, setIsChecking] = useState(true);
-
-  // Use useCallback to avoid triggering useEffect too often
-  const getUser = useCallback(() => loggedInUser(), [loggedInUser]);
+  const [localUser, setLocalUser] = useState(user);
 
   useEffect(() => {
     let isMounted = true;
+
     const checkAuth = async () => {
       try {
-        const currentUser = await getUser();
-        if (isMounted) setUser(currentUser);
+        // Only fetch if user is not already available
+        if (!user) {
+          const fetchedUser = await loggedInUser();
+          if (isMounted) setLocalUser(fetchedUser);
+        } else {
+          setLocalUser(user);
+        }
       } catch (error) {
         console.error('Auth check error:', error);
-        if (isMounted) setUser(null);
+        if (isMounted) setLocalUser(null);
       } finally {
         if (isMounted) setIsChecking(false);
       }
@@ -36,9 +38,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return () => {
       isMounted = false;
     };
-  }, [getUser]);
+  }, [user, loggedInUser]);
 
-  // Show loading state while checking authentication
   if (isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -50,14 +51,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Check if user is logged in
-  const isAuthenticated = !!user && !!document.cookie
-    .split('; ')
-    .find(row => row.startsWith('authToken='));
-
+  const isAuthenticated =
+    !!localUser &&
+    !!document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('authToken='));
 
   if (!isAuthenticated) {
-    return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
+    return (
+      <Navigate
+        to={`/login?returnTo=${encodeURIComponent(location.pathname)}`}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;
