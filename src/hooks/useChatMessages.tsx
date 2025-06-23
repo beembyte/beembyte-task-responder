@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth"
 import type { Message } from "@/components/chat/ChatMessageList"
 import type { User } from "@/types"
 import { chatApi } from "@/services/chatApi"
+import { useFileUpload } from "@/hooks/useFileUpload"
 import { toast } from "sonner"
 
 export function useChatMessages(chatId: string | undefined) {
@@ -18,6 +19,8 @@ export function useChatMessages(chatId: string | undefined) {
   const [isSending, setIsSending] = useState(false)
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
   const [isPolling, setIsPolling] = useState(false)
+
+  const { uploadFiles, isUploading } = useFileUpload()
 
   // Refs to track component state
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -78,10 +81,10 @@ export function useChatMessages(chatId: string | undefined) {
               text: msg.message,
               sender: msg.sender_type === "responder" ? "responder" : "client",
               timestamp: new Date(msg.createdAt),
-              isRead: true, // assume fetched messages are read
+              isRead: true,
               file_urls: msg.file_urls || [],
             }))
-            .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()) // sort by date
+            .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
 
           // Update last message timestamp
           if (transformedMessages.length > 0) {
@@ -185,15 +188,23 @@ export function useChatMessages(chatId: string | undefined) {
   const sendMessage = useCallback(async () => {
     if ((!newMessage.trim() && filesToSend.length === 0) || isSending || !chatId || !user) return
 
-    if (filesToSend.length > 0) {
-      toast.error("File sending is not implemented yet. Please remove files to send a message.")
-      return
-    }
+    setIsSending(true)
+    const tempId = `temp_${Date.now()}`
+    const messageText = newMessage.trim()
+    let fileUrls: string[] = []
 
-    if (newMessage.trim()) {
-      setIsSending(true)
-      const tempId = `temp_${Date.now()}`
-      const messageText = newMessage.trim()
+    try {
+      // Upload files first if any
+      if (filesToSend.length > 0) {
+        const uploadResult = await uploadFiles(filesToSend)
+        if (uploadResult.success && uploadResult.urls) {
+          fileUrls = uploadResult.urls
+        } else {
+          toast.error(uploadResult.error || "Failed to upload files")
+          setIsSending(false)
+          return
+        }
+      }
 
       // Optimistic UI update
       const optimisticMessage: Message = {
@@ -202,71 +213,67 @@ export function useChatMessages(chatId: string | undefined) {
         sender: "responder",
         timestamp: new Date(),
         isRead: false,
-        file_urls: [],
+        file_urls: fileUrls,
       }
 
       setMessages((prev) => [...prev, optimisticMessage])
       setNewMessage("")
+      setFilesToSend([])
 
-      try {
-        const response = await chatApi.sendMessage({
-          task_id: chatId,
-          message: messageText,
-          file_urls: [], // No file URLs for now
-          sender_type: "responder",
-        })
+      const response = await chatApi.sendMessage({
+        task_id: chatId,
+        message: messageText,
+        file_urls: fileUrls,
+        sender_type: "responder",
+      })
 
-        if (response.success && response.data) {
-          // Update the optimistic message with real data
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === tempId
-                ? {
-                  ...optimisticMessage,
-                  id: response.data._id,
-                  timestamp: new Date(response.data.createdAt),
-                }
-                : msg,
-            ),
-          )
+      if (response.success && response.data) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempId
+              ? {
+                ...optimisticMessage,
+                id: response.data._id,
+                timestamp: new Date(response.data.createdAt),
+              }
+              : msg,
+          ),
+        )
 
-          // Update last message timestamp
-          lastMessageTimestampRef.current = new Date(response.data.createdAt)
-        } else {
-          toast.error(response.message || "Failed to send message.")
-          // Remove optimistic message on failure
-          setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
-          setNewMessage(messageText) // Restore message in input
-        }
-      } catch (error) {
-        console.error("Error sending message:", error)
-        toast.error("An error occurred while sending the message.")
-        // Remove optimistic message on error
+        lastMessageTimestampRef.current = new Date(response.data.createdAt)
+      } else {
+        toast.error(response.message || "Failed to send message.")
         setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
         setNewMessage(messageText)
-      } finally {
-        setIsSending(false)
+        setFilesToSend(filesToSend)
       }
+    } catch (error) {
+      console.error("Error sending message:", error)
+      toast.error("An error occurred while sending the message.")
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
+      setNewMessage(messageText)
+      setFilesToSend(filesToSend)
+    } finally {
+      setIsSending(false)
     }
-  }, [newMessage, filesToSend, chatId, user, isSending])
+  }, [newMessage, filesToSend, chatId, user, isSending, uploadFiles])
 
   const deleteMessage = useCallback(
     async (messageId: string) => {
       const originalMessages = messages
 
-      // Optimistic update
       setMessages((prev) => prev.filter((msg) => msg.id !== messageId))
 
       try {
         const response = await chatApi.deleteMessage(messageId)
         if (!response.success) {
           toast.error(response.message || "Failed to delete message.")
-          setMessages(originalMessages) // Revert on failure
+          setMessages(originalMessages)
         }
       } catch (error) {
         console.error("Error deleting message:", error)
         toast.error("An error occurred while deleting the message.")
-        setMessages(originalMessages) // Revert on error
+        setMessages(originalMessages)
       }
     },
     [messages],
@@ -296,7 +303,7 @@ export function useChatMessages(chatId: string | undefined) {
     addFiles,
     removeFile,
     isLoadingMessages,
-    isSending,
+    isSending: isSending || isUploading,
     deleteMessage,
     refreshMessages,
     isPolling,
