@@ -5,11 +5,11 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import {
-    authApi,
-    type RegisterRequest,
-    type LoginRequest,
-    type VerifyCodeRequest,
-    type ResendVerificationRequest,
+  authApi,
+  type RegisterRequest,
+  type LoginRequest,
+  type VerifyCodeRequest,
+  type ResendVerificationRequest,
 } from "../services/authApi"
 import { handleApiErrors } from "@/utils/apiResponse"
 import type { User } from "@/types"
@@ -17,261 +17,261 @@ import { socketService, socket } from "@/services/socket"
 import { getCookie } from "@/utils/formatUtils"
 
 export const useAuth = () => {
-    const [isLoading, setIsLoading] = useState(false)
-    const [isPasswordChanging, setIsPasswordChanging] = useState(false)
-    const [resendCountdown, setResendCountdown] = useState(0)
-    const [user, setUser] = useState<User>(null);
-    const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
+  const [isPasswordChanging, setIsPasswordChanging] = useState(false)
+  const [resendCountdown, setResendCountdown] = useState(0)
+  const [user, setUser] = useState<User>(null);
+  const navigate = useNavigate()
 
-    const register = async (userData: RegisterRequest) => {
-        setIsLoading(true)
-        try {
-            const response = await authApi.register(userData)
+  const register = async (userData: RegisterRequest) => {
+    setIsLoading(true)
+    try {
+      const response = await authApi.register(userData)
 
-            if (response.success) {
-                toast.success(response.message || "Registration successful! Please verify your email.")
-                localStorage.setItem("authEmail", userData.email)
-                navigate("/verify-code")
-            } else {
-                handleApiErrors(response)
-            }
-        } catch (error) {
-            console.error("Registration error:", error)
-            toast.error("An unexpected error occurred. Please try again later.")
-        } finally {
-            setIsLoading(false)
-        }
+      if (response.success) {
+        toast.success(response.message || "Registration successful! Please verify your email.")
+        localStorage.setItem("authEmail", userData.email)
+        navigate("/verify-code")
+      } else {
+        handleApiErrors(response)
+      }
+    } catch (error) {
+      console.error("Registration error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    const login = async (credentials: LoginRequest) => {
-        setIsLoading(true)
-        try {
-            const response = await authApi.login(credentials)
+  const login = async (credentials: LoginRequest) => {
+    setIsLoading(true)
+    try {
+      const response = await authApi.login(credentials)
 
-            if (response.success) {
-                toast.success(response.message || "Login successful!")
+      if (response.success) {
+        toast.success(response.message || "Login successful!")
 
-                const { auth_token, user } = response.data
-                // Token is now stored in cookie by the authApi.login function
-                localStorage.setItem("authorizeUser", JSON.stringify(user))
+        const { auth_token, user } = response.data
+        // Token is now stored in cookie by the authApi.login function
+        localStorage.setItem("authorizeUser", JSON.stringify(user))
 
-                // Ensure user is valid before setting it
-                if (user) {
-                    setUser(user as User)
+        // Ensure user is valid before setting it
+        if (user) {
+          setUser(user as unknown as User)
 
-                    // Connect to socket after successful login
-                    if (user.user_id && user.role) {
-                        try {
-                            // Use the socketService to connect
-                            socketService.connect(user.user_id, user.role)
+          // Connect to socket after successful login
+          if (user.user_id && user.role) {
+            try {
+              // Use the socketService to connect
+              socketService.connect(user.user_id, user.role)
 
-                            // Add error handling for socket connection
-                            socket.on("connect_error", (error) => {
-                                console.error("Socket connection error:", error)
-                                toast.error("Could not establish live connection. Some features may be limited.")
-                            })
-                        } catch (socketError) {
-                            console.error("Socket connection error:", socketError)
-                            // Show toast message but don't prevent login
-                            toast.error("Could not establish live connection. Some features may be limited.")
-                        }
-                    }
-                }
-
-                navigate("/dashboard")
-            } else {
-                handleApiErrors(response)
+              // Add error handling for socket connection
+              socket.on("connect_error", (error) => {
+                console.error("Socket connection error:", error)
+                toast.error("Could not establish live connection. Some features may be limited.")
+              })
+            } catch (socketError) {
+              console.error("Socket connection error:", socketError)
+              // Show toast message but don't prevent login
+              toast.error("Could not establish live connection. Some features may be limited.")
             }
-        } catch (error) {
-            console.error("Login error:", error)
-            toast.error("An unexpected error occurred. Please try again later.")
-        } finally {
-            setIsLoading(false)
+          }
         }
+
+        navigate("/dashboard")
+      } else {
+        handleApiErrors(response)
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    const verifyCode = async (code: string) => {
-        setIsLoading(true)
-        try {
-            const verifyData: VerifyCodeRequest = { code }
-            const response = await authApi.verifyCode(verifyData)
+  const verifyCode = async (code: string) => {
+    setIsLoading(true)
+    try {
+      const verifyData: VerifyCodeRequest = { code }
+      const response = await authApi.verifyCode(verifyData)
 
-            if (response.success) {
-                localStorage.removeItem("authEmail")
-                toast.success(response.message || "Verification successful!")
-                navigate("/login")
-            } else {
-                handleApiErrors(response)
-            }
-        } catch (error) {
-            console.error("Verification error:", error)
-            toast.error("An unexpected error occurred. Please try again later.")
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const resendVerification = async () => {
-        setIsLoading(true)
-        try {
-            const email = localStorage.getItem("authEmail")
-            const resendData: ResendVerificationRequest = { email }
-            const response = await authApi.resendVerification(resendData)
-
-            if (response.success) {
-                toast.success(response.message || "Verification code resent successfully!")
-                // Start countdown for 120 seconds (2 minutes)
-                setResendCountdown(120)
-                const countdownInterval = setInterval(() => {
-                    setResendCountdown((prev) => {
-                        if (prev <= 1) {
-                            clearInterval(countdownInterval)
-                            return 0
-                        }
-                        return prev - 1
-                    })
-                }, 1000)
-            } else {
-                handleApiErrors(response)
-            }
-        } catch (error) {
-            console.error("Resend verification error:", error)
-            toast.error("An unexpected error occurred. Please try again later.")
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const logout = () => {
-        try {
-            socketService.disconnect()
-        } catch (error) {
-            console.error("Error disconnecting socket:", error)
-            // Don't block logout due to socket issues
-        }
-        authApi.logout()
-        setUser(null)
+      if (response.success) {
+        localStorage.removeItem("authEmail")
+        toast.success(response.message || "Verification successful!")
         navigate("/login")
-        toast.success("Successfully logged out")
-
+      } else {
+        handleApiErrors(response)
+      }
+    } catch (error) {
+      console.error("Verification error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    const updateProfile = async (profileData: Partial<User>) => {
-        setIsLoading(true)
-        try {
-            const response = await authApi.updateLoggedInUser(profileData)
+  const resendVerification = async () => {
+    setIsLoading(true)
+    try {
+      const email = localStorage.getItem("authEmail")
+      const resendData: ResendVerificationRequest = { email }
+      const response = await authApi.resendVerification(resendData)
 
-            if (response.success) {
-                const updatedUser = { ...user, ...profileData } as User
-                setUser(updatedUser)
-                localStorage.setItem("authorizeUser", JSON.stringify(updatedUser))
-                toast.success(response.message || "Profile updated successfully!")
-            } else {
-                handleApiErrors(response)
+      if (response.success) {
+        toast.success(response.message || "Verification code resent successfully!")
+        // Start countdown for 120 seconds (2 minutes)
+        setResendCountdown(120)
+        const countdownInterval = setInterval(() => {
+          setResendCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(countdownInterval)
+              return 0
             }
-        } catch (error) {
-            console.error("Update profile error:", error)
-            toast.error("An unexpected error occurred. Please try again later.")
-        } finally {
-            setIsLoading(false)
-        }
+            return prev - 1
+          })
+        }, 1000)
+      } else {
+        handleApiErrors(response)
+      }
+    } catch (error) {
+      console.error("Resend verification error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-
-
-    const loggedInUser = async (): Promise<User> => {
-        try {
-            if (user) return user;
-
-            const response = await authApi.logedInUser();
-            if (response.success) {
-                setUser(response.data);
-                return response.data;
-            }
-        } catch (error) {
-            console.error("Error fetching user:", error);
-        }
-        return null;
-    };
-
-    const verifyAuthToken = async () => {
-        try {
-            const auth_token = getCookie('authToken');
-
-            if (!auth_token) {
-                // No token found, redirect to login
-                navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
-                return;
-            }
-
-            const response = await authApi.verifyAuthToken(auth_token)
-            if (!response.success) {
-                // Token is invalid or expired, clear auth data and redirect
-                document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                localStorage.removeItem("authorizeUser");
-                toast.error("Session expired. Please login again.");
-                navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
-            }
-        } catch (error) {
-            console.error("Token verification error:", error)
-            // Clear auth data on error
-            document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            localStorage.removeItem("authorizeUser");
-            toast.error("Failed to verify session. Please login again.")
-            navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
-        }
+  const logout = () => {
+    try {
+      socketService.disconnect()
+    } catch (error) {
+      console.error("Error disconnecting socket:", error)
+      // Don't block logout due to socket issues
     }
-    //   changePassword: async (
-    //         oldPassword: string,
-    //         newPassword: string,
-    //         confirmPassword?: string,
-    //         userId: string | null = null
-    //     ): Promise<AuthResponse> => {
+    authApi.logout()
+    setUser(null)
+    navigate("/login")
+    toast.success("Successfully logged out")
 
-    const changePassword = async (
-        old_password: string,
-        new_password: string,
-        confirm_password: string,
-        user_id: string | null = null
-    ): Promise<{ success: boolean; message?: string }> => {
-        setIsPasswordChanging(true)
-        try {
-            if (new_password !== confirm_password) {
-                toast.error("New password and confirmation do not match.")
-                return { success: false, message: "Passwords do not match." }
-            }
+  }
 
-            const response = await authApi.changePassword(old_password, new_password, confirm_password, user_id)
+  const updateProfile = async (profileData: Partial<User>) => {
+    setIsLoading(true)
+    try {
+      const response = await authApi.updateLoggedInUser(profileData)
 
-            if (response.success) {
-                toast.success(response.message || "Password changed successfully!")
-                return { success: true }
-            } else {
-                handleApiErrors(response)
-                return { success: false, message: response.message }
-            }
-        } catch (error) {
-            console.error("Change password error:", error)
-            toast.error("An unexpected error occurred. Please try again later.")
-            return { success: false, message: "Failed to change password. Please try again later." }
-        } finally {
-            setIsPasswordChanging(false)
-        }
+      if (response.success) {
+        const updatedUser = { ...user, ...profileData } as User
+        setUser(updatedUser)
+        localStorage.setItem("authorizeUser", JSON.stringify(updatedUser))
+        toast.success(response.message || "Profile updated successfully!")
+      } else {
+        handleApiErrors(response)
+      }
+    } catch (error) {
+      console.error("Update profile error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    return {
-        isLoading,
-        register,
-        login,
-        verifyCode,
-        resendVerification,
-        resendCountdown,
-        logout,
-        user,
-        updateProfile,
-        loggedInUser,
-        verifyAuthToken,
-        changePassword,
-        isPasswordChanging,
+
+
+  const loggedInUser = async (): Promise<User> => {
+    try {
+      if (user) return user;
+
+      const response = await authApi.logedInUser();
+      if (response.success) {
+        setUser(response.data);
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
     }
+    return null;
+  };
+
+  const verifyAuthToken = async () => {
+    try {
+      const auth_token = getCookie('authToken');
+
+      if (!auth_token) {
+        // No token found, redirect to login
+        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+        return;
+      }
+
+      const response = await authApi.verifyAuthToken(auth_token)
+      if (!response.success) {
+        // Token is invalid or expired, clear auth data and redirect
+        document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        localStorage.removeItem("authorizeUser");
+        toast.error("Session expired. Please login again.");
+        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+      }
+    } catch (error) {
+      console.error("Token verification error:", error)
+      // Clear auth data on error
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      localStorage.removeItem("authorizeUser");
+      toast.error("Failed to verify session. Please login again.")
+      navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+    }
+  }
+  //   changePassword: async (
+  //         oldPassword: string,
+  //         newPassword: string,
+  //         confirmPassword?: string,
+  //         userId: string | null = null
+  //     ): Promise<AuthResponse> => {
+
+  const changePassword = async (
+    old_password: string,
+    new_password: string,
+    confirm_password: string,
+    user_id: string | null = null
+  ): Promise<{ success: boolean; message?: string }> => {
+    setIsPasswordChanging(true)
+    try {
+      if (new_password !== confirm_password) {
+        toast.error("New password and confirmation do not match.")
+        return { success: false, message: "Passwords do not match." }
+      }
+
+      const response = await authApi.changePassword(old_password, new_password, confirm_password, user_id)
+
+      if (response.success) {
+        toast.success(response.message || "Password changed successfully!")
+        return { success: true }
+      } else {
+        handleApiErrors(response)
+        return { success: false, message: response.message }
+      }
+    } catch (error) {
+      console.error("Change password error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+      return { success: false, message: "Failed to change password. Please try again later." }
+    } finally {
+      setIsPasswordChanging(false)
+    }
+  }
+
+  return {
+    isLoading,
+    register,
+    login,
+    verifyCode,
+    resendVerification,
+    resendCountdown,
+    logout,
+    user,
+    updateProfile,
+    loggedInUser,
+    verifyAuthToken,
+    changePassword,
+    isPasswordChanging,
+  }
 }
