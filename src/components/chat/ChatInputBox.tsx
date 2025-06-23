@@ -12,6 +12,7 @@ interface ChatInputBoxProps {
   onAttachFile?: (files: FileList) => void;
   onKeyPress?: (e: React.KeyboardEvent) => void;
   recipientName?: string;
+  disabled?: boolean;
 }
 
 const ChatInputBox: React.FC<ChatInputBoxProps> = ({
@@ -21,15 +22,17 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
   onAttachFile,
   onKeyPress,
   recipientName,
+  disabled = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Make textarea auto-resize up to 4 lines
   useAutosizeTextarea(textareaRef, value, { minRows: 1, maxRows: 4 });
 
   const handleAttach = () => {
-    fileInputRef.current?.click();
+    if (!disabled) {
+      fileInputRef.current?.click();
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +41,12 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
       onAttachFile(files);
     }
     if(e.target) e.target.value = "";
+  };
+
+  const handleSend = () => {
+    if (!disabled) {
+      onSend();
+    }
   };
 
   return (
@@ -53,11 +62,12 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
             className="bg-gray-100 border-none rounded-2xl pr-10 py-3 text-sm resize-none pl-4 focus-visible:ring-1 focus-visible:ring-primary"
             style={{
               lineHeight: "1.4rem",
-              maxHeight: "7.5rem", // ~4-5 lines tall for most font sizes
-              minHeight: "2.5rem", // ~1 line tall
+              maxHeight: "7.5rem",
+              minHeight: "2.5rem",
               overflowY: "auto",
             }}
             rows={1}
+            disabled={disabled}
           />
           <Button 
             variant="ghost" 
@@ -66,6 +76,7 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
             onClick={handleAttach}
             tabIndex={-1}
             type="button"
+            disabled={disabled}
           >
             <Paperclip className="h-5 w-5 text-gray-500" />
           </Button>
@@ -76,12 +87,14 @@ const ChatInputBox: React.FC<ChatInputBoxProps> = ({
             onChange={handleFileChange}
             multiple
             accept="image/*,application/pdf,.doc,.docx,text/csv,.xlsx,.xls"
+            disabled={disabled}
           />
         </div>
         <Button 
-          onClick={onSend} 
+          onClick={handleSend} 
           size="icon" 
           className="h-11 w-11 rounded-full flex-shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
+          disabled={disabled}
         >
           <Send className="h-5 w-5" />
         </Button>
