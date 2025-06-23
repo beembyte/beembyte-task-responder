@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -24,14 +25,20 @@ export function useChatMessages(chatId: string | undefined) {
 
   // Refs to track component state
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const lastMessageTimestampRef = useRef<Date | null>(null)
   const isActiveRef = useRef(true)
+  const isMountedRef = useRef(true)
 
   // Get current user
   useEffect(() => {
     const fetchUser = async () => {
-      const userData = await loggedInUser()
-      setUser(userData)
+      try {
+        const userData = await loggedInUser()
+        if (isMountedRef.current) {
+          setUser(userData)
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error)
+      }
     }
     fetchUser()
   }, [loggedInUser])
@@ -40,17 +47,12 @@ export function useChatMessages(chatId: string | undefined) {
   useEffect(() => {
     const handleVisibilityChange = () => {
       isActiveRef.current = !document.hidden
-      if (document.hidden) {
-        // Stop polling when tab is not active
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current)
-          pollingIntervalRef.current = null
-        }
-      } else {
-        // Resume polling when tab becomes active
-        if (chatId && !pollingIntervalRef.current) {
-          startPolling()
-        }
+      if (document.hidden && pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+        pollingIntervalRef.current = null
+        setIsPolling(false)
+      } else if (!document.hidden && chatId && !pollingIntervalRef.current) {
+        startPolling()
       }
     }
 
@@ -63,8 +65,8 @@ export function useChatMessages(chatId: string | undefined) {
   // Fetch messages from API
   const fetchMessages = useCallback(
     async (isInitialLoad = false) => {
-      if (!chatId) {
-        setIsLoadingMessages(false)
+      if (!chatId || !isMountedRef.current) {
+        if (isInitialLoad) setIsLoadingMessages(false)
         return
       }
 
@@ -74,6 +76,9 @@ export function useChatMessages(chatId: string | undefined) {
 
       try {
         const response = await chatApi.getMessages(chatId)
+        
+        if (!isMountedRef.current) return
+
         if (response.success && Array.isArray(response.data)) {
           const transformedMessages: Message[] = response.data
             .map((msg: any) => ({
@@ -86,24 +91,13 @@ export function useChatMessages(chatId: string | undefined) {
             }))
             .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
 
-          // Update last message timestamp
-          if (transformedMessages.length > 0) {
-            lastMessageTimestampRef.current = transformedMessages[transformedMessages.length - 1].timestamp
-          }
-
           if (isInitialLoad) {
             setMessages(transformedMessages)
           } else {
-            // For polling updates, only add new messages
             setMessages((prevMessages) => {
               const existingIds = new Set(prevMessages.map((msg) => msg.id))
               const newMessages = transformedMessages.filter((msg) => !existingIds.has(msg.id))
-
-              if (newMessages.length > 0) {
-                console.log(`Found ${newMessages.length} new messages`)
-                return [...prevMessages, ...newMessages]
-              }
-              return prevMessages
+              return newMessages.length > 0 ? [...prevMessages, ...newMessages] : prevMessages
             })
           }
         } else if (isInitialLoad) {
@@ -111,11 +105,11 @@ export function useChatMessages(chatId: string | undefined) {
         }
       } catch (error) {
         console.error("Error fetching messages:", error)
-        if (isInitialLoad) {
+        if (isInitialLoad && isMountedRef.current) {
           toast.error("Failed to load chat messages.")
         }
       } finally {
-        if (isInitialLoad) {
+        if (isInitialLoad && isMountedRef.current) {
           setIsLoadingMessages(false)
         }
       }
@@ -125,16 +119,16 @@ export function useChatMessages(chatId: string | undefined) {
 
   // Start polling for new messages
   const startPolling = useCallback(() => {
-    if (!chatId || pollingIntervalRef.current) return
+    if (!chatId || pollingIntervalRef.current || !isMountedRef.current) return
 
     console.log("Starting message polling...")
     setIsPolling(true)
 
     pollingIntervalRef.current = setInterval(() => {
-      if (isActiveRef.current) {
-        fetchMessages(false) // Poll for new messages
+      if (isActiveRef.current && isMountedRef.current) {
+        fetchMessages(false)
       }
-    }, 3000) // Poll every 3 seconds
+    }, 10000) // Poll every 10 seconds to reduce load
   }, [chatId, fetchMessages])
 
   // Stop polling
@@ -159,10 +153,10 @@ export function useChatMessages(chatId: string | undefined) {
 
     // Start polling after initial load
     const pollTimeout = setTimeout(() => {
-      if (isActiveRef.current) {
+      if (isActiveRef.current && isMountedRef.current) {
         startPolling()
       }
-    }, 1000) // Start polling 1 second after initial load
+    }, 3000)
 
     return () => {
       clearTimeout(pollTimeout)
@@ -173,6 +167,7 @@ export function useChatMessages(chatId: string | undefined) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
       stopPolling()
     }
   }, [stopPolling])
@@ -191,6 +186,7 @@ export function useChatMessages(chatId: string | undefined) {
     setIsSending(true)
     const tempId = `temp_${Date.now()}`
     const messageText = newMessage.trim()
+    const filesToSendBackup = [...filesToSend]
     let fileUrls: string[] = []
 
     try {
@@ -201,7 +197,6 @@ export function useChatMessages(chatId: string | undefined) {
           fileUrls = uploadResult.urls
         } else {
           toast.error(uploadResult.error || "Failed to upload files")
-          setIsSending(false)
           return
         }
       }
@@ -217,6 +212,8 @@ export function useChatMessages(chatId: string | undefined) {
       }
 
       setMessages((prev) => [...prev, optimisticMessage])
+      
+      // Clear form immediately
       setNewMessage("")
       setFilesToSend([])
 
@@ -239,20 +236,21 @@ export function useChatMessages(chatId: string | undefined) {
               : msg,
           ),
         )
-
-        lastMessageTimestampRef.current = new Date(response.data.createdAt)
+        toast.success("Message sent successfully")
       } else {
-        toast.error(response.message || "Failed to send message.")
+        // On error, restore form data and remove optimistic message
         setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
         setNewMessage(messageText)
-        setFilesToSend(filesToSend)
+        setFilesToSend(filesToSendBackup)
+        toast.error(response.message || "Failed to send message.")
       }
     } catch (error) {
       console.error("Error sending message:", error)
-      toast.error("An error occurred while sending the message.")
+      // On error, restore form data and remove optimistic message
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
       setNewMessage(messageText)
-      setFilesToSend(filesToSend)
+      setFilesToSend(filesToSendBackup)
+      toast.error("An error occurred while sending the message.")
     } finally {
       setIsSending(false)
     }
@@ -269,6 +267,8 @@ export function useChatMessages(chatId: string | undefined) {
         if (!response.success) {
           toast.error(response.message || "Failed to delete message.")
           setMessages(originalMessages)
+        } else {
+          toast.success("Message deleted successfully")
         }
       } catch (error) {
         console.error("Error deleting message:", error)
@@ -286,7 +286,6 @@ export function useChatMessages(chatId: string | undefined) {
     }
   }
 
-  // Manual refresh function
   const refreshMessages = useCallback(() => {
     fetchMessages(false)
   }, [fetchMessages])

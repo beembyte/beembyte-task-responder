@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -62,11 +61,11 @@ export const useAuth = () => {
           // Connect to socket after successful login
           if (user.user_id && user.role) {
             try {
-              // Use the socketService to connect
-              socketService.connect(user.user_id, user.role)
+              // Use the socketService to connect (no arguments needed)
+              socketService.connect()
 
               // Add error handling for socket connection
-              socket.on("connect_error", (error) => {
+              socket?.on("connect_error", (error) => {
                 console.error("Socket connection error:", error)
                 toast.error("Could not establish live connection. Some features may be limited.")
               })
@@ -177,8 +176,6 @@ export const useAuth = () => {
     }
   }
 
-
-
   const loggedInUser = async (): Promise<User> => {
     try {
       if (user) return user;
@@ -221,12 +218,6 @@ export const useAuth = () => {
       navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
     }
   }
-  //   changePassword: async (
-  //         oldPassword: string,
-  //         newPassword: string,
-  //         confirmPassword?: string,
-  //         userId: string | null = null
-  //     ): Promise<AuthResponse> => {
 
   const changePassword = async (
     old_password: string,
