@@ -56,12 +56,12 @@ const Navbar: React.FC = () => {
               History
             </Link>
 
-            <div className="relative">
+            {/* <div className="relative">
               <Link to="/notifications">
                 <Bell className="h-5 w-5 text-muted-foreground hover:text-primary" />
                 <NotificationBadge count={2} />
               </Link>
-            </div>
+            </div> */}
             <Link to="/profile">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`} alt={user?.first_name} />
