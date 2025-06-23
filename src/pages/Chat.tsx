@@ -32,6 +32,7 @@ const Chat = () => {
     deleteMessage,
     refreshMessages,
     isPolling,
+    isSending,
   } = useChatMessages(id)
 
   const { task } = useTaskInfo(id)
@@ -89,6 +90,7 @@ const Chat = () => {
               onAttachFile={handleAttachFile}
               onKeyPress={onKeyPress}
               recipientName={recipient.name}
+              disabled={isSending}
             />
           </div>
         </div>

@@ -32,7 +32,18 @@ export interface AuthResponse {
   errors?: FieldError[];
   success: boolean;
   message: string;
-  data?: any;
+  data?: {
+    auth_token?: string;
+    user?: {
+      role: any;
+      user_id: any;
+      id: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+      phone_number?: string;
+    };
+  };
   token?: string;
 }
 
@@ -178,6 +189,67 @@ export const authApi = {
     }
   },
 
+  //   forgotPassword API
+  forgotPassword: async (email: string): Promise<AuthResponse> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/responder/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      return {
+        success: false,
+        message: "Failed to send reset link. Please try again later.",
+      };
+    }
+  },
+
+  changePassword: async (
+    old_password: string,
+    new_password: string,
+    confirm_password: string,
+    user_id: string
+  ): Promise<AuthResponse> => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `${API_BASE_URL}/responder/change-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            old_password,
+            new_password,
+            confirm_password,
+            user_id,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Change password error:", error);
+      return {
+        success: false,
+        message: "Failed to change password. Please try again later.",
+      };
+    }
+  },
+
   logedInUser: async () => {
     try {
       const token = getAuthToken();
@@ -196,6 +268,30 @@ export const authApi = {
       return {
         success: false,
         message: "Failed to fetch user Please try again later.",
+      };
+    }
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  updateLoggedInUser: async (userData: any): Promise<AuthResponse> => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/responder/edit-profile`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Update user error:", error);
+      return {
+        success: false,
+        message: "Failed to update user. Please try again later.",
       };
     }
   },

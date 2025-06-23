@@ -18,6 +18,7 @@ import { getCookie } from "@/utils/formatUtils"
 
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isPasswordChanging, setIsPasswordChanging] = useState(false)
   const [resendCountdown, setResendCountdown] = useState(0)
   const [user, setUser] = useState<User>(null);
   const navigate = useNavigate()
@@ -56,7 +57,7 @@ export const useAuth = () => {
 
         // Ensure user is valid before setting it
         if (user) {
-          setUser(user as User)
+          setUser(user as unknown as User)
 
           // Connect to socket after successful login
           if (user.user_id && user.role) {
@@ -155,18 +156,42 @@ export const useAuth = () => {
 
   }
 
-  const updateProfile = () => { }
+  const updateProfile = async (profileData: Partial<User>) => {
+    setIsLoading(true)
+    try {
+      const response = await authApi.updateLoggedInUser(profileData)
+
+      if (response.success) {
+        const updatedUser = { ...user, ...profileData } as User
+        setUser(updatedUser)
+        localStorage.setItem("authorizeUser", JSON.stringify(updatedUser))
+        toast.success(response.message || "Profile updated successfully!")
+      } else {
+        handleApiErrors(response)
+      }
+    } catch (error) {
+      console.error("Update profile error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+
 
   const loggedInUser = async (): Promise<User> => {
     try {
-      const response = await authApi.logedInUser()
+      if (user) return user;
+
+      const response = await authApi.logedInUser();
       if (response.success) {
+        setUser(response.data);
         return response.data;
       }
     } catch (error) {
       console.error("Error fetching user:", error);
-      return null;
     }
+    return null;
   };
 
   const verifyAuthToken = async () => {
@@ -196,6 +221,43 @@ export const useAuth = () => {
       navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
     }
   }
+  //   changePassword: async (
+  //         oldPassword: string,
+  //         newPassword: string,
+  //         confirmPassword?: string,
+  //         userId: string | null = null
+  //     ): Promise<AuthResponse> => {
+
+  const changePassword = async (
+    old_password: string,
+    new_password: string,
+    confirm_password: string,
+    user_id: string | null = null
+  ): Promise<{ success: boolean; message?: string }> => {
+    setIsPasswordChanging(true)
+    try {
+      if (new_password !== confirm_password) {
+        toast.error("New password and confirmation do not match.")
+        return { success: false, message: "Passwords do not match." }
+      }
+
+      const response = await authApi.changePassword(old_password, new_password, confirm_password, user_id)
+
+      if (response.success) {
+        toast.success(response.message || "Password changed successfully!")
+        return { success: true }
+      } else {
+        handleApiErrors(response)
+        return { success: false, message: response.message }
+      }
+    } catch (error) {
+      console.error("Change password error:", error)
+      toast.error("An unexpected error occurred. Please try again later.")
+      return { success: false, message: "Failed to change password. Please try again later." }
+    } finally {
+      setIsPasswordChanging(false)
+    }
+  }
 
   return {
     isLoading,
@@ -205,8 +267,11 @@ export const useAuth = () => {
     resendVerification,
     resendCountdown,
     logout,
+    user,
     updateProfile,
     loggedInUser,
-    verifyAuthToken
+    verifyAuthToken,
+    changePassword,
+    isPasswordChanging,
   }
 }
