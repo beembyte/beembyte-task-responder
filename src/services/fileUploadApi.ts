@@ -18,17 +18,14 @@ export const fileUploadApi = {
     try {
       const token = getAuthToken();
 
-      const response = await fetch(
-        `${API_HOST_ADDRESS}/api/upload/upload/multiple`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            // Don't set Content-Type header - let the browser set it with boundary for FormData
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_HOST_ADDRESS}/api/upload/multiple`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Don't set Content-Type header - let the browser set it with boundary for FormData
+        },
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

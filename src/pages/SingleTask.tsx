@@ -188,7 +188,7 @@ const SingleTask: React.FC = () => {
                 )}
               </TaskDescription>
               <TaskKeyNotes keyNotes={task.key_notes} />
-              <TaskAttachments fileUrls={task.file_urls} />
+              <TaskAttachments fileUrls={task.files} />
               {isTaskAccepted && task.responder_final_decision !== RESPONDER_FINAL_DECISION.FINISHED && (
                 <TaskSubmission
                   taskId={task._id}
