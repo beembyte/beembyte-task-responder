@@ -1,3 +1,4 @@
+
 import React, { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Upload, Link, FileText, Send, X } from "lucide-react"
 import { toast } from "sonner"
 import useTask from "@/hooks/useTask"
+import { useFileUpload } from "@/hooks/useFileUpload"
 
 interface TaskSubmissionProps {
   taskId: string
@@ -24,13 +26,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { submitTask } = useTask();
-
-  // For simulating file uploads, generate URLs (in production, files would be uploaded to storage)
-  const simulateFileUpload = async (files: File[]) => {
-    // Replace with real upload logic if needed.
-    // For now, just return the names as URLs:
-    return files.map(f => "https://test.jpg")
-  }
+  const { uploadFiles, isUploading } = useFileUpload();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -52,13 +48,27 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
     setIsSubmitting(true)
 
     try {
-      const filesUrls = await simulateFileUpload(selectedFiles)
+      let filesUrls: string[] = []
+      
+      // Upload files if any are selected
+      if (selectedFiles.length > 0) {
+        const uploadResult = await uploadFiles(selectedFiles)
+        if (uploadResult.success && uploadResult.urls) {
+          filesUrls = uploadResult.urls
+        } else {
+          toast.error(uploadResult.error || "Failed to upload files")
+          setIsSubmitting(false)
+          return
+        }
+      }
+
       const response = await submitTask({
         task_id: taskId,
         description: submissionText,
         link: submissionLink,
         files_urls: filesUrls,
       })
+      
       if (response && response.success) {
         setIsOpen(false)
         setSubmissionText("")
@@ -66,7 +76,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
         setSelectedFiles([])
 
         if (onSubmit) {
-          onSubmit(response.data) // Pass task data so parent can refresh or display submission
+          onSubmit(response.data)
         }
       }
     } catch (error) {
@@ -75,6 +85,8 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
       setIsSubmitting(false)
     }
   }
+
+  const isLoading = isSubmitting || isUploading
 
   return (
     <Card className="border-0 shadow-sm bg-gray-50/50">
@@ -151,10 +163,11 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
                         multiple
                         onChange={handleFileSelect}
                         className="hidden"
+                        disabled={isLoading}
                       />
                       <Upload className="mx-auto h-12 w-12 text-gray-400" />
                       <p className="mt-2 text-sm text-gray-600">
-                        <label htmlFor="file-upload" className="cursor-pointer text-blue-600 hover:text-blue-500">
+                        <label htmlFor="file-upload" className={`cursor-pointer text-blue-600 hover:text-blue-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                           Click to upload files
                         </label>{" "}
                         or drag and drop
@@ -173,6 +186,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
                                 variant="outline"
                                 size="sm"
                                 onClick={() => removeFile(index)}
+                                disabled={isLoading}
                               >
                                 Remove
                               </Button>
@@ -186,11 +200,11 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({ taskId, onSubmit, onCan
               </Tabs>
               
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-                <Button variant="outline" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>
                   Cancel
                 </Button>
-                <Button onClick={handleSubmit} disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit Work"}
+                <Button onClick={handleSubmit} disabled={isLoading}>
+                  {isLoading ? (isUploading ? "Uploading files..." : "Submitting...") : "Submit Work"}
                 </Button>
               </div>
             </DialogContent>
