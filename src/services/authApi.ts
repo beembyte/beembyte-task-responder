@@ -31,7 +31,7 @@ export interface ResendVerificationRequest {
 export interface AuthResponse {
   errors?: FieldError[];
   success: boolean;
-  message: string;
+  message: string | { message: string; verified: boolean };
   data?: {
     auth_token?: string;
     user?: {
