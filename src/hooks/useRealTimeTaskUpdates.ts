@@ -1,6 +1,5 @@
 
 import { useEffect, useCallback } from 'react';
-import { socket } from '@/services/socket';
 import { toast } from 'sonner';
 
 interface UseRealTimeTaskUpdatesProps {
@@ -34,20 +33,11 @@ export const useRealTimeTaskUpdates = ({
   }, [onTaskStatusChange]);
 
   useEffect(() => {
-    // Listen for new tasks
-    socket.on('new_task', handleNewTask);
+    // Socket functionality disabled - real-time updates handled by polling
+    console.log('Real-time task updates using polling instead of socket');
     
-    // Listen for task updates
-    socket.on('task_updated', handleTaskUpdate);
-    
-    // Listen for task status changes
-    socket.on('task_status_changed', handleTaskStatusChange);
-
-    // Cleanup listeners on unmount
     return () => {
-      socket.off('new_task', handleNewTask);
-      socket.off('task_updated', handleTaskUpdate);
-      socket.off('task_status_changed', handleTaskStatusChange);
+      // Cleanup if needed
     };
   }, [handleNewTask, handleTaskUpdate, handleTaskStatusChange]);
 };
