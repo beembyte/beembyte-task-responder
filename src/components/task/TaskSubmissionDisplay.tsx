@@ -1,12 +1,16 @@
 
-import React from "react"
-import { Link as LinkIcon, Github, Linkedin, Facebook, Youtube, Folder } from "lucide-react"
+import React, { useState } from "react"
+import { Link as LinkIcon, Github, Linkedin, Facebook, Youtube, Folder, Pen } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import SubmissionFileItem from "./SubmissionFileItem"
+import TaskSubmissionEditModal from "./TaskSubmissionEditModal"
 
 interface TaskSubmissionDisplayProps {
   description?: string
   link?: string
   files_urls?: string[]
+  taskId?: string
+  onUpdate?: (data: any) => void
 }
 
 const getLinkIcon = (url: string) => {
@@ -30,22 +34,51 @@ const TaskSubmissionDisplay: React.FC<TaskSubmissionDisplayProps> = ({
   description,
   link,
   files_urls,
+  taskId,
+  onUpdate,
 }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const showDescription = description && description.toLowerCase() !== "here is the submission link."
 
   if (!showDescription && !link && (!files_urls || files_urls.length === 0)) return null
 
+  const handleEditSubmission = () => {
+    setIsEditModalOpen(true)
+  }
+
+  const handleUpdateSubmission = (updatedData: any) => {
+    if (onUpdate) {
+      onUpdate(updatedData)
+    }
+    setIsEditModalOpen(false)
+  }
+
   return (
     <div className="mt-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-medium text-gray-800">Submission</h3>
+        {taskId && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleEditSubmission}
+            className="text-gray-600 hover:text-gray-800"
+          >
+            <Pen className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+
       {showDescription && (
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-800 mb-2">Submission Description</h3>
+          <h4 className="text-sm font-medium text-gray-800 mb-2">Description</h4>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
       )}
+      
       {link && (
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-800 mb-2">Submission Link</h3>
+          <h4 className="text-sm font-medium text-gray-800 mb-2">Link</h4>
           <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3 flex items-center gap-3">
             {getLinkIcon(link)}
             <a
@@ -59,15 +92,30 @@ const TaskSubmissionDisplay: React.FC<TaskSubmissionDisplayProps> = ({
           </div>
         </div>
       )}
+      
       {files_urls && files_urls.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-gray-800 mb-2">Submitted Files</h3>
+          <h4 className="text-sm font-medium text-gray-800 mb-2">Files</h4>
           <div className="flex flex-wrap gap-2">
             {files_urls.map((url, i) => (
               <SubmissionFileItem key={i} url={url} />
             ))}
           </div>
         </div>
+      )}
+
+      {isEditModalOpen && taskId && (
+        <TaskSubmissionEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          taskId={taskId}
+          currentData={{
+            description: description || "",
+            link: link || "",
+            files_urls: files_urls || [],
+          }}
+          onUpdate={handleUpdateSubmission}
+        />
       )}
     </div>
   )

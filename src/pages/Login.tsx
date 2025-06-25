@@ -22,14 +22,13 @@ const Login: React.FC = () => {
     setLoading(true);
     
     try {
-      await login({ email, password });
+      const result = await login({ email, password });
       
-      // Get the returnTo parameter from URL
-      const params = new URLSearchParams(location.search);
-      const returnTo = params.get('returnTo') || '/dashboard';
+      // Only navigate if login was successful
+      // If login failed due to unverified email, useAuth will handle navigation to verify-code
+      // If login was successful, useAuth will handle navigation to dashboard
+      // So we don't need to do any navigation here anymore
       
-      // Navigate to the intended page after successful login
-      navigate(returnTo);
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

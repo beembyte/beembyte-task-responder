@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Logo from "@/components/Logo"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
+import PasswordValidation from "@/components/PasswordValidation"
 
 const Register: React.FC = () => {
   const navigate = useNavigate()
@@ -152,6 +153,7 @@ const Register: React.FC = () => {
                       {showPassword ? "Hide" : "Show"}
                     </button>
                   </div>
+                  <PasswordValidation password={password} />
                   {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                 </div>
 
