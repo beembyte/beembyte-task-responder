@@ -1,8 +1,7 @@
-
 "use client"
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { toast } from "sonner"
 import {
   authApi,
@@ -22,6 +21,7 @@ export const useAuth = () => {
   const [resendCountdown, setResendCountdown] = useState(0)
   const [user, setUser] = useState<User>(null);
   const navigate = useNavigate()
+  const location = useLocation()
 
   const register = async (userData: RegisterRequest) => {
     setIsLoading(true)
@@ -29,11 +29,16 @@ export const useAuth = () => {
       const response = await authApi.register(userData)
 
       if (response.success) {
-        toast.success(response.message || "Registration successful! Please verify your email.")
+        const message = typeof response.message === 'string' ? response.message : response.message?.message || "Registration successful! Please verify your email."
+        toast.success(message)
         localStorage.setItem("authEmail", userData.email)
         navigate("/verify-code")
       } else {
-        handleApiErrors(response)
+        if (typeof response.message === 'string') {
+          handleApiErrors({ ...response, message: response.message })
+        } else {
+          toast.error(response.message?.message || "Registration failed")
+        }
       }
     } catch (error) {
       console.error("Registration error:", error)
@@ -49,7 +54,8 @@ export const useAuth = () => {
       const response = await authApi.login(credentials)
 
       if (response.success) {
-        toast.success(response.message || "Login successful!")
+        const message = typeof response.message === 'string' ? response.message : response.message?.message || "Login successful!"
+        toast.success(message)
 
         const { auth_token, user } = response.data
         // Token is now stored in cookie by the authApi.login function
@@ -62,7 +68,7 @@ export const useAuth = () => {
           // Connect to socket after successful login
           if (user.user_id && user.role) {
             try {
-              // Use the socketService to connect
+              // Use the socketService to connect with user info
               socketService.connect(user.user_id, user.role)
 
               // Add error handling for socket connection
@@ -78,9 +84,24 @@ export const useAuth = () => {
           }
         }
 
-        navigate("/dashboard")
+        // Get the returnTo parameter from URL and navigate accordingly
+        const params = new URLSearchParams(location.search);
+        const returnTo = params.get('returnTo') || '/dashboard';
+        navigate(returnTo)
       } else {
-        handleApiErrors(response)
+        // Check if the error is specifically about unverified email
+        if (typeof response.message === 'object' && response.message?.verified === false) {
+          toast.error(response.message.message)
+          // Store email for verification process
+          localStorage.setItem("authEmail", credentials.email)
+          navigate("/verify-code")
+        } else {
+          if (typeof response.message === 'string') {
+            handleApiErrors({ ...response, message: response.message })
+          } else {
+            toast.error(response.message?.message || "Login failed")
+          }
+        }
       }
     } catch (error) {
       console.error("Login error:", error)
@@ -98,10 +119,15 @@ export const useAuth = () => {
 
       if (response.success) {
         localStorage.removeItem("authEmail")
-        toast.success(response.message || "Verification successful!")
+        const message = typeof response.message === 'string' ? response.message : response.message?.message || "Verification successful!"
+        toast.success(message)
         navigate("/login")
       } else {
-        handleApiErrors(response)
+        if (typeof response.message === 'string') {
+          handleApiErrors({ ...response, message: response.message })
+        } else {
+          toast.error(response.message?.message || "Verification failed")
+        }
       }
     } catch (error) {
       console.error("Verification error:", error)
@@ -119,7 +145,8 @@ export const useAuth = () => {
       const response = await authApi.resendVerification(resendData)
 
       if (response.success) {
-        toast.success(response.message || "Verification code resent successfully!")
+        const message = typeof response.message === 'string' ? response.message : response.message?.message || "Verification code resent successfully!"
+        toast.success(message)
         // Start countdown for 120 seconds (2 minutes)
         setResendCountdown(120)
         const countdownInterval = setInterval(() => {
@@ -132,7 +159,11 @@ export const useAuth = () => {
           })
         }, 1000)
       } else {
-        handleApiErrors(response)
+        if (typeof response.message === 'string') {
+          handleApiErrors({ ...response, message: response.message })
+        } else {
+          toast.error(response.message?.message || "Failed to resend verification")
+        }
       }
     } catch (error) {
       console.error("Resend verification error:", error)
@@ -165,9 +196,14 @@ export const useAuth = () => {
         const updatedUser = { ...user, ...profileData } as User
         setUser(updatedUser)
         localStorage.setItem("authorizeUser", JSON.stringify(updatedUser))
-        toast.success(response.message || "Profile updated successfully!")
+        const message = typeof response.message === 'string' ? response.message : response.message?.message || "Profile updated successfully!"
+        toast.success(message)
       } else {
-        handleApiErrors(response)
+        if (typeof response.message === 'string') {
+          handleApiErrors({ ...response, message: response.message })
+        } else {
+          toast.error(response.message?.message || "Profile update failed")
+        }
       }
     } catch (error) {
       console.error("Update profile error:", error)
@@ -176,8 +212,6 @@ export const useAuth = () => {
       setIsLoading(false)
     }
   }
-
-
 
   const loggedInUser = async (): Promise<User> => {
     try {
@@ -221,12 +255,6 @@ export const useAuth = () => {
       navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
     }
   }
-  //   changePassword: async (
-  //         oldPassword: string,
-  //         newPassword: string,
-  //         confirmPassword?: string,
-  //         userId: string | null = null
-  //     ): Promise<AuthResponse> => {
 
   const changePassword = async (
     old_password: string,
@@ -244,11 +272,18 @@ export const useAuth = () => {
       const response = await authApi.changePassword(old_password, new_password, confirm_password, user_id)
 
       if (response.success) {
-        toast.success(response.message || "Password changed successfully!")
+        const message = typeof response.message === 'string' ? response.message : response.message?.message || "Password changed successfully!"
+        toast.success(message)
         return { success: true }
       } else {
-        handleApiErrors(response)
-        return { success: false, message: response.message }
+        if (typeof response.message === 'string') {
+          handleApiErrors({ ...response, message: response.message })
+          return { success: false, message: response.message }
+        } else {
+          const errorMessage = response.message?.message || "Failed to change password"
+          toast.error(errorMessage)
+          return { success: false, message: errorMessage }
+        }
       }
     } catch (error) {
       console.error("Change password error:", error)

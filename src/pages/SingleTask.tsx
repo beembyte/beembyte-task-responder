@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -152,6 +153,17 @@ const SingleTask: React.FC = () => {
     }
   }
 
+  const handleSubmissionUpdate = (updatedTaskData: any) => {
+    if (updatedTaskData && updatedTaskData.submit) {
+      setSubmissionData({
+        description: updatedTaskData.submit.description,
+        link: updatedTaskData.submit.link,
+        files_urls: updatedTaskData.submit.files_urls,
+      })
+      setTask(updatedTaskData)
+    }
+  }
+
   const isTaskAccepted = task?.assigned_status === ASSIGNED_STATUS.ASSIGNED || task?.status === TASK_STATUS.INPROGRESS
 
   if (isLoadingTask) {
@@ -184,6 +196,8 @@ const SingleTask: React.FC = () => {
                     description={submissionData.description}
                     link={submissionData.link}
                     files_urls={submissionData.files_urls}
+                    taskId={task._id}
+                    onUpdate={handleSubmissionUpdate}
                   />
                 )}
               </TaskDescription>
