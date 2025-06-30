@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 export interface UploadResult {
   success: boolean;
   urls?: string[];
+  url?: string;
   error?: string;
 }
 
@@ -52,8 +53,35 @@ export const useFileUpload = () => {
   }, []);
 
   const uploadSingleFile = useCallback(async (file: File): Promise<UploadResult> => {
-    return uploadFiles([file]);
-  }, [uploadFiles]);
+    if (!file) {
+      return { success: false, error: 'No file provided' };
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      console.log('Uploading single file:', file.name);
+
+      const response = await fileUploadApi.uploadSingle(file);
+      
+      if (response.success && response.url) {
+        setUploadProgress(100);
+        toast.success('File uploaded successfully');
+        return { success: true, url: response.url };
+      } else {
+        throw new Error(response.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Single file upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload file';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  }, []);
 
   return {
     uploadFiles,

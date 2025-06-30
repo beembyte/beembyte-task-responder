@@ -1,43 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/layout/Navbar';
-
-// Mock transaction data
-const transactions = [
-  {
-    id: '1',
-    amount: 4813.17,
-    status: 'completed',
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    type: 'payment',
-    description: 'Task completion: Software Developer at Xanotech'
-  },
-  {
-    id: '2',
-    amount: 2500,
-    status: 'completed',
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    type: 'payment',
-    description: 'Task completion: Mobile App Update'
-  },
-  {
-    id: '3',
-    amount: 5000,
-    status: 'processing',
-    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    type: 'withdrawal',
-    description: 'Withdrawal to Bank Account'
-  }
-];
+import { useAuth } from '@/hooks/useAuth';
+import { User } from '@/types';
+import TransactionHistory from '@/components/wallet/TransactionHistory';
 
 const Wallet: React.FC = () => {
   const { toast } = useToast();
+  const { loggedInUser } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('');
   const [bankDetails, setBankDetails] = useState({
     accountName: '',
@@ -46,17 +22,19 @@ const Wallet: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Calculate wallet balance
-  const walletBalance = transactions.reduce((total, transaction) => {
-    if (transaction.status === 'completed') {
-      if (transaction.type === 'payment') {
-        return total + transaction.amount;
-      } else if (transaction.type === 'withdrawal') {
-        return total - transaction.amount;
-      }
-    }
-    return total;
-  }, 0);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userProfile = await loggedInUser();
+      setUser(userProfile);
+    };
+    fetchUser();
+  }, []);
+
+  // Get wallet balance from API
+  const walletBalance = user?.wallet_id?.balance || 0;
+  const walletCurrency = user?.wallet_id?.currency || 'NGN';
+  const lockedBalance = user?.wallet_id?.locked_balance || 0;
+  const userType = user?.role === 'responder' ? 'responder' : 'user';
 
   const handleWithdrawalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +72,7 @@ const Wallet: React.FC = () => {
     setTimeout(() => {
       toast({
         title: "Withdrawal Initiated",
-        description: `Your withdrawal of NGN ${parseFloat(withdrawAmount).toLocaleString()} has been initiated and is being processed.`
+        description: `Your withdrawal of ${walletCurrency} ${parseFloat(withdrawAmount).toLocaleString()} has been initiated and is being processed.`
       });
 
       setWithdrawAmount('');
@@ -119,8 +97,11 @@ const Wallet: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="mb-4">
-                <h3 className="text-3xl font-bold text-white mb-1">NGN {walletBalance.toLocaleString()}</h3>
+                <h3 className="text-3xl font-bold text-white mb-1">{walletCurrency} {walletBalance.toLocaleString()}</h3>
                 <p className="text-white/80 text-sm">Available for withdrawal</p>
+                {lockedBalance > 0 && (
+                  <p className="text-white/70 text-xs mt-2">Locked: {walletCurrency} {lockedBalance.toLocaleString()}</p>
+                )}
               </div>
             </CardContent>
             <CardFooter>
@@ -150,50 +131,7 @@ const Wallet: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-                <CardDescription>Your recent transactions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {transactions.map(transaction => (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-md">
-                      <div>
-                        <p className="font-medium text-sm">
-                          {transaction.description}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {transaction.date.toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className={`font-semibold ${transaction.type === 'payment' ? 'text-green-600' : 'text-amber-600'}`}>
-                          {transaction.type === 'payment' ? '+' : '-'} NGN {transaction.amount.toLocaleString()}
-                        </p>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${transaction.status === 'completed'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-amber-100 text-amber-800'
-                            }`}
-                        >
-                          {transaction.status === 'completed' ? 'Completed' : 'Processing'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  View All Transactions
-                </Button>
-              </CardFooter>
-            </Card>
+            <TransactionHistory userType={userType} />
           </div>
 
           <div>
@@ -205,7 +143,7 @@ const Wallet: React.FC = () => {
               <CardContent>
                 <form onSubmit={handleWithdrawalSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Amount (NGN)</Label>
+                    <Label htmlFor="amount">Amount ({walletCurrency})</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -213,6 +151,7 @@ const Wallet: React.FC = () => {
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                       min={0}
+                      max={walletBalance}
                     />
                   </div>
 
@@ -246,7 +185,7 @@ const Wallet: React.FC = () => {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full" disabled={isSubmitting || walletBalance === 0}>
                     {isSubmitting ? 'Processing...' : 'Withdraw'}
                   </Button>
                 </form>

@@ -3,7 +3,9 @@ import { longFormatters } from "date-fns";
 // Format price to currency (₦Naira)
 export const formatNaira = (amount: number): string => {
   // Show as ₦ and with no decimal places by default
-  return `₦${(amount || 0).toLocaleString("en-NG", { minimumFractionDigits: 0 })}`;
+  return `₦${(amount || 0).toLocaleString("en-NG", {
+    minimumFractionDigits: 0,
+  })}`;
 };
 
 // Format price to currency
@@ -61,4 +63,11 @@ export const getCookie = (name: string): string | null => {
     new RegExp("(^|;\\s*)" + name + "=([^;]*)")
   );
   return match ? decodeURIComponent(match[2]) : null;
+};
+
+export const getAuthToken = () => {
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("authToken="))
+    ?.split("=")[1];
 };

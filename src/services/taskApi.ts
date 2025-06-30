@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/config/env";
+import { getAuthToken } from "@/utils/formatUtils";
 
 export interface getAllunAssignedTaskPayload {
   limit: number;
@@ -15,13 +16,6 @@ export interface getCompletedTaskPayload {
   title: string;
   description: string;
 }
-
-const getAuthToken = () => {
-  return document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("authToken="))
-    ?.split("=")[1];
-};
 
 export const taskApi = {
   getAllPendingAndUnassignedTask: async (

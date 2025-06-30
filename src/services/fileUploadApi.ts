@@ -1,9 +1,11 @@
+
 import { API_HOST_ADDRESS } from "@/config/env";
 
 export interface FileUploadResponse {
   success: boolean;
   message?: string;
   urls?: string[];
+  url?: string;
 }
 
 const getAuthToken = () => {
@@ -48,6 +50,45 @@ export const fileUploadApi = {
         success: false,
         message:
           error instanceof Error ? error.message : "Failed to upload files",
+      };
+    }
+  },
+
+  uploadSingle: async (file: File): Promise<FileUploadResponse> => {
+    try {
+      const token = getAuthToken();
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`${API_HOST_ADDRESS}/api/upload/single`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.url) {
+        return {
+          success: true,
+          url: data.url,
+          message: "File uploaded successfully",
+        };
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error) {
+      console.error("Single file upload API error:", error);
+      return {
+        success: false,
+        message:
+          error instanceof Error ? error.message : "Failed to upload file",
       };
     }
   },

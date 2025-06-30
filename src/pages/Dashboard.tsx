@@ -10,6 +10,7 @@ import useTask, { DashStatsData } from '@/hooks/useTask';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import CompactTaskCard from '@/components/CompactTaskCard';
+import RankingBadge from '@/components/RankingBadge';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -103,14 +104,22 @@ const Dashboard: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">
                 Welcome, {user?.first_name}!
               </h1>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-500">
-                  <span className="mr-2">ResponderId:</span>
-                  <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-                    {user?.responder_id}
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-medium text-gray-500">
+                    <span className="mr-2">ResponderId:</span>
+                    <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
+                      {user?.responder_id}
+                    </span>
                   </span>
-                </span>
-                <span className="flex items-center mt-1">
+                  <RankingBadge 
+                    rankStatus={user?.rank_status}
+                    userCriteria={user?.rank_criteria}
+                    completedTasks={dashboardStats?.completedThisMonthCount || 0} 
+                    size="sm" 
+                  />
+                </div>
+                <span className="flex items-center">
                   <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'bg-green-500' : 'bg-red-500'}`}></span>
                   <span className={`text-sm font-medium ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'text-green-600' : 'text-red-600'}`}>
                     {user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'Available' : 'Busy'}
