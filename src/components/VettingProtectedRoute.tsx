@@ -1,24 +1,24 @@
 
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getCookie } from '@/utils/formatUtils';
 
-interface ProtectedRouteProps {
+interface VettingProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const VettingProtectedRoute: React.FC<VettingProtectedRouteProps> = ({ children }) => {
   const { verifyAuthToken } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const location = useLocation();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndVettingStatus = async () => {
       const authToken = getCookie('authToken');
       const authorizeUser = localStorage.getItem('authorizeUser');
       
+      // If no token or user data, redirect to login
       if (!authToken || !authorizeUser) {
         setIsAuthenticated(false);
         setIsLoading(false);
@@ -26,16 +26,27 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       }
 
       try {
+        // Verify the auth token
         await verifyAuthToken();
         setIsAuthenticated(true);
+        
+        // Check if vetting is already completed
+        const vettingCompleted = localStorage.getItem('vettingCompleted');
+        if (vettingCompleted) {
+          // Vetting already completed, redirect to dashboard
+          setIsLoading(false);
+          return;
+        }
+        
       } catch (error) {
+        console.error('Auth verification failed:', error);
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkAuth();
+    checkAuthAndVettingStatus();
   }, [verifyAuthToken]);
 
   if (isLoading) {
@@ -46,20 +57,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // If not authenticated, redirect to login
   if (!isAuthenticated) {
-    return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Check if user needs to complete vetting - enforce for all routes except vetting itself
+  // If vetting is completed, redirect to dashboard
   const vettingCompleted = localStorage.getItem('vettingCompleted');
-  const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
-  
-  // If user just registered (hasCompletedRegistration exists) and hasn't completed vetting
-  if (hasCompletedRegistration && !vettingCompleted && location.pathname !== '/vetting') {
-    return <Navigate to="/vetting" replace />;
+  if (vettingCompleted) {
+    return <Navigate to="/dashboard" replace />;
   }
 
+  // User is authenticated and vetting is not completed, show vetting page
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default VettingProtectedRoute;

@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Logo from '@/components/Logo';
 import { useAuth } from '@/hooks/useAuth';
+import { getCookie } from '@/utils/formatUtils';
 import { Loader2 } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -16,6 +17,26 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Check if user is already authenticated and redirect
+  useEffect(() => {
+    const authToken = getCookie('authToken');
+    const authorizeUser = localStorage.getItem('authorizeUser');
+    
+    if (authToken && authorizeUser) {
+      // User is already authenticated, check if they need vetting
+      const vettingCompleted = localStorage.getItem('vettingCompleted');
+      const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
+      
+      if (hasCompletedRegistration && !vettingCompleted) {
+        navigate('/vetting');
+      } else {
+        const params = new URLSearchParams(location.search);
+        const returnTo = params.get('returnTo') || '/dashboard';
+        navigate(returnTo);
+      }
+    }
+  }, [navigate, location.search]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
