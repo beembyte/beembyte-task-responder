@@ -1,4 +1,3 @@
-
 export enum USER_ROLES {
   USER = "user",
   RESPONSER = "responder",
@@ -26,6 +25,32 @@ export interface USER_LOCATION {
   longitude: string;
 }
 
+export interface RANK_CRITERIA {
+  tasks_completed: number;
+  minimum_rating: number;
+}
+
+export interface RANK_STATUS {
+  criteria: RANK_CRITERIA;
+  _id: string;
+  rank_name: string;
+  rank_color: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WALLET {
+  _id: string;
+  user_id: string;
+  type: string;
+  balance: number;
+  locked_balance: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
 export type User = {
   first_name: string;
   last_name: string;
@@ -41,6 +66,22 @@ export type User = {
   status?: USER_STATUS;
   responder_id?: string;
   availability_status?: AVAILABILITY_STATUS;
+  // API response fields
+  rank_criteria?: RANK_CRITERIA;
+  rank_status?: RANK_STATUS;
+  preferred_categories?: string[];
+  job_title?: string;
+  portfolio_link?: string;
+  resume?: string;
+  tools_technologies?: string;
+  years_of_experience?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  preferred_callDate?: string;
+  preferred_callTime?: string;
+  user_id?: string;
+  wallet_id?: WALLET;
   // Added optional fields for SingleTask UI
   photo_url?: string;
   rating?: number;
@@ -131,4 +172,3 @@ export type TaskInfo = {
     files_urls?: string[];
   };
 };
-

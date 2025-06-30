@@ -32,6 +32,7 @@ export const useAuth = () => {
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Registration successful! Please verify your email."
         toast.success(message)
         localStorage.setItem("authEmail", userData.email)
+        localStorage.setItem("hasCompletedRegistration", "true")
         navigate("/verify-code")
       } else {
         if (typeof response.message === 'string') {
@@ -84,6 +85,15 @@ export const useAuth = () => {
           }
         }
 
+        // Check if this is a new user who needs to complete vetting
+        const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
+        const vettingCompleted = localStorage.getItem('vettingCompleted');
+        
+        if (hasCompletedRegistration && !vettingCompleted) {
+          navigate('/vetting');
+          return;
+        }
+
         // Get the returnTo parameter from URL and navigate accordingly
         const params = new URLSearchParams(location.search);
         const returnTo = params.get('returnTo') || '/dashboard';
@@ -121,7 +131,16 @@ export const useAuth = () => {
         localStorage.removeItem("authEmail")
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Verification successful!"
         toast.success(message)
-        navigate("/login")
+        
+        // Check if this is a new user who needs to complete vetting
+        const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
+        const vettingCompleted = localStorage.getItem('vettingCompleted');
+        
+        if (hasCompletedRegistration && !vettingCompleted) {
+          navigate("/vetting")
+        } else {
+          navigate("/login")
+        }
       } else {
         if (typeof response.message === 'string') {
           handleApiErrors({ ...response, message: response.message })
