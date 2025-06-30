@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import VettingProtectedRoute from './components/VettingProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import PendingTasks from './pages/PendingTasks';
 import OngoingTasks from './pages/OngoingTasks';
@@ -16,6 +17,7 @@ import Chat from '@/pages/Chat';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import VerifyCode from '@/pages/VerifyCode';
+import Vetting from '@/pages/Vetting';
 import Profile from '@/pages/Profile';
 import Wallet from '@/pages/Wallet';
 import { Toaster } from '@/components/ui/sonner';
@@ -34,6 +36,13 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-code" element={<VerifyCode />} />
+                
+                {/* Vetting route with special protection */}
+                <Route path="/vetting" element={
+                  <VettingProtectedRoute>
+                    <Vetting />
+                  </VettingProtectedRoute>
+                } />
                 
                 {/* Protected routes */}
                 <Route path="/" element={
