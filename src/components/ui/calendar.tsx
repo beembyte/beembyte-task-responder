@@ -16,7 +16,6 @@ function Calendar({
   showOutsideDays = true,
   disabled,
   onDateSelect,
-  onSelect,
   ...props
 }: CalendarProps) {
   // Default disabled function to prevent past dates
@@ -51,10 +50,10 @@ function Calendar({
     }
     
     // Call the original onSelect if provided
-    if (onSelect) {
-      onSelect(selected);
+    if (props.onSelect) {
+      props.onSelect(selected);
     }
-  }, [onDateSelect, onSelect]);
+  }, [onDateSelect, props.onSelect]);
 
   return (
     <DayPicker
