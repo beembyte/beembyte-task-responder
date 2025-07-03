@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
@@ -12,20 +13,25 @@ function Calendar({
   classNames,
   showOutsideDays = true,
   disabled,
+  onSelect,
   ...props
 }: CalendarProps) {
-  // Default disabled function to prevent past dates for task creation
+  // Default disabled function to prevent past dates
   const defaultDisabled = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return date < today;
   };
 
+  // Combine user disabled prop with default disabled
+  const combinedDisabled = disabled || defaultDisabled;
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
-      // disabled={disabled || defaultDisabled}
+      disabled={combinedDisabled}
+      onSelect={onSelect}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",

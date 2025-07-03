@@ -33,8 +33,8 @@ export const useRealTimeTaskUpdates = ({
   }, [onTaskStatusChange]);
 
   useEffect(() => {
-    // Socket functionality disabled - real-time updates handled by polling
-    console.log('Real-time task updates using polling instead of socket');
+    // Auto-refresh removed - real-time updates handled by manual refresh only
+    console.log('Real-time task updates configured without auto-refresh');
     
     return () => {
       // Cleanup if needed
