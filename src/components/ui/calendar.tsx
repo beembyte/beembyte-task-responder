@@ -16,7 +16,6 @@ function Calendar({
   showOutsideDays = true,
   disabled,
   onDateSelect,
-  onSelect,
   ...props
 }: CalendarProps) {
   // Default disabled function to prevent past dates
@@ -30,14 +29,31 @@ function Calendar({
   const combinedDisabled = disabled || defaultDisabled;
 
   // Handle date selection with auto-close
-  const handleSelect = (date: Date | undefined) => {
-    if (onSelect) {
-      onSelect(date);
+  const handleSelect = React.useCallback((selected: any) => {
+    // Handle both single date and date range selections
+    let dateToSelect: Date | undefined;
+    
+    if (selected instanceof Date) {
+      dateToSelect = selected;
+    } else if (selected && typeof selected === 'object' && 'from' in selected) {
+      // Handle date range - use the 'from' date
+      dateToSelect = selected.from;
+    } else if (Array.isArray(selected) && selected.length > 0) {
+      // Handle multiple dates - use the first one
+      dateToSelect = selected[0];
+    } else {
+      dateToSelect = selected;
     }
+
     if (onDateSelect) {
-      onDateSelect(date);
+      onDateSelect(dateToSelect);
     }
-  };
+    
+    // Call the original onSelect if provided
+    if (props.onSelect) {
+      props.onSelect(selected);
+    }
+  }, [onDateSelect, props.onSelect]);
 
   return (
     <DayPicker
