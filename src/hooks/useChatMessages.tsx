@@ -19,13 +19,10 @@ export function useChatMessages(chatId: string | undefined) {
   const [filesToSend, setFilesToSend] = useState<File[]>([])
   const [isSending, setIsSending] = useState(false)
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
-  const [isPolling, setIsPolling] = useState(false)
 
   const { uploadFiles, isUploading } = useFileUpload()
 
   // Refs to track component state
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const isActiveRef = useRef(true)
   const isMountedRef = useRef(true)
 
   // Get current user
@@ -42,25 +39,6 @@ export function useChatMessages(chatId: string | undefined) {
     }
     fetchUser()
   }, [loggedInUser])
-
-  // Track if page/tab is active for efficient polling
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      isActiveRef.current = !document.hidden
-      if (document.hidden && pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
-        pollingIntervalRef.current = null
-        setIsPolling(false)
-      } else if (!document.hidden && chatId && !pollingIntervalRef.current) {
-        startPolling()
-      }
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-    }
-  }, [chatId])
 
   // Fetch messages from API
   const fetchMessages = useCallback(
@@ -91,15 +69,7 @@ export function useChatMessages(chatId: string | undefined) {
             }))
             .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
 
-          if (isInitialLoad) {
-            setMessages(transformedMessages)
-          } else {
-            setMessages((prevMessages) => {
-              const existingIds = new Set(prevMessages.map((msg) => msg.id))
-              const newMessages = transformedMessages.filter((msg) => !existingIds.has(msg.id))
-              return newMessages.length > 0 ? [...prevMessages, ...newMessages] : prevMessages
-            })
-          }
+          setMessages(transformedMessages)
         } else if (isInitialLoad) {
           toast.error(response.message || "Could not load chat history.")
         }
@@ -117,60 +87,23 @@ export function useChatMessages(chatId: string | undefined) {
     [chatId],
   )
 
-  // Start polling for new messages
-  const startPolling = useCallback(() => {
-    if (!chatId || pollingIntervalRef.current || !isMountedRef.current) return
-
-    console.log("Starting message polling...")
-    setIsPolling(true)
-
-    pollingIntervalRef.current = setInterval(() => {
-      if (isActiveRef.current && isMountedRef.current) {
-        fetchMessages(false)
-      }
-    }, 10000) // Poll every 10 seconds to reduce load
-  }, [chatId, fetchMessages])
-
-  // Stop polling
-  const stopPolling = useCallback(() => {
-    if (pollingIntervalRef.current) {
-      console.log("Stopping message polling...")
-      clearInterval(pollingIntervalRef.current)
-      pollingIntervalRef.current = null
-      setIsPolling(false)
-    }
-  }, [])
-
-  // Initial message fetch and start polling
+  // Initial message fetch only - no polling
   useEffect(() => {
     if (!chatId) {
       setIsLoadingMessages(false)
       return
     }
 
-    // Initial load
+    // Initial load only
     fetchMessages(true)
-
-    // Start polling after initial load
-    const pollTimeout = setTimeout(() => {
-      if (isActiveRef.current && isMountedRef.current) {
-        startPolling()
-      }
-    }, 3000)
-
-    return () => {
-      clearTimeout(pollTimeout)
-      stopPolling()
-    }
-  }, [chatId, fetchMessages, startPolling, stopPolling])
+  }, [chatId, fetchMessages])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       isMountedRef.current = false
-      stopPolling()
     }
-  }, [stopPolling])
+  }, [])
 
   const addFiles = useCallback((newFiles: File[]) => {
     setFilesToSend((prev) => [...prev, ...newFiles])
@@ -305,6 +238,6 @@ export function useChatMessages(chatId: string | undefined) {
     isSending: isSending || isUploading,
     deleteMessage,
     refreshMessages,
-    isPolling,
+    isPolling: false, // Always false now since we removed polling
   }
 }
