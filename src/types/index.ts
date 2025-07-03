@@ -1,3 +1,4 @@
+
 export enum USER_ROLES {
   USER = "user",
   RESPONSER = "responder",
@@ -5,6 +6,7 @@ export enum USER_ROLES {
 }
 
 export enum USER_STATUS {
+  "PENDING" = "pending",
   "ACTIVE" = "active",
   "DEACTIVATED" = "deactivated",
   "FLAGGED" = "flagged",

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,6 +48,7 @@ const Vetting: React.FC = () => {
   const [callTime, setCallTime] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [selectedCountryCode, setSelectedCountryCode] = useState('');
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     job_title: '',
@@ -188,6 +188,11 @@ const Vetting: React.FC = () => {
       });
       // Stay on vetting page
     }
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setCallDate(date);
+    setIsDatePickerOpen(false); // Auto-close the popover
   };
 
   const renderStep = () => {
@@ -366,7 +371,7 @@ const Vetting: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label>Preferred Date for Vetting Call *</Label>
-                  <Popover>
+                  <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"outline"}
@@ -374,6 +379,7 @@ const Vetting: React.FC = () => {
                           "w-full justify-start text-left font-normal mt-2",
                           !callDate && "text-muted-foreground"
                         )}
+                        onClick={() => setIsDatePickerOpen(true)}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {callDate ? format(callDate, "PPP") : <span>Pick a date</span>}
@@ -383,8 +389,7 @@ const Vetting: React.FC = () => {
                       <Calendar
                         mode="single"
                         selected={callDate}
-                        onSelect={setCallDate}
-                        disabled={(date) => date < new Date()}
+                        onSelect={handleDateSelect}
                         initialFocus
                         className="pointer-events-auto"
                       />

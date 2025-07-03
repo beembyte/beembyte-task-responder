@@ -13,6 +13,7 @@ import ChatInputBox from "@/components/chat/ChatInputBox"
 import { useChatMessages } from "@/hooks/useChatMessages"
 import { useTaskInfo } from "@/hooks/useTaskInfo"
 import FileUploadPreview from "@/components/chat/FileUploadPreview"
+import { TASK_STATUS, USER_FINAL_DECISION } from "@/types"
 
 const Chat = () => {
   const { id } = useParams<{ id: string }>()
@@ -46,6 +47,11 @@ const Chat = () => {
     avatar: "https://robohash.org/client.png?set=set4",
     isOnline: false,
   }
+
+  // Check if chat should be disabled - only disable if task is completed AND approved/disputed
+  const isChatDisabled = task?.status === TASK_STATUS.COMPLETED && 
+    (task?.user_final_decision === USER_FINAL_DECISION.APPROVED || 
+     task?.user_final_decision === USER_FINAL_DECISION.DISPUTED)
 
   const handleAttachFile = (newFiles: FileList) => {
     if (newFiles.length > 0) {
@@ -83,16 +89,25 @@ const Chat = () => {
             onDeleteMessage={deleteMessage}
           />
           <div className="border-t bg-white">
-            <FileUploadPreview files={filesToSend} onRemoveFile={removeFile} />
-            <ChatInputBox
-              value={newMessage}
-              onChange={setNewMessage}
-              onSend={sendMessage}
-              onAttachFile={handleAttachFile}
-              onKeyPress={onKeyPress}
-              recipientName={recipient.name}
-              disabled={isSending}
-            />
+            {!isChatDisabled && (
+              <>
+                <FileUploadPreview files={filesToSend} onRemoveFile={removeFile} />
+                <ChatInputBox
+                  value={newMessage}
+                  onChange={setNewMessage}
+                  onSend={sendMessage}
+                  onAttachFile={handleAttachFile}
+                  onKeyPress={onKeyPress}
+                  recipientName={recipient.name}
+                  disabled={isSending}
+                />
+              </>
+            )}
+            {isChatDisabled && (
+              <div className="p-4 text-center text-gray-500 text-sm bg-gray-50 border-t">
+                Chat is no longer available - Task has been completed and {task?.user_final_decision === USER_FINAL_DECISION.APPROVED ? 'approved' : 'disputed'}.
+              </div>
+            )}
           </div>
         </div>
 

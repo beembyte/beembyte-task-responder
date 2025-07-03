@@ -4,13 +4,14 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AVAILABILITY_STATUS, User } from '@/types';
+import { AVAILABILITY_STATUS, User, USER_STATUS } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import useTask, { DashStatsData } from '@/hooks/useTask';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import CompactTaskCard from '@/components/CompactTaskCard';
 import RankingBadge from '@/components/RankingBadge';
+import AccountActivationBanner from '@/components/AccountActivationBanner';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -30,30 +31,36 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const fetchRecentTasks = async () => {
-      const response = await getPendingUnassignedTask({
-        limit: 6, // Fetch only 6 for dashboard overview
-        page: 1,
-        sort: 1,
-        title: '',
-        description: ''
-      });
+    // Only fetch tasks if user is activated (not pending)
+    if (user && user.status !== USER_STATUS.PENDING) {
+      const fetchRecentTasks = async () => {
+        const response = await getPendingUnassignedTask({
+          limit: 6,
+          page: 1,
+          sort: 1,
+          title: '',
+          description: ''
+        });
 
-      if (response.success && response.data) {
-        setRecentTasks(response.data.items);
-      }
-    };
+        if (response.success && response.data) {
+          setRecentTasks(response.data.items);
+        }
+      };
 
-    fetchRecentTasks();
-  }, []);
+      fetchRecentTasks();
+    }
+  }, [user]);
 
   useEffect(() => {
-    const getStats = async () => {
-      const response = await getDashboardStats()
-      setDashStats(response.data)
+    // Only fetch stats if user is activated (not pending)
+    if (user && user.status !== USER_STATUS.PENDING) {
+      const getStats = async () => {
+        const response = await getDashboardStats()
+        setDashStats(response.data)
+      }
+      getStats()
     }
-    getStats()
-  }, [])
+  }, [user])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -89,6 +96,9 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Check if user is pending vetting approval
+  const isPendingVetting = user?.status === USER_STATUS.PENDING;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -112,184 +122,231 @@ const Dashboard: React.FC = () => {
                       {user?.responder_id}
                     </span>
                   </span>
-                  <RankingBadge 
-                    rankStatus={user?.rank_status}
-                    userCriteria={user?.rank_criteria}
-                    completedTasks={dashboardStats?.completedThisMonthCount || 0} 
-                    size="sm" 
-                  />
+                  {!isPendingVetting && (
+                    <RankingBadge 
+                      rankStatus={user?.rank_status}
+                      userCriteria={user?.rank_criteria}
+                      completedTasks={dashboardStats?.completedThisMonthCount || 0} 
+                      size="sm" 
+                    />
+                  )}
                 </div>
-                <span className="flex items-center">
-                  <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span className={`text-sm font-medium ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'text-green-600' : 'text-red-600'}`}>
-                    {user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'Available' : 'Busy'}
+                {!isPendingVetting && (
+                  <span className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                    <span className={`text-sm font-medium ${user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'text-green-600' : 'text-red-600'}`}>
+                      {user?.availability_status && user?.availability_status == AVAILABILITY_STATUS.AVAILABLE ? 'Available' : 'Busy'}
+                    </span>
                   </span>
-                </span>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Available Tasks</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">{dashboardStats && dashboardStats?.pendingTasksCount}</div>
-              <p className="text-xs text-gray-500">Ready to apply</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Current Task</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">{dashboardStats && dashboardStats?.inProgressTask ? 1 : 0}</div>
-              <p className="text-xs text-gray-500">In progress</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Completed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">{dashboardStats && dashboardStats?.completedThisMonthCount}</div>
-              <p className="text-xs text-gray-500">This month</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Current Ongoing Task */}
-        {dashboardStats?.inProgressTask && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold flex items-center mb-4">
-              <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-              Current Task
-            </h2>
-            <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow cursor-pointer" onClick={handleOngoingTaskClick}>
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row gap-6">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-base font-bold text-gray-900 mb-2">
-                          {dashboardStats.inProgressTask.title}
-                        </h3>
-                        <p className="text-sm text-blue-600 font-medium mb-2">
-                          {dashboardStats.inProgressTask.subject}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <Badge className="bg-blue-100 text-blue-800">
-                          In Progress
-                        </Badge>
-                        {dashboardStats.inProgressTask.difficulty && (
-                          <Badge className={`${getDifficultyColor(dashboardStats.inProgressTask.difficulty)} font-semibold`}>
-                            {dashboardStats.inProgressTask.difficulty.toUpperCase()}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <p className="text-gray-700 mb-4 text-sm leading-relaxed line-clamp-2">
-                      {dashboardStats.inProgressTask.description}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>Due: {formatDate(String(dashboardStats.inProgressTask.deadline || dashboardStats.inProgressTask.createdAt))}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>Started: {formatDate(String(dashboardStats.inProgressTask.createdAt))}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="lg:w-64 flex flex-col justify-between">
-                    <div className="text-center lg:text-right mb-6">
-                      <div className="text-xl font-bold text-green-600 mb-1">
-                        {formatPayment(dashboardStats.inProgressTask.price || 0)}
-                      </div>
-                      <p className="text-sm text-gray-500">Fixed price</p>
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/task/${dashboardStats.inProgressTask._id}`);
-                      }}
-                    >
-                      Continue Work
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Show Account Activation Banner for pending users */}
+        {isPendingVetting && (
+          <AccountActivationBanner isActivated={false} />
         )}
 
-        {/* Recent Available Tasks */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center">
-              <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-              Recent Available Tasks
+        {/* Only show task-related content if user is not pending */}
+        {!isPendingVetting && (
+          <>
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">Available Tasks</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold">{dashboardStats && dashboardStats?.pendingTasksCount}</div>
+                  <p className="text-xs text-gray-500">Ready to apply</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">Current Task</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold">{dashboardStats && dashboardStats?.inProgressTask ? 1 : 0}</div>
+                  <p className="text-xs text-gray-500">In progress</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">Completed</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold">{dashboardStats && dashboardStats?.completedThisMonthCount}</div>
+                  <p className="text-xs text-gray-500">This month</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Current Ongoing Task */}
+            {dashboardStats?.inProgressTask && (
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold flex items-center mb-4">
+                  <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                  Current Task
+                </h2>
+                <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow cursor-pointer" onClick={handleOngoingTaskClick}>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-base font-bold text-gray-900 mb-2">
+                              {dashboardStats.inProgressTask.title}
+                            </h3>
+                            <p className="text-sm text-blue-600 font-medium mb-2">
+                              {dashboardStats.inProgressTask.subject}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge className="bg-blue-100 text-blue-800">
+                              In Progress
+                            </Badge>
+                            {dashboardStats.inProgressTask.difficulty && (
+                              <Badge className={`${getDifficultyColor(dashboardStats.inProgressTask.difficulty)} font-semibold`}>
+                                {dashboardStats.inProgressTask.difficulty.toUpperCase()}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className="text-gray-700 mb-4 text-sm leading-relaxed line-clamp-2">
+                          {dashboardStats.inProgressTask.description}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span>Due: {formatDate(String(dashboardStats.inProgressTask.deadline || dashboardStats.inProgressTask.createdAt))}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Clock className="w-4 h-4 text-gray-400" />
+                            <span>Started: {formatDate(String(dashboardStats.inProgressTask.createdAt))}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="lg:w-64 flex flex-col justify-between">
+                        <div className="text-center lg:text-right mb-6">
+                          <div className="text-xl font-bold text-green-600 mb-1">
+                            {formatPayment(dashboardStats.inProgressTask.price || 0)}
+                          </div>
+                          <p className="text-sm text-gray-500">Fixed price</p>
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="w-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/task/${dashboardStats.inProgressTask._id}`);
+                          }}
+                        >
+                          Continue Work
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Recent Available Tasks */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold flex items-center">
+                  <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                  Recent Available Tasks
+                </h2>
+                <Link to="/pending-tasks">
+                  <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                    <span>View All</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+
+              {isLoading ? (
+                <div className="text-center py-8">Loading tasks...</div>
+              ) : recentTasks && recentTasks.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {recentTasks.map((task) => (
+                    <CompactTaskCard key={task._id} task={task} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900">No tasks available</h3>
+                  <p className="text-sm text-gray-500 mt-2">New tasks will appear here when available</p>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="border-dashed border-2 hover:border-primary transition-colors">
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-base font-semibold mb-2">Browse Available Tasks</h3>
+                  <p className="text-sm text-gray-600 mb-4">Find and apply for new tasks</p>
+                  <Link to="/pending-tasks">
+                    <Button className="w-full">Browse Tasks</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card className="border-dashed border-2 hover:border-primary transition-colors">
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-base font-semibold mb-2">Work History</h3>
+                  <p className="text-sm text-gray-600 mb-4">Review completed projects</p>
+                  <Link to="/completed-tasks">
+                    <Button variant="outline" className="w-full">View History</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
+
+        {/* Show different content for pending users */}
+        {isPendingVetting && (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Your Profile is Under Review
             </h2>
-            <Link to="/pending-tasks">
-              <Button variant="outline" size="sm" className="flex items-center space-x-1">
-                <span>View All</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+              Thank you for completing your vetting application! Our team is currently reviewing your profile. 
+              You'll receive an email notification once your account is approved and you can start accepting tasks.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-base font-semibold mb-2">Update Profile</h3>
+                  <p className="text-sm text-gray-600 mb-4">Make changes to your profile information</p>
+                  <Link to="/profile">
+                    <Button variant="outline" className="w-full">View Profile</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-base font-semibold mb-2">Wallet</h3>
+                  <p className="text-sm text-gray-600 mb-4">Check your wallet and earnings</p>
+                  <Link to="/wallet">
+                    <Button variant="outline" className="w-full">View Wallet</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-
-          {isLoading ? (
-            <div className="text-center py-8">Loading tasks...</div>
-          ) : recentTasks && recentTasks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentTasks.map((task) => (
-                <CompactTaskCard key={task._id} task={task} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-medium text-gray-900">No tasks available</h3>
-              <p className="text-sm text-gray-500 mt-2">New tasks will appear here when available</p>
-            </div>
-          )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-dashed border-2 hover:border-primary transition-colors">
-            <CardContent className="p-6 text-center">
-              <h3 className="text-base font-semibold mb-2">Browse Available Tasks</h3>
-              <p className="text-sm text-gray-600 mb-4">Find and apply for new tasks</p>
-              <Link to="/pending-tasks">
-                <Button className="w-full">Browse Tasks</Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="border-dashed border-2 hover:border-primary transition-colors">
-            <CardContent className="p-6 text-center">
-              <h3 className="text-base font-semibold mb-2">Work History</h3>
-              <p className="text-sm text-gray-600 mb-4">Review completed projects</p>
-              <Link to="/completed-tasks">
-                <Button variant="outline" className="w-full">View History</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
+        )}
       </div>
     </div>
   );
