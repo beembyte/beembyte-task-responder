@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AVAILABILITY_STATUS, User } from '@/types';
+import { AVAILABILITY_STATUS, User, USER_STATUS } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import useTask, { DashStatsData } from '@/hooks/useTask';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     // Only fetch tasks if user is activated (not pending)
-    if (user && user.status !== 'pending') {
+    if (user && user.status !== USER_STATUS.PENDING) {
       const fetchRecentTasks = async () => {
         const response = await getPendingUnassignedTask({
           limit: 6,
@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     // Only fetch stats if user is activated (not pending)
-    if (user && user.status !== 'pending') {
+    if (user && user.status !== USER_STATUS.PENDING) {
       const getStats = async () => {
         const response = await getDashboardStats()
         setDashStats(response.data)
@@ -97,7 +97,7 @@ const Dashboard: React.FC = () => {
   };
 
   // Check if user is pending vetting approval
-  const isPendingVetting = user?.status === 'pending';
+  const isPendingVetting = user?.status === USER_STATUS.PENDING;
 
   return (
     <div className="min-h-screen flex flex-col">

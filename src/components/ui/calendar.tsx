@@ -13,7 +13,6 @@ function Calendar({
   classNames,
   showOutsideDays = true,
   disabled,
-  onSelect,
   ...props
 }: CalendarProps) {
   // Default disabled function to prevent past dates
@@ -31,7 +30,6 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
       disabled={combinedDisabled}
-      onSelect={onSelect}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
