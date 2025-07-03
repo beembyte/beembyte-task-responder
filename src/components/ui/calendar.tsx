@@ -18,6 +18,9 @@ function Calendar({
   onDateSelect,
   ...props
 }: CalendarProps) {
+  // Extract onSelect from props before using them
+  const { onSelect: originalOnSelect, ...dayPickerProps } = props;
+
   // Default disabled function to prevent past dates
   const defaultDisabled = (date: Date) => {
     const today = new Date();
@@ -50,17 +53,17 @@ function Calendar({
     }
     
     // Call the original onSelect if provided
-    if (props.onSelect) {
-      props.onSelect(selected);
+    if (originalOnSelect) {
+      originalOnSelect(selected);
     }
-  }, [onDateSelect, props.onSelect]);
+  }, [onDateSelect, originalOnSelect]);
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
       disabled={combinedDisabled}
-      {...props}
+      {...dayPickerProps}
       onSelect={handleSelect}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
