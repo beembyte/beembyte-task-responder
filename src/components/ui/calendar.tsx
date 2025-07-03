@@ -16,7 +16,6 @@ function Calendar({
   showOutsideDays = true,
   disabled,
   onDateSelect,
-  onSelect,
   ...props
 }: CalendarProps) {
   // Default disabled function to prevent past dates
@@ -51,16 +50,17 @@ function Calendar({
     }
     
     // Call the original onSelect if provided
-    if (onSelect) {
-      onSelect(selected);
+    if (props.onSelect) {
+      props.onSelect(selected);
     }
-  }, [onDateSelect, onSelect]);
+  }, [onDateSelect, props.onSelect]);
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
       disabled={combinedDisabled}
+      {...props}
       onSelect={handleSelect}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -100,7 +100,6 @@ function Calendar({
         IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
       }}
-      {...props}
     />
   );
 }
