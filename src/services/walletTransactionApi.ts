@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from "@/config/env";
 import { getAuthToken } from "@/utils/formatUtils";
 
@@ -16,6 +17,8 @@ export interface WalletTransaction {
     note?: string;
   };
   status: string;
+  task_fee_amount?: number;
+  task_fee_percentage?: number;
   createdAt: string;
   updatedAt: string;
 }
