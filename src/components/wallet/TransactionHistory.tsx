@@ -150,7 +150,6 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ userType = 'use
                       >
                         <div className="flex items-center space-x-3">
                           <div className="text-lg">
-                            {/* {getTransactionIcon(transaction.transaction_type, transaction.direction)} */}
                             <div
                               className={`p-1.5 rounded-full ${transaction.direction === 'credit'
                                 ? 'bg-green-100 dark:bg-green-900/20'
@@ -185,6 +184,15 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ userType = 'use
                             {transaction.direction === 'credit' ? '+' : '-'}
                             {formatAmount(transaction.amount, transaction.currency)}
                           </p>
+                          
+                          {/* Task Fee Display */}
+                          {transaction.task_fee_amount && transaction.task_fee_percentage && (
+                            <p className="text-xs text-red-600 font-medium">
+                              - {formatAmount(transaction.task_fee_amount, transaction.currency)} 
+                              <span className="ml-1">({transaction.task_fee_percentage}% fee)</span>
+                            </p>
+                          )}
+                          
                           <span
                             className={cn(
                               "text-xs px-2 py-1 rounded-full",
