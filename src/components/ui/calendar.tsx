@@ -6,13 +6,17 @@ import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  onDateSelect?: (date: Date | undefined) => void;
+};
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
   disabled,
+  onDateSelect,
+  onSelect,
   ...props
 }: CalendarProps) {
   // Default disabled function to prevent past dates
@@ -25,11 +29,22 @@ function Calendar({
   // Combine user disabled prop with default disabled
   const combinedDisabled = disabled || defaultDisabled;
 
+  // Handle date selection with auto-close
+  const handleSelect = (date: Date | undefined) => {
+    if (onSelect) {
+      onSelect(date);
+    }
+    if (onDateSelect) {
+      onDateSelect(date);
+    }
+  };
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
       disabled={combinedDisabled}
+      onSelect={handleSelect}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
