@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -86,7 +87,7 @@ export const useAuth = () => {
         }
 
         if (!user.is_vetted) {
-          navigate('/vetting');
+          navigate('/vetting', { state: { is_vetted: user.is_vetted } });
           return;
         }
 
@@ -129,7 +130,7 @@ export const useAuth = () => {
         toast.success(message)
 
         if (!response.data.is_vetted) {
-          navigate("/vetting")
+          navigate("/vetting", { state: { is_vetted: response.data.is_vetted } })
         } else {
           navigate("/login")
         }
