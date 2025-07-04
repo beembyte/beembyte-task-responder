@@ -30,10 +30,10 @@ const VettingProtectedRoute: React.FC<VettingProtectedRouteProps> = ({ children 
         await verifyAuthToken();
         setIsAuthenticated(true);
         
-        // Check if vetting is already completed
-        const vettingCompleted = localStorage.getItem('vettingCompleted');
-        if (vettingCompleted) {
-          // Vetting already completed, redirect to dashboard
+        // Check if user is already vetted based on user data
+        const userData = JSON.parse(authorizeUser);
+        if (userData.is_vetted) {
+          // User is already vetted, redirect to dashboard
           setIsLoading(false);
           return;
         }
@@ -62,13 +62,16 @@ const VettingProtectedRoute: React.FC<VettingProtectedRouteProps> = ({ children 
     return <Navigate to="/login" replace />;
   }
 
-  // If vetting is completed, redirect to dashboard
-  const vettingCompleted = localStorage.getItem('vettingCompleted');
-  if (vettingCompleted) {
-    return <Navigate to="/dashboard" replace />;
+  // Check if user is vetted based on stored user data
+  const authorizeUser = localStorage.getItem('authorizeUser');
+  if (authorizeUser) {
+    const userData = JSON.parse(authorizeUser);
+    if (userData.is_vetted) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
-  // User is authenticated and vetting is not completed, show vetting page
+  // User is authenticated and not vetted, show vetting page
   return <>{children}</>;
 };
 
