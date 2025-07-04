@@ -85,11 +85,7 @@ export const useAuth = () => {
           }
         }
 
-        // Check if this is a new user who needs to complete vetting
-        const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
-        const vettingCompleted = localStorage.getItem('vettingCompleted');
-        
-        if (hasCompletedRegistration && !vettingCompleted) {
+        if (!user.is_vetted) {
           navigate('/vetting');
           return;
         }
@@ -131,12 +127,8 @@ export const useAuth = () => {
         localStorage.removeItem("authEmail")
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Verification successful!"
         toast.success(message)
-        
-        // Check if this is a new user who needs to complete vetting
-        const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
-        const vettingCompleted = localStorage.getItem('vettingCompleted');
-        
-        if (hasCompletedRegistration && !vettingCompleted) {
+
+        if (!response.data.is_vetted) {
           navigate("/vetting")
         } else {
           navigate("/login")

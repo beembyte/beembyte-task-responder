@@ -41,10 +41,20 @@ export interface AuthResponse {
       first_name: string;
       last_name: string;
       email: string;
+      is_vetted: boolean;
       phone_number?: string;
     };
   };
   token?: string;
+}
+
+export interface AuthVerifyResponse {
+  errors?: FieldError[];
+  success: boolean;
+  message: string | { message: string; verified: boolean };
+  data?: {
+    is_vetted: boolean;
+  };
 }
 
 // Set cookie with token
@@ -115,7 +125,9 @@ export const authApi = {
   },
 
   // Verify signup code
-  verifyCode: async (verifyData: VerifyCodeRequest): Promise<AuthResponse> => {
+  verifyCode: async (
+    verifyData: VerifyCodeRequest
+  ): Promise<AuthVerifyResponse> => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/responder/signup-verification`,
