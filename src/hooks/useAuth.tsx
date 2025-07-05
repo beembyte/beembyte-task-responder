@@ -76,12 +76,12 @@ export const useAuth = () => {
               // Add error handling for socket connection
               socket.on("connect_error", (error) => {
                 console.error("Socket connection error:", error)
-                toast.error("Could not establish live connection. Some features may be limited.")
+                // toast.error("Could not establish live connection. Some features may be limited.")
               })
             } catch (socketError) {
               console.error("Socket connection error:", socketError)
               // Show toast message but don't prevent login
-              toast.error("Could not establish live connection. Some features may be limited.")
+              // toast.error("Could not establish live connection. Some features may be limited.")
             }
           }
         }
