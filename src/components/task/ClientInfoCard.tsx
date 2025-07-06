@@ -9,9 +9,9 @@ interface ClientInfoCardProps {
   task: TaskInfo
 }
 
-const getRoboHashUrl = (name: string) => {
-  const base = name ? name.trim() : "client";
-  return `https://robohash.org/${encodeURIComponent(base)}.png?size=80x80&set=set3`;
+const getDicebearUrl = (firstName: string) => {
+  const seed = firstName ? firstName.trim() : "client";
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
 };
 
 const renderStatusBadge = (status?: string) => {
@@ -44,7 +44,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarImage
-              src={getRoboHashUrl(client?.first_name || "client")}
+              src={getDicebearUrl(client?.first_name || "client")}
               alt={client?.first_name || "Client"}
             />
             <AvatarFallback>?</AvatarFallback>

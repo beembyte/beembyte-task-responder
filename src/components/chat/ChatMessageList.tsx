@@ -25,6 +25,11 @@ interface ChatMessageListProps {
   onDeleteMessage?: (messageId: string) => void
 }
 
+const getDicebearUrl = (firstName: string) => {
+  const seed = firstName ? firstName.trim() : "user";
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
+};
+
 const ChatMessageList: React.FC<ChatMessageListProps> = ({
   messages,
   user,
@@ -73,7 +78,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
           >
             {message.sender !== "responder" && (
               <Avatar className="h-7 w-7 mt-1 mr-2 flex-shrink-0">
-                <AvatarImage src={`https://robohash.org/${user?.first_name || "responder"}.png?set=set3`} alt={recipient.name} />
+                <AvatarImage src={getDicebearUrl(task?.created_by?.first_name || "client")} alt={recipient.name} />
                 <AvatarFallback>{recipient.name.charAt(0)}</AvatarFallback>
               </Avatar>
             )}
@@ -121,7 +126,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
             {message.sender === "responder" && (
               <Avatar className="h-7 w-7 mt-1 ml-2 flex-shrink-0">
                 <AvatarImage
-                  src={`https://robohash.org/${user?.first_name || "responder"}.png?set=set4`}
+                  src={getDicebearUrl(user?.first_name || "responder")}
                   alt={user?.first_name || "You"}
                 />
                 <AvatarFallback>{(user?.first_name || "Y").charAt(0)}</AvatarFallback>
@@ -136,4 +141,3 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
 }
 
 export default ChatMessageList
-

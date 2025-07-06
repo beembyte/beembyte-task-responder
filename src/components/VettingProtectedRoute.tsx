@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getCookie } from '@/utils/formatUtils';
 
@@ -10,8 +10,12 @@ interface VettingProtectedRouteProps {
 
 const VettingProtectedRoute: React.FC<VettingProtectedRouteProps> = ({ children }) => {
   const { verifyAuthToken } = useAuth();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check if is_vetted status was passed through navigation state
+  const passedVettingStatus = location.state?.is_vetted;
 
   useEffect(() => {
     const checkAuthAndVettingStatus = async () => {
@@ -30,10 +34,20 @@ const VettingProtectedRoute: React.FC<VettingProtectedRouteProps> = ({ children 
         await verifyAuthToken();
         setIsAuthenticated(true);
         
-        // Check if vetting is already completed
-        const vettingCompleted = localStorage.getItem('vettingCompleted');
-        if (vettingCompleted) {
-          // Vetting already completed, redirect to dashboard
+        // Check vetting status - prioritize navigation state over localStorage
+        let isVetted = false;
+        
+        if (passedVettingStatus !== undefined) {
+          // Use the fresh status passed from login/verification
+          isVetted = passedVettingStatus;
+        } else {
+          // Fall back to stored user data
+          const userData = JSON.parse(authorizeUser);
+          isVetted = userData.is_vetted;
+        }
+        
+        if (isVetted) {
+          // User is already vetted, redirect to dashboard
           setIsLoading(false);
           return;
         }
@@ -47,7 +61,7 @@ const VettingProtectedRoute: React.FC<VettingProtectedRouteProps> = ({ children 
     };
 
     checkAuthAndVettingStatus();
-  }, [verifyAuthToken]);
+  }, [verifyAuthToken, passedVettingStatus]);
 
   if (isLoading) {
     return (
@@ -62,13 +76,26 @@ const VettingProtectedRoute: React.FC<VettingProtectedRouteProps> = ({ children 
     return <Navigate to="/login" replace />;
   }
 
-  // If vetting is completed, redirect to dashboard
-  const vettingCompleted = localStorage.getItem('vettingCompleted');
-  if (vettingCompleted) {
+  // Check vetting status - prioritize navigation state over localStorage
+  let isVetted = false;
+  
+  if (passedVettingStatus !== undefined) {
+    // Use the fresh status passed from login/verification
+    isVetted = passedVettingStatus;
+  } else {
+    // Fall back to stored user data
+    const authorizeUser = localStorage.getItem('authorizeUser');
+    if (authorizeUser) {
+      const userData = JSON.parse(authorizeUser);
+      isVetted = userData.is_vetted;
+    }
+  }
+
+  if (isVetted) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // User is authenticated and vetting is not completed, show vetting page
+  // User is authenticated and not vetted, show vetting page
   return <>{children}</>;
 };
 
