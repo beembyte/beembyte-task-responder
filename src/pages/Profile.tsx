@@ -118,7 +118,7 @@ const Profile: React.FC = () => {
                         <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-4">
                             <Avatar className="h-16 w-16 sm:h-24 sm:w-24 border-4 border-primary/10">
                                 <AvatarImage
-                                    src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`}
+                                    src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user?.first_name}`}
                                     alt={user?.first_name}
                                 />
                                 <AvatarFallback className="text-lg sm:text-2xl bg-primary/10">
@@ -126,14 +126,14 @@ const Profile: React.FC = () => {
                                     {formData.last_name.charAt(0)}
                                 </AvatarFallback>
                             </Avatar>
-                            
+
                             <div className="flex-1 text-center sm:text-left">
                                 <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-2">
                                     <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                                         {formData.first_name} {formData.last_name}
                                     </h1>
                                     {user?.rank_status && (
-                                        <Badge 
+                                        <Badge
                                             className="text-white text-xs"
                                             style={{ backgroundColor: user.rank_status.rank_color }}
                                         >
@@ -142,11 +142,11 @@ const Profile: React.FC = () => {
                                         </Badge>
                                     )}
                                 </div>
-                                
+
                                 {user?.job_title && (
                                     <p className="text-gray-600 mb-2 text-sm sm:text-base">{user.job_title}</p>
                                 )}
-                                
+
                                 <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 mb-3">
                                     {user?.city && user?.country && (
                                         <div className="flex items-center space-x-1">
@@ -161,7 +161,7 @@ const Profile: React.FC = () => {
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
                                     <div className="flex items-center space-x-2">
                                         <span className="text-xs text-gray-500">ID:</span>
@@ -176,7 +176,7 @@ const Profile: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Rank Progress Display - Mobile optimized */}
                         {user?.rank_status && user?.rank_criteria && (
                             <div className="mt-4">
@@ -186,11 +186,11 @@ const Profile: React.FC = () => {
                                         <span>{user.rank_status.criteria.tasks_completed} for next rank</span>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div 
+                                        <div
                                             className="h-2 rounded-full transition-all duration-300"
-                                            style={{ 
+                                            style={{
                                                 width: `${Math.min((user.rank_criteria.tasks_completed / user.rank_status.criteria.tasks_completed) * 100, 100)}%`,
-                                                backgroundColor: user.rank_status.rank_color 
+                                                backgroundColor: user.rank_status.rank_color
                                             }}
                                         />
                                     </div>
@@ -213,11 +213,10 @@ const Profile: React.FC = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                                        activeTab === tab.id
+                                    className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${activeTab === tab.id
                                             ? 'border-primary text-primary'
                                             : 'border-transparent text-gray-500 hover:text-gray-700'
-                                    }`}
+                                        }`}
                                 >
                                     {tab.label}
                                 </button>
@@ -378,7 +377,7 @@ const Profile: React.FC = () => {
                                         <Label className="text-sm">Current Rank Progress</Label>
                                         <div className="p-4 bg-gray-50 rounded-lg">
                                             <div className="flex items-center justify-between mb-2">
-                                                <Badge 
+                                                <Badge
                                                     className="text-white text-xs"
                                                     style={{ backgroundColor: user.rank_status.rank_color }}
                                                 >
@@ -390,11 +389,11 @@ const Profile: React.FC = () => {
                                                 </span>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-3">
-                                                <div 
+                                                <div
                                                     className="h-3 rounded-full transition-all duration-300"
-                                                    style={{ 
+                                                    style={{
                                                         width: `${Math.min(((user.rank_criteria?.tasks_completed || 0) / user.rank_status.criteria.tasks_completed) * 100, 100)}%`,
-                                                        backgroundColor: user.rank_status.rank_color 
+                                                        backgroundColor: user.rank_status.rank_color
                                                     }}
                                                 />
                                             </div>
