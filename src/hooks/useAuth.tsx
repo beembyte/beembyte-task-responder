@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -75,22 +76,18 @@ export const useAuth = () => {
               // Add error handling for socket connection
               socket.on("connect_error", (error) => {
                 console.error("Socket connection error:", error)
-                toast.error("Could not establish live connection. Some features may be limited.")
+                // toast.error("Could not establish live connection. Some features may be limited.")
               })
             } catch (socketError) {
               console.error("Socket connection error:", socketError)
               // Show toast message but don't prevent login
-              toast.error("Could not establish live connection. Some features may be limited.")
+              // toast.error("Could not establish live connection. Some features may be limited.")
             }
           }
         }
 
-        // Check if this is a new user who needs to complete vetting
-        const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
-        const vettingCompleted = localStorage.getItem('vettingCompleted');
-        
-        if (hasCompletedRegistration && !vettingCompleted) {
-          navigate('/vetting');
+        if (!user.is_vetted) {
+          navigate('/vetting', { state: { is_vetted: user.is_vetted } });
           return;
         }
 
@@ -131,13 +128,9 @@ export const useAuth = () => {
         localStorage.removeItem("authEmail")
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Verification successful!"
         toast.success(message)
-        
-        // Check if this is a new user who needs to complete vetting
-        const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
-        const vettingCompleted = localStorage.getItem('vettingCompleted');
-        
-        if (hasCompletedRegistration && !vettingCompleted) {
-          navigate("/vetting")
+
+        if (!response.data.is_vetted) {
+          navigate("/vetting", { state: { is_vetted: response.data.is_vetted } })
         } else {
           navigate("/login")
         }

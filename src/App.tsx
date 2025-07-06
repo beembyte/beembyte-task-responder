@@ -17,6 +17,9 @@ import Chat from '@/pages/Chat';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import VerifyCode from '@/pages/VerifyCode';
+import ForgotPassword from '@/pages/ForgotPassword';
+import VerifyResetOTP from '@/pages/VerifyResetOTP';
+import ResetPassword from '@/pages/ResetPassword';
 import Vetting from '@/pages/Vetting';
 import Profile from '@/pages/Profile';
 import Wallet from '@/pages/Wallet';
@@ -36,6 +39,9 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-code" element={<VerifyCode />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/verify-reset-otp" element={<VerifyResetOTP />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 
                 {/* Vetting route with special protection */}
                 <Route path="/vetting" element={

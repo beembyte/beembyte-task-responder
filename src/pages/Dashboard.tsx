@@ -13,6 +13,11 @@ import CompactTaskCard from '@/components/CompactTaskCard';
 import RankingBadge from '@/components/RankingBadge';
 import AccountActivationBanner from '@/components/AccountActivationBanner';
 
+const getDicebearUrl = (firstName: string) => {
+  const seed = firstName ? firstName.trim() : "user";
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
+};
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { loggedInUser } = useAuth()
@@ -107,7 +112,7 @@ const Dashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16 border">
-              <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`} alt={user?.first_name} />
+              <AvatarImage src={getDicebearUrl(user?.first_name || 'user')} alt={user?.first_name} />
               <AvatarFallback>{user?.first_name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <div>

@@ -8,10 +8,10 @@ interface ResponderInfoCardProps {
   responder: UserType | null;
 }
 
-// Generate RoboHash set3 avatar (set3 = cute monsters/avatars)
-const getRoboHashUrl = (name: string) => {
-  const base = name ? name.trim() : "client";
-  return `https://robohash.org/${encodeURIComponent(base)}.png?set=set3&size=80x80`;
+// Generate Dicebear avatar using firstname
+const getDicebearUrl = (firstName: string) => {
+  const seed = firstName ? firstName.trim() : "client";
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
 };
 
 const ResponderInfoCard: React.FC<ResponderInfoCardProps> = ({ responder }) => {
@@ -33,7 +33,7 @@ const ResponderInfoCard: React.FC<ResponderInfoCardProps> = ({ responder }) => {
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage
-              src={getRoboHashUrl(responder?.first_name || "client")}
+              src={getDicebearUrl(responder?.first_name || "client")}
               alt={responderName}
             />
             <AvatarFallback>

@@ -28,6 +28,18 @@ export interface ResendVerificationRequest {
   email: string;
 }
 
+export interface VerifyOTPRequest {
+  code: string;
+  type: string;
+}
+
+export interface ResetPasswordRequest {
+  code: string;
+  new_password: string;
+  confirm_password: string;
+  user_id: string;
+}
+
 export interface AuthResponse {
   errors?: FieldError[];
   success: boolean;
@@ -41,10 +53,22 @@ export interface AuthResponse {
       first_name: string;
       last_name: string;
       email: string;
+      is_vetted: boolean;
       phone_number?: string;
     };
+    email?: string;
+    user_id?: string;
   };
   token?: string;
+}
+
+export interface AuthVerifyResponse {
+  errors?: FieldError[];
+  success: boolean;
+  message: string | { message: string; verified: boolean };
+  data?: {
+    is_vetted: boolean;
+  };
 }
 
 // Set cookie with token
@@ -115,7 +139,9 @@ export const authApi = {
   },
 
   // Verify signup code
-  verifyCode: async (verifyData: VerifyCodeRequest): Promise<AuthResponse> => {
+  verifyCode: async (
+    verifyData: VerifyCodeRequest
+  ): Promise<AuthVerifyResponse> => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/responder/signup-verification`,
@@ -210,6 +236,54 @@ export const authApi = {
       return {
         success: false,
         message: "Failed to send reset link. Please try again later.",
+      };
+    }
+  },
+
+  verifyOTP: async (verifyData: VerifyOTPRequest): Promise<AuthResponse> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/responder/verify-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(verifyData),
+        }
+      );
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Verify OTP error:", error);
+      return {
+        success: false,
+        message: "Failed to verify OTP. Please try again later.",
+      };
+    }
+  },
+
+  resetPassword: async (resetData: ResetPasswordRequest): Promise<AuthResponse> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/responder/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(resetData),
+        }
+      );
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Reset password error:", error);
+      return {
+        success: false,
+        message: "Failed to reset password. Please try again later.",
       };
     }
   },
