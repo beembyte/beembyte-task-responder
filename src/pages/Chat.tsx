@@ -15,6 +15,11 @@ import { useTaskInfo } from "@/hooks/useTaskInfo"
 import FileUploadPreview from "@/components/chat/FileUploadPreview"
 import { TASK_STATUS, USER_FINAL_DECISION } from "@/types"
 
+const getDicebearUrl = (firstName: string) => {
+  const seed = firstName ? firstName.trim() : "client";
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
+};
+
 const Chat = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -44,7 +49,7 @@ const Chat = () => {
   // Show recipient as the client
   const recipient = {
     name: task?.created_by?.first_name || "Client",
-    avatar: "https://robohash.org/client.png?set=set4",
+    avatar: getDicebearUrl(task?.created_by?.first_name || "client"),
     isOnline: false,
   }
 
