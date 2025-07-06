@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -112,15 +113,18 @@ const Dashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16 border">
-              <AvatarImage src={getDicebearUrl(user?.first_name || 'user')} alt={user?.first_name} />
+              <AvatarImage 
+                src={getDicebearUrl(user?.first_name || 'user')} 
+                alt={user?.first_name || 'User'} 
+              />
               <AvatarFallback>{user?.first_name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-gray-900">
                 Welcome, {user?.first_name}!
               </h1>
               <div className="flex flex-col space-y-2">
-                <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
                   <span className="text-sm font-medium text-gray-500">
                     <span className="mr-2">ResponderId:</span>
                     <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
@@ -128,12 +132,14 @@ const Dashboard: React.FC = () => {
                     </span>
                   </span>
                   {!isPendingVetting && (
-                    <RankingBadge 
-                      rankStatus={user?.rank_status}
-                      userCriteria={user?.rank_criteria}
-                      completedTasks={dashboardStats?.completedThisMonthCount || 0} 
-                      size="sm" 
-                    />
+                    <div className="flex-shrink-0">
+                      <RankingBadge 
+                        rankStatus={user?.rank_status}
+                        userCriteria={user?.rank_criteria}
+                        completedTasks={dashboardStats?.completedThisMonthCount || 0} 
+                        size="sm" 
+                      />
+                    </div>
                   )}
                 </div>
                 {!isPendingVetting && (
