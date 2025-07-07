@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -75,7 +76,7 @@ const Vetting: React.FC = () => {
       case 2:
         return !!(formData.job_title && formData.years_of_experience && formData.tools_technologies && formData.preferred_categories.length > 0);
       case 3:
-        return !!(resumeFile);
+        return true; // Resume is now optional, so this step is always valid
       case 4:
         return !!(callDate && callTime && formData.call_platform);
       default:
@@ -143,7 +144,7 @@ const Vetting: React.FC = () => {
     
     // Don't leave vetting page if file upload fails or vetting fails
     try {
-      // Upload resume file first
+      // Upload resume file if provided
       if (resumeFile) {
         const uploadResult = await uploadSingleFile(resumeFile);
         if (uploadResult.success && uploadResult.url) {
@@ -163,7 +164,7 @@ const Vetting: React.FC = () => {
         preferred_callDate: callDate,
         preferred_callTime: callTime,
         call_platform: formData.call_platform,
-        resume: resumeUrl
+        ...(resumeUrl && { resume: resumeUrl }) // Only include resume if uploaded
       };
       
       const result = await submitVetting(submissionData);
@@ -334,7 +335,7 @@ const Vetting: React.FC = () => {
             <h3 className="text-2xl font-semibold">Resume Upload</h3>
             <div className="space-y-6">
               <div>
-                <Label htmlFor="resume">Upload Resume *</Label>
+                <Label htmlFor="resume">Upload Resume (Optional)</Label>
                 <div className="mt-2">
                   <input
                     id="resume"
@@ -351,7 +352,7 @@ const Vetting: React.FC = () => {
                   >
                     <Upload size={24} />
                     <span className="text-sm">
-                      {resumeFile ? resumeFile.name : "Click to upload your resume"}
+                      {resumeFile ? resumeFile.name : "Click to upload your resume (optional)"}
                     </span>
                     <span className="text-xs text-gray-500">
                       Supports PDF, DOC, DOCX files
