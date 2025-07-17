@@ -12,31 +12,49 @@ import { Loader2 } from 'lucide-react';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, verifyAuthToken } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Check if user is already authenticated and redirect
   useEffect(() => {
-    const authToken = getCookie('authToken');
-    const authorizeUser = localStorage.getItem('authorizeUser');
-    
-    if (authToken && authorizeUser) {
-      // User is already authenticated, check if they need vetting
-      const vettingCompleted = localStorage.getItem('vettingCompleted');
-      const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
-      
-      if (hasCompletedRegistration && !vettingCompleted) {
-        navigate('/vetting');
-      } else {
-        const params = new URLSearchParams(location.search);
-        const returnTo = params.get('returnTo') || '/dashboard';
-        navigate(returnTo);
+    const checkAuthStatus = async () => {
+      try {
+        const authToken = getCookie('authToken');
+        const authorizeUser = localStorage.getItem('authorizeUser');
+        
+        if (authToken && authorizeUser) {
+          // Verify the token is still valid
+          await verifyAuthToken();
+          
+          // User is authenticated, check if they need vetting
+          const user = JSON.parse(authorizeUser);
+          const vettingCompleted = localStorage.getItem('vettingCompleted');
+          const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
+          
+          if (hasCompletedRegistration && !vettingCompleted) {
+            navigate('/vetting');
+          } else {
+            const params = new URLSearchParams(location.search);
+            const returnTo = params.get('returnTo') || '/dashboard';
+            navigate(returnTo);
+          }
+        }
+      } catch (error) {
+        console.log('Auth verification failed, user needs to login');
+        // Clear invalid auth data
+        document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        localStorage.removeItem("authorizeUser");
+      } finally {
+        setIsCheckingAuth(false);
       }
-    }
-  }, [navigate, location.search]);
+    };
+
+    checkAuthStatus();
+  }, [navigate, location.search, verifyAuthToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,18 +62,25 @@ const Login: React.FC = () => {
     
     try {
       const result = await login({ email, password });
-      
-      // Only navigate if login was successful
-      // If login failed due to unverified email, useAuth will handle navigation to verify-code
-      // If login was successful, useAuth will handle navigation to dashboard
-      // So we don't need to do any navigation here anymore
-      
+      // Navigation is handled by useAuth hook
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading while checking auth status
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Checking authentication...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">

@@ -1,3 +1,4 @@
+
 @import "react-datepicker/dist/react-datepicker.css";
 @tailwind base;
 @tailwind components;
@@ -66,6 +67,31 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 14px;
+  }
+  
+  /* Override all font sizes to use only 12px, 13px, 14px, 18px */
+  .text-xs { font-size: 12px; }
+  .text-sm { font-size: 13px; }
+  .text-base { font-size: 14px; }
+  .text-lg { font-size: 18px; }
+  .text-xl { font-size: 18px; }
+  .text-2xl { font-size: 18px; }
+  .text-3xl { font-size: 18px; }
+  .text-4xl { font-size: 18px; }
+  .text-5xl { font-size: 18px; }
+  .text-6xl { font-size: 18px; }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-size: 18px;
+  }
+  
+  p, span, div {
+    font-size: 14px;
+  }
+  
+  small {
+    font-size: 12px;
   }
 }
 
@@ -87,11 +113,13 @@
 }
 
 .react-datepicker__day-name {
-  @apply text-muted-foreground text-sm font-normal w-9 leading-9;
+  @apply text-muted-foreground w-9 leading-9;
+  font-size: 13px;
 }
 
 .react-datepicker__day {
-  @apply w-9 h-9 leading-9 text-sm hover:bg-accent hover:text-accent-foreground rounded-md;
+  @apply w-9 h-9 leading-9 hover:bg-accent hover:text-accent-foreground rounded-md;
+  font-size: 13px;
 }
 
 .react-datepicker__day--selected {

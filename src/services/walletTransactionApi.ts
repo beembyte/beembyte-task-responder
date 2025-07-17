@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from "@/config/env";
 import { getAuthToken } from "@/utils/formatUtils";
 
@@ -45,24 +44,19 @@ const walletTransactionApi = {
   getResponderTransactionHistory: async (
     params: TransactionHistoryParams = {}
   ): Promise<TransactionHistoryResponse> => {
-    const token = getAuthToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
     const queryParams = new URLSearchParams();
     if (params.month) queryParams.append("month", params.month);
     if (params.year) queryParams.append("year", params.year.toString());
     if (params.direction) queryParams.append("direction", params.direction);
 
     const response = await fetch(
-      `${API_BASE_URL}/responder/wallet-transaction/history?${queryParams}`,
+      `${API_BASE_URL}/wallet-transactions/history?${queryParams}`,
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
       }
     );
 
