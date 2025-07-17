@@ -23,8 +23,6 @@ export const taskApi = {
   ) => {
     const { limit, page, sort, title, description } = payload;
     try {
-      const token = getAuthToken();
-
       // Build query parameters properly
       const queryParams = new URLSearchParams({
         limit: limit.toString(),
@@ -41,13 +39,13 @@ export const taskApi = {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/responder/task/all-unassigned-pending-task?${queryParams.toString()}`,
+        `${API_BASE_URL}/tasks/all-unassigned-pending-task?${queryParams.toString()}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         }
       );
       const data = await response.json();
@@ -64,8 +62,6 @@ export const taskApi = {
   getCompletedTask: async (payload: getCompletedTaskPayload) => {
     const { limit, page, sort, title, description } = payload;
     try {
-      const token = getAuthToken();
-
       // Build query parameters properly
       const queryParams = new URLSearchParams({
         limit: limit.toString(),
@@ -82,13 +78,13 @@ export const taskApi = {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/responder/task/all-completed-task?${queryParams.toString()}`,
+        `${API_BASE_URL}/tasks/all-completed-task?${queryParams.toString()}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         }
       );
       const data = await response.json();
@@ -104,17 +100,13 @@ export const taskApi = {
 
   getDashboardStats: async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_BASE_URL}/responder/task/dashboard-stats`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/tasks/dashboard-stats`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
       const data = await response.json();
       return data;
     } catch (error) {
@@ -128,15 +120,14 @@ export const taskApi = {
 
   getOneTaskById: async (task_id: string) => {
     try {
-      const token = getAuthToken();
       const response = await fetch(
-        `${API_BASE_URL}/responder/task/findOne?task_id=${task_id}`,
+        `${API_BASE_URL}/tasks/findOne?task_id=${task_id}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         }
       );
       const data = await response.json();
@@ -152,18 +143,14 @@ export const taskApi = {
 
   acceptTask: async (task_id: string) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_BASE_URL}/responder/task/accept-task`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ task_id }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/tasks/accept-task`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task_id }),
+        credentials: "include",
+      });
       const data = await response.json();
       return data;
     } catch (error) {
@@ -177,18 +164,14 @@ export const taskApi = {
 
   cancelTask: async (task_id: string) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_BASE_URL}/responder/task/cancel-task`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ task_id }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/tasks/cancel-task`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task_id }),
+        credentials: "include",
+      });
       const data = await response.json();
       return data;
     } catch (error) {
@@ -212,23 +195,19 @@ export const taskApi = {
     files_urls: string[];
   }) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_BASE_URL}/responder/task/submit-task`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            task_id,
-            description,
-            link,
-            files_urls,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/tasks/submit-task`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          task_id,
+          description,
+          link,
+          files_urls,
+        }),
+        credentials: "include",
+      });
       const data = await response.json();
       return data;
     } catch (error) {

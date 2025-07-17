@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from "../config/env";
 
 interface FieldError {
@@ -71,27 +72,12 @@ export interface AuthVerifyResponse {
   };
 }
 
-// Set cookie with token
-const setAuthCookie = (token: string) => {
-  // Set cookie to expire in 30 days
-  const expiryDate = new Date();
-  expiryDate.setDate(expiryDate.getDate() + 30);
-  document.cookie = `authToken=${token}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
-};
-
-const getAuthToken = () => {
-  return document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("authToken="))
-    ?.split("=")[1];
-};
-
 // Authentication API service
 export const authApi = {
   // Register a new user
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/responder/create`, {
+      const response = await fetch(`${API_BASE_URL}/users/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -113,21 +99,16 @@ export const authApi = {
   // Login a user
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/responder/login`, {
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
+        credentials: "include",
       });
 
       const data = await response.json();
-
-      // If login successful, store the token in a cookie
-      if (data.success && data.data?.auth_token) {
-        setAuthCookie(data.data.auth_token);
-      }
-
       return data;
     } catch (error) {
       console.error("Login error:", error);
@@ -192,17 +173,15 @@ export const authApi = {
     }
   },
 
-  verifyAuthToken: async (auth_token: string) => {
+  verifyAuthToken: async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/responder/verify-authToken/${auth_token}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/verify-auth-token`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
       const data = await response.json();
       return data;
@@ -218,16 +197,13 @@ export const authApi = {
   //   forgotPassword API
   forgotPassword: async (email: string): Promise<AuthResponse> => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/responder/forgot-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
       const data = await response.json();
       return data;
@@ -242,16 +218,13 @@ export const authApi = {
 
   verifyOTP: async (verifyData: VerifyOTPRequest): Promise<AuthResponse> => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/responder/verify-otp`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(verifyData),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(verifyData),
+      });
 
       const data = await response.json();
       return data;
@@ -264,18 +237,17 @@ export const authApi = {
     }
   },
 
-  resetPassword: async (resetData: ResetPasswordRequest): Promise<AuthResponse> => {
+  resetPassword: async (
+    resetData: ResetPasswordRequest
+  ): Promise<AuthResponse> => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/responder/reset-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(resetData),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(resetData),
+      });
 
       const data = await response.json();
       return data;
@@ -295,23 +267,19 @@ export const authApi = {
     user_id: string
   ): Promise<AuthResponse> => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_BASE_URL}/responder/change-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            old_password,
-            new_password,
-            confirm_password,
-            user_id,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          old_password,
+          new_password,
+          confirm_password,
+          user_id,
+        }),
+        credentials: "include",
+      });
 
       const data = await response.json();
       return data;
@@ -326,13 +294,12 @@ export const authApi = {
 
   logedInUser: async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/responder/user-profile`, {
+      const response = await fetch(`${API_BASE_URL}/users/user-profile`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -349,14 +316,13 @@ export const authApi = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateLoggedInUser: async (userData: any): Promise<AuthResponse> => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/responder/edit-profile`, {
+      const response = await fetch(`${API_BASE_URL}/users/edit-profile`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(userData),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -371,9 +337,21 @@ export const authApi = {
   },
 
   // Logout user and clear cookie
-  logout: () => {
-    document.cookie =
-      "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    localStorage.removeItem("authorizeUser");
+  logout: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await response.json();
+      localStorage.removeItem("authorizeUser");
+      return data;
+    } catch (error) {
+      console.error("Logout error:", error);
+      return {
+        success: false,
+        message: "Logout failed. Please try again.",
+      };
+    }
   },
 };

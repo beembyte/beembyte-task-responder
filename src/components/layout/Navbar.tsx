@@ -7,30 +7,24 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import NotificationBadge from '../NotificationBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
-  // Check authentication state from localStorage and cookies
-  const storedUser = localStorage.getItem("authorizeUser");
+  // Check authentication state from auth hook
   const authCookie = document.cookie
     .split('; ')
     .find(row => row.startsWith('authToken='));
 
-  const isLoggedIn = !!(storedUser && authCookie);
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const isLoggedIn = !!(user && authCookie);
 
   if (!isLoggedIn && (location.pathname === '/login' || location.pathname === '/register')) {
     return null;
   }
-
-  const handleLogout = () => {
-    localStorage.removeItem('authorizeUser');
-    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    window.location.href = '/login';
-  };
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -47,6 +41,14 @@ const Navbar: React.FC = () => {
     { path: '/profile', label: 'Profile', icon: User },
   ];
 
+  // Safe user display values with fallbacks
+  const userFirstName = user?.first_name || 'User';
+  const userResponderIdText = typeof user?.responder_id === 'object' && user?.responder_id?.responder_id 
+    ? user.responder_id.responder_id 
+    : typeof user?.responder_id === 'string' 
+    ? user.responder_id 
+    : 'N/A';
+
   return (
     <>
       <nav className="sticky top-0 z-50 border-b bg-background px-4 py-3 shadow-sm">
@@ -61,29 +63,28 @@ const Navbar: React.FC = () => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`${
-                      location.pathname === item.path 
-                        ? 'text-primary font-medium' 
-                        : 'text-muted-foreground hover:text-primary'
-                    } transition-colors flex items-center space-x-1`}
+                    className={`${location.pathname === item.path
+                      ? 'text-primary font-medium'
+                      : 'text-muted-foreground hover:text-primary'
+                      } transition-colors flex items-center space-x-1`}
                   >
                     <item.icon className="w-4 h-4" />
                     <span>{item.label}</span>
                   </Link>
                 ))}
-                
+
                 <Link to="/profile">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`} alt={user?.first_name} />
-                    <AvatarFallback>{user?.first_name?.charAt(0) || 'U'}</AvatarFallback>
+                    <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${userFirstName}`} alt={userFirstName} />
+                    <AvatarFallback>{userFirstName.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </Link>
               </div>
 
               {/* Mobile Menu Button */}
               <div className="md:hidden">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
                   onClick={toggleMobileMenu}
                   className="relative z-50"
@@ -115,11 +116,11 @@ const Navbar: React.FC = () => {
       {isLoggedIn && mobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50" 
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50"
             onClick={closeMobileMenu}
           />
-          
+
           {/* Menu Panel */}
           <div className="fixed top-0 right-0 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
             <div className="flex flex-col h-full">
@@ -127,12 +128,12 @@ const Navbar: React.FC = () => {
               <div className="flex items-center justify-between p-4 border-b">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={`https://robohash.org/${user?.first_name || 'user'}?set=set4`} alt={user?.first_name} />
-                    <AvatarFallback>{user?.first_name?.charAt(0) || 'U'}</AvatarFallback>
+                    <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${userFirstName}`} alt={userFirstName} />
+                    <AvatarFallback>{userFirstName.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium text-sm">{user?.first_name}</p>
-                    <p className="text-xs text-gray-500">{user?.responder_id}</p>
+                    <p className="font-medium text-sm">{userFirstName}</p>
+                    <p className="text-xs text-gray-500">{userResponderIdText}</p>
                   </div>
                 </div>
               </div>
@@ -144,11 +145,10 @@ const Navbar: React.FC = () => {
                     key={item.path}
                     to={item.path}
                     onClick={closeMobileMenu}
-                    className={`flex items-center space-x-3 px-4 py-3 text-sm transition-colors ${
-                      location.pathname === item.path
-                        ? 'bg-primary/10 text-primary border-r-2 border-primary'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                    className={`flex items-center space-x-3 px-4 py-3 text-sm transition-colors ${location.pathname === item.path
+                      ? 'bg-primary/10 text-primary border-r-2 border-primary'
+                      : 'text-gray-700 hover:bg-gray-50'
+                      }`}
                   >
                     <item.icon className="w-5 h-5" />
                     <span>{item.label}</span>
@@ -161,7 +161,7 @@ const Navbar: React.FC = () => {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    handleLogout();
+                    logout();
                     closeMobileMenu();
                   }}
                   className="w-full text-sm"

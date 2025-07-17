@@ -1,4 +1,3 @@
-
 export enum USER_ROLES {
   USER = "user",
   RESPONSER = "responder",
@@ -39,6 +38,8 @@ export interface RANK_STATUS {
   rank_color: string;
   createdAt: string;
   updatedAt: string;
+  min_tasks_completed?: number; // Added for backward compatibility
+  min_rating?: number; // Added for backward compatibility
 }
 
 export interface WALLET {
@@ -53,6 +54,53 @@ export interface WALLET {
   __v: number;
 }
 
+export interface RESPONDER_DATA {
+  rank_criteria: RANK_CRITERIA;
+  _id: string;
+  user: string;
+  responder_id: string;
+  job_title: string;
+  years_of_experience: number;
+  portfolio_link: string;
+  tools_technologies: Array<{
+    _id: string;
+    name: string;
+    __v: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  preferred_categories: Array<{
+    _id: string;
+    name: string;
+    __v: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  preferred_callDate: string;
+  preferred_callTime: string;
+  call_platform: string;
+  resume: string;
+  country: string;
+  state: string;
+  city: string;
+  bio: string;
+  skills: string[];
+  availability_status: AVAILABILITY_STATUS;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  rank_status: {
+    _id: string;
+    rank_name: string;
+    rank_color: string;
+    min_tasks_completed: number;
+    min_rating: number;
+    __v: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export type User = {
   first_name: string;
   last_name: string;
@@ -62,11 +110,12 @@ export type User = {
   role: USER_ROLES;
   _id?: string;
   is_verified: boolean;
+  is_vetted?: boolean;
   location?: USER_LOCATION;
   last_login: Date;
   has_set_transaction_pin?: boolean;
   status?: USER_STATUS;
-  responder_id?: string;
+  responder_id?: RESPONDER_DATA;
   availability_status?: AVAILABILITY_STATUS;
   // API response fields
   rank_criteria?: RANK_CRITERIA;
@@ -88,6 +137,9 @@ export type User = {
   photo_url?: string;
   rating?: number;
   tasks_count?: number;
+  // Added missing properties
+  bio?: string;
+  skills?: string[];
 };
 
 export type TaskStatus = "pending" | "accepted" | "rejected" | "completed";

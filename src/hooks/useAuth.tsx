@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -20,9 +19,24 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isPasswordChanging, setIsPasswordChanging] = useState(false)
   const [resendCountdown, setResendCountdown] = useState(0)
-  const [user, setUser] = useState<User>(null);
+  const [user, setUser] = useState<User>(() => {
+    // Initialize user state from localStorage
+    try {
+      const storedUser = localStorage.getItem("authorizeUser");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error("Error parsing stored user:", error);
+      return null;
+    }
+  });
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Helper function to update user state and localStorage
+  const updateUserState = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem("authorizeUser", JSON.stringify(userData));
+  };
 
   const register = async (userData: RegisterRequest) => {
     setIsLoading(true)
@@ -61,11 +75,10 @@ export const useAuth = () => {
 
         const { auth_token, user } = response.data
         // Token is now stored in cookie by the authApi.login function
-        localStorage.setItem("authorizeUser", JSON.stringify(user))
 
         // Ensure user is valid before setting it
         if (user) {
-          setUser(user as unknown as User)
+          updateUserState(user as unknown as User);
 
           // Connect to socket after successful login
           if (user.user_id && user.role) {
@@ -194,9 +207,9 @@ export const useAuth = () => {
     }
     authApi.logout()
     setUser(null)
+    localStorage.removeItem("authorizeUser")
     navigate("/login")
     toast.success("Successfully logged out")
-
   }
 
   const updateProfile = async (profileData: Partial<User>) => {
@@ -206,8 +219,7 @@ export const useAuth = () => {
 
       if (response.success) {
         const updatedUser = { ...user, ...profileData } as User
-        setUser(updatedUser)
-        localStorage.setItem("authorizeUser", JSON.stringify(updatedUser))
+        updateUserState(updatedUser);
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Profile updated successfully!"
         toast.success(message)
       } else {
@@ -231,7 +243,7 @@ export const useAuth = () => {
 
       const response = await authApi.logedInUser();
       if (response.success) {
-        setUser(response.data);
+        updateUserState(response.data);
         return response.data;
       }
     } catch (error) {
@@ -240,33 +252,38 @@ export const useAuth = () => {
     return null;
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await authApi.logedInUser();
+      if (response.success) {
+        updateUserState(response.data);
+        return response.data;
+      }
+      throw new Error('Failed to refresh user');
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      throw error;
+    }
+  };
+
   const verifyAuthToken = async () => {
     try {
-      const auth_token = getCookie('authToken');
-
-      if (!auth_token) {
-        // No token found, redirect to login
-        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
-        return;
-      }
-
-      const response = await authApi.verifyAuthToken(auth_token)
+      const response = await authApi.verifyAuthToken(); // already sends with credentials
       if (!response.success) {
-        // Token is invalid or expired, clear auth data and redirect
-        document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        // Token is invalid or expired — clean up and redirect
+        setUser(null);
         localStorage.removeItem("authorizeUser");
         toast.error("Session expired. Please login again.");
-        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
       }
     } catch (error) {
-      console.error("Token verification error:", error)
-      // Clear auth data on error
-      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      console.error("Token verification error:", error);
+      setUser(null);
       localStorage.removeItem("authorizeUser");
-      toast.error("Failed to verify session. Please login again.")
-      navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+      toast.error("Failed to verify session. Please login again.");
+      navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
     }
-  }
+  };
 
   const changePassword = async (
     old_password: string,
@@ -317,6 +334,7 @@ export const useAuth = () => {
     user,
     updateProfile,
     loggedInUser,
+    refreshUser,
     verifyAuthToken,
     changePassword,
     isPasswordChanging,

@@ -38,7 +38,7 @@ export function useChatMessages(chatId: string | undefined) {
       }
     }
     fetchUser()
-  }, [loggedInUser])
+  }, [])
 
   // Fetch messages from API
   const fetchMessages = useCallback(
@@ -54,7 +54,7 @@ export function useChatMessages(chatId: string | undefined) {
 
       try {
         const response = await chatApi.getMessages(chatId)
-        
+
         if (!isMountedRef.current) return
 
         if (response.success && Array.isArray(response.data)) {
@@ -145,7 +145,7 @@ export function useChatMessages(chatId: string | undefined) {
       }
 
       setMessages((prev) => [...prev, optimisticMessage])
-      
+
       // Clear form immediately
       setNewMessage("")
       setFilesToSend([])
