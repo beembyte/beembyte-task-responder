@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,17 +15,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useVetting } from '@/hooks/useVetting';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { useCountryState } from '@/hooks/useCountryState';
-import { ChevronLeft, ChevronRight, Upload, CalendarIcon, Clock, Video } from 'lucide-react';
+import { useVettingData } from '@/hooks/useVettingData';
+import { ChevronLeft, ChevronRight, Upload, CalendarIcon, Clock, Video, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-
-const EXPERTISE_AREAS = [
-  'Web Development', 'Mobile Development', 'UI/UX Design', 'Graphic Design',
-  'Content Writing', 'Copywriting', 'Digital Marketing', 'SEO/SEM',
-  'Data Analysis', 'Project Management', 'Virtual Assistant', 'Translation',
-  'Video Editing', 'Photography', 'Social Media Management', 'Customer Support',
-  'Assignment and Projects Handling'
-];
 
 const CALL_PLATFORMS = [
   { name: 'Zoom', icon: 'zoom' },
@@ -43,23 +37,28 @@ const Vetting: React.FC = () => {
   const { submitVetting, isSubmitting } = useVetting();
   const { uploadSingleFile, isUploading } = useFileUpload();
   const { countries, states, isLoadingCountries, isLoadingStates, fetchStates } = useCountryState();
+  const { categories, tools, isLoadingCategories, isLoadingTools } = useVettingData();
   const [currentStep, setCurrentStep] = useState(1);
   const [callDate, setCallDate] = useState<Date>();
   const [callTime, setCallTime] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [selectedCountryCode, setSelectedCountryCode] = useState('');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState('');
   
   const [formData, setFormData] = useState({
     job_title: '',
-    years_of_experience: '',
+    years_of_experience: 0,
     portfolio_link: '',
-    tools_technologies: '',
+    tools_technologies: [] as string[],
     preferred_categories: [] as string[],
     preferred_callDate: null as Date | null,
     preferred_callTime: '',
     call_platform: '',
     resume: '',
+    bio: '',
+    skills: [] as string[],
     country: '',
     state: '',
     city: ''
@@ -73,9 +72,9 @@ const Vetting: React.FC = () => {
       case 1:
         return !!(formData.country && formData.state && formData.city);
       case 2:
-        return !!(formData.job_title && formData.years_of_experience && formData.tools_technologies && formData.preferred_categories.length > 0);
+        return !!(formData.job_title && formData.years_of_experience && formData.tools_technologies.length > 0 && formData.preferred_categories.length > 0);
       case 3:
-        return !!(resumeFile);
+        return true; // Resume is optional, bio and skills are optional
       case 4:
         return !!(callDate && callTime && formData.call_platform);
       default:
@@ -113,13 +112,37 @@ const Vetting: React.FC = () => {
     }
   };
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
+  const handleCategoryChange = (categoryId: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
       preferred_categories: checked 
-        ? [...prev.preferred_categories, category]
-        : prev.preferred_categories.filter(item => item !== category)
+        ? [...prev.preferred_categories, categoryId]
+        : prev.preferred_categories.filter(item => item !== categoryId)
     }));
+  };
+
+  const handleToolChange = (toolId: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      tools_technologies: checked 
+        ? [...prev.tools_technologies, toolId]
+        : prev.tools_technologies.filter(item => item !== toolId)
+    }));
+  };
+
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !selectedSkills.includes(newSkill.trim())) {
+      const updatedSkills = [...selectedSkills, newSkill.trim()];
+      setSelectedSkills(updatedSkills);
+      setFormData(prev => ({ ...prev, skills: updatedSkills }));
+      setNewSkill('');
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    const updatedSkills = selectedSkills.filter(skill => skill !== skillToRemove);
+    setSelectedSkills(updatedSkills);
+    setFormData(prev => ({ ...prev, skills: updatedSkills }));
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,9 +164,8 @@ const Vetting: React.FC = () => {
 
     let resumeUrl = '';
     
-    // Don't leave vetting page if file upload fails or vetting fails
     try {
-      // Upload resume file first
+      // Upload resume file if provided
       if (resumeFile) {
         const uploadResult = await uploadSingleFile(resumeFile);
         if (uploadResult.success && uploadResult.url) {
@@ -154,7 +176,7 @@ const Vetting: React.FC = () => {
             title: "Upload Failed",
             description: "Failed to upload resume. Please try again.",
           });
-          return; // Stay on vetting page
+          return;
         }
       }
 
@@ -163,16 +185,14 @@ const Vetting: React.FC = () => {
         preferred_callDate: callDate,
         preferred_callTime: callTime,
         call_platform: formData.call_platform,
-        resume: resumeUrl
+        ...(resumeUrl && { resume: resumeUrl })
       };
       
       const result = await submitVetting(submissionData);
       
       if (result.success) {
-        // Only navigate to dashboard on successful vetting submission
         navigate('/dashboard');
       } else {
-        // Stay on vetting page and show error
         toast({
           variant: "destructive",
           title: "Vetting Submission Failed",
@@ -186,13 +206,12 @@ const Vetting: React.FC = () => {
         title: "Submission Error",
         description: "An error occurred. Please try again.",
       });
-      // Stay on vetting page
     }
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     setCallDate(date);
-    setIsDatePickerOpen(false); // Auto-close the popover
+    setIsDatePickerOpen(false);
   };
 
   const renderStep = () => {
@@ -274,45 +293,55 @@ const Vetting: React.FC = () => {
                 </div>
                 <div>
                   <Label htmlFor="experience">Years of Experience *</Label>
-                  <Select value={formData.years_of_experience} onValueChange={(value) => setFormData(prev => ({ ...prev, years_of_experience: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select years of experience" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0-1">0-1 years</SelectItem>
-                      <SelectItem value="2-3">2-3 years</SelectItem>
-                      <SelectItem value="4-5">4-5 years</SelectItem>
-                      <SelectItem value="6-10">6-10 years</SelectItem>
-                      <SelectItem value="10+">10+ years</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="experience"
+                    type="number"
+                    min="0"
+                    value={formData.years_of_experience}
+                    onChange={(e) => setFormData(prev => ({ ...prev, years_of_experience: parseInt(e.target.value) || 0 }))}
+                    placeholder="e.g., 5"
+                  />
                 </div>
               </div>
               
               <div>
-                <Label htmlFor="tools">Tools/Technologies Known *</Label>
-                <Textarea
-                  id="tools"
-                  value={formData.tools_technologies}
-                  onChange={(e) => setFormData(prev => ({ ...prev, tools_technologies: e.target.value }))}
-                  placeholder="e.g., React (Expert), Node.js (Intermediate), Figma (Advanced)"
-                />
+                <Label>Tools/Technologies *</Label>
+                {isLoadingTools ? (
+                  <p className="text-sm text-gray-500">Loading tools...</p>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
+                    {tools.map(tool => (
+                      <div key={tool._id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                        <Checkbox
+                          id={`tool-${tool._id}`}
+                          checked={formData.tools_technologies.includes(tool._id)}
+                          onCheckedChange={(checked) => handleToolChange(tool._id, checked as boolean)}
+                        />
+                        <Label htmlFor={`tool-${tool._id}`} className="text-sm cursor-pointer">{tool.name}</Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div>
                 <Label>Preferred Categories *</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
-                  {EXPERTISE_AREAS.map(category => (
-                    <div key={category} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
-                      <Checkbox
-                        id={`cat-${category}`}
-                        checked={formData.preferred_categories.includes(category)}
-                        onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
-                      />
-                      <Label htmlFor={`cat-${category}`} className="text-sm cursor-pointer">{category}</Label>
-                    </div>
-                  ))}
-                </div>
+                {isLoadingCategories ? (
+                  <p className="text-sm text-gray-500">Loading categories...</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                    {categories.map(category => (
+                      <div key={category._id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                        <Checkbox
+                          id={`cat-${category._id}`}
+                          checked={formData.preferred_categories.includes(category._id)}
+                          onCheckedChange={(checked) => handleCategoryChange(category._id, checked as boolean)}
+                        />
+                        <Label htmlFor={`cat-${category._id}`} className="text-sm cursor-pointer">{category.name}</Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div>
@@ -331,10 +360,55 @@ const Vetting: React.FC = () => {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-semibold">Resume Upload</h3>
+            <h3 className="text-2xl font-semibold">Additional Information</h3>
             <div className="space-y-6">
               <div>
-                <Label htmlFor="resume">Upload Resume *</Label>
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  value={formData.bio}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                  placeholder="Tell us about yourself and your experience..."
+                  rows={4}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="skills">Skills</Label>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      id="skills"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      placeholder="Add a skill"
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
+                    />
+                    <Button type="button" onClick={handleAddSkill} variant="outline">
+                      Add
+                    </Button>
+                  </div>
+                  {selectedSkills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedSkills.map((skill, index) => (
+                        <div key={index} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                          <span>{skill}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSkill(skill)}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="resume">Upload Resume (Optional)</Label>
                 <div className="mt-2">
                   <input
                     id="resume"
@@ -351,7 +425,7 @@ const Vetting: React.FC = () => {
                   >
                     <Upload size={24} />
                     <span className="text-sm">
-                      {resumeFile ? resumeFile.name : "Click to upload your resume"}
+                      {resumeFile ? resumeFile.name : "Click to upload your resume (optional)"}
                     </span>
                     <span className="text-xs text-gray-500">
                       Supports PDF, DOC, DOCX files

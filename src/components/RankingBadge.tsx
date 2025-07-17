@@ -11,6 +11,11 @@ interface RankingBadgeProps {
       tasks_completed: number;
       minimum_rating: number;
     };
+  } | {
+    rank_name: string;
+    rank_color: string;
+    min_tasks_completed: number;
+    min_rating: number;
   };
   userCriteria?: {
     tasks_completed: number;
@@ -30,8 +35,13 @@ const RankingBadge: React.FC<RankingBadgeProps> = ({
 }) => {
   // If we have API data, use it; otherwise fall back to old hardcoded system
   if (rankStatus && userCriteria) {
-    const progress = rankStatus.criteria.tasks_completed > 0 
-      ? (userCriteria.tasks_completed / rankStatus.criteria.tasks_completed) * 100
+    // Handle both API response formats
+    const criteriaTasksCompleted = 'criteria' in rankStatus 
+      ? rankStatus.criteria.tasks_completed 
+      : rankStatus.min_tasks_completed;
+    
+    const progress = criteriaTasksCompleted > 0 
+      ? (userCriteria.tasks_completed / criteriaTasksCompleted) * 100
       : 100;
 
     const iconSize = size === 'sm' ? 12 : size === 'md' ? 14 : 16;
@@ -51,7 +61,7 @@ const RankingBadge: React.FC<RankingBadgeProps> = ({
           <div className="w-full">
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>{userCriteria.tasks_completed} tasks</span>
-              <span>{rankStatus.criteria.tasks_completed} for next rank</span>
+              <span>{criteriaTasksCompleted} for next rank</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 

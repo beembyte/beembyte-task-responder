@@ -3,24 +3,36 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { vettingApi, VettingSubmissionRequest, VettingResponse } from '../services/vettingApi';
 import { useToast } from './use-toast';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './useAuth';
 
 export const useVetting = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Submit vetting application
   const submitVettingMutation = useMutation({
     mutationFn: (vettingData: VettingSubmissionRequest) => vettingApi.submitVetting(vettingData),
-    onSuccess: (data: VettingResponse) => {
+    onSuccess: async (data: VettingResponse) => {
       if (data.success) {
         toast({
           title: "Vetting Application Submitted",
-          description: "Your application has been submitted for review. You can now access your dashboard.",
+          description: "Your application has been submitted for review. Redirecting to dashboard...",
         });
-        // Mark vetting as completed
-        localStorage.setItem('vettingCompleted', 'true');
-        // Remove first time user flag
-        localStorage.removeItem('isFirstTimeUser');
+        
+        try {
+          // Refresh user profile to get updated vetting status
+          await refreshUser();
+          
+          // Navigate to dashboard after successful submission
+          navigate('/dashboard');
+        } catch (error) {
+          console.error('Failed to refresh user after vetting:', error);
+          // Still navigate to dashboard even if refresh fails
+          navigate('/dashboard');
+        }
       } else {
         toast({
           variant: "destructive",
