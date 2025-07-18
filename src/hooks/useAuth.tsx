@@ -34,6 +34,7 @@ export const useAuth = () => {
 
   // Helper function to update user state and localStorage
   const updateUserState = (userData: User) => {
+    console.log("🔐 Updating user state:", { userId: userData?.user_id, isVetted: userData?.is_vetted });
     setUser(userData);
     localStorage.setItem("authorizeUser", JSON.stringify(userData));
   };
@@ -67,47 +68,70 @@ export const useAuth = () => {
   const login = async (credentials: LoginRequest) => {
     setIsLoading(true)
     try {
+      console.log("🔐 Starting login process...");
       const response = await authApi.login(credentials)
+      console.log("🔐 Login API response received:", { success: response.success, hasData: !!response.data });
 
       if (response.success) {
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Login successful!"
         toast.success(message)
 
         const { auth_token, user } = response.data
-        // Token is now stored in cookie by the authApi.login function
+        console.log("🔐 Login data extracted:", { hasToken: !!auth_token, hasUser: !!user, userId: user?.user_id });
 
         // Ensure user is valid before setting it
         if (user) {
           updateUserState(user as unknown as User);
+          console.log("🔐 User data stored:", { userId: user.user_id, isVetted: user.is_vetted });
 
           // Connect to socket after successful login
           if (user.user_id && user.role) {
             try {
-              // Use the socketService to connect with user info
               socketService.connect(user.user_id, user.role)
-
-              // Add error handling for socket connection
               socket.on("connect_error", (error) => {
                 console.error("Socket connection error:", error)
-                // toast.error("Could not establish live connection. Some features may be limited.")
               })
             } catch (socketError) {
               console.error("Socket connection error:", socketError)
-              // Show toast message but don't prevent login
-              // toast.error("Could not establish live connection. Some features may be limited.")
             }
           }
-        }
 
-        if (!user.is_vetted) {
-          navigate('/vetting', { state: { is_vetted: user.is_vetted } });
-          return;
-        }
+          // Add longer delay to ensure cookie is set
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Check final authentication state
+          const finalCookieCheck = document.cookie.includes('authToken=');
+          const finalStoredUser = localStorage.getItem("authorizeUser");
+          console.log("🔐 Final auth state:", { 
+            hasCookie: finalCookieCheck, 
+            hasStoredUser: !!finalStoredUser,
+            userVetted: user.is_vetted 
+          });
 
-        // Get the returnTo parameter from URL and navigate accordingly
-        const params = new URLSearchParams(location.search);
-        const returnTo = params.get('returnTo') || '/dashboard';
-        navigate(returnTo)
+          // Navigate based on vetting status
+          console.log("🔐 Checking vetting status:", { isVetted: user.is_vetted });
+          
+          if (!user.is_vetted) {
+            console.log("🔐 User not vetted, navigating to vetting...");
+            navigate('/vetting', { replace: true });
+            return;
+          }
+
+          // Get the returnTo parameter from URL and navigate accordingly
+          const params = new URLSearchParams(location.search);
+          const returnTo = params.get('returnTo') || '/dashboard';
+          console.log("🔐 User is vetted, navigating to:", returnTo);
+          navigate(returnTo, { replace: true });
+          
+          // Force page reload to ensure authentication state is recognized
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+          
+        } else {
+          console.error("🔐 No user data in response");
+          toast.error("Login failed - no user data received");
+        }
       } else {
         // Check if the error is specifically about unverified email
         if (typeof response.message === 'object' && response.message?.verified === false) {
@@ -268,7 +292,7 @@ export const useAuth = () => {
 
   const verifyAuthToken = async () => {
     try {
-      const response = await authApi.verifyAuthToken(); // already sends with credentials
+      const response = await authApi.verifyAuthToken();
       if (!response.success) {
         // Token is invalid or expired — clean up and redirect
         setUser(null);

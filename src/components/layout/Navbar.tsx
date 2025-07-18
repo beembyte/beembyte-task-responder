@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bell, Wallet, Menu, X, Home, History, User } from 'lucide-react';
 import Logo from '../Logo';
@@ -14,13 +14,34 @@ const Navbar: React.FC = () => {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check authentication state from auth hook
-  const authCookie = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('authToken='));
+  // Enhanced authentication state checking
+  useEffect(() => {
+    const checkAuthState = () => {
+      const authCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('authToken='));
+      const storedUser = localStorage.getItem("authorizeUser");
+      
+      // More lenient check - if we have user data, consider authenticated
+      const authenticated = !!(user && (authCookie || storedUser));
+      
+      console.log("🔍 Navbar auth check:", { 
+        hasUser: !!user, 
+        hasCookie: !!authCookie, 
+        hasStoredUser: !!storedUser,
+        authenticated,
+        currentPath: location.pathname 
+      });
+      
+      setIsLoggedIn(authenticated);
+    };
 
-  const isLoggedIn = !!(user && authCookie);
+    checkAuthState();
+    
+    // Check auth state whenever user changes
+  }, [user, location.pathname]);
 
   if (!isLoggedIn && (location.pathname === '/login' || location.pathname === '/register')) {
     return null;
@@ -48,6 +69,8 @@ const Navbar: React.FC = () => {
     : typeof user?.responder_id === 'string' 
     ? user.responder_id 
     : 'N/A';
+
+  console.log("🔍 Navbar render:", { isLoggedIn, userFirstName, currentPath: location.pathname });
 
   return (
     <>

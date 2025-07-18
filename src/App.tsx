@@ -27,6 +27,45 @@ import { Toaster } from '@/components/ui/sonner';
 
 const queryClient = new QueryClient();
 
+// Root route component to handle initial routing logic
+const RootRoute = () => {
+  const hasAuthCookie = document.cookie.includes('authToken=');
+  const storedUser = localStorage.getItem("authorizeUser");
+  const isAuthenticated = !!storedUser && (hasAuthCookie || !!storedUser);
+  
+  console.log("🔍 RootRoute check:", { 
+    hasAuthCookie, 
+    hasStoredUser: !!storedUser, 
+    isAuthenticated 
+  });
+
+  if (isAuthenticated) {
+    try {
+      const user = JSON.parse(storedUser);
+      console.log("🔍 RootRoute user check:", { 
+        userId: user?.user_id, 
+        isVetted: user?.is_vetted 
+      });
+      
+      if (!user.is_vetted) {
+        console.log("🔍 RootRoute redirecting to: /vetting");
+        window.location.href = '/vetting';
+        return null;
+      } else {
+        console.log("🔍 RootRoute redirecting to: /dashboard");
+        window.location.href = '/dashboard';
+        return null;
+      }
+    } catch (error) {
+      console.error("🔍 Error parsing stored user:", error);
+    }
+  }
+  
+  console.log("🔍 RootRoute redirecting to: /login");
+  window.location.href = '/login';
+  return null;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -35,6 +74,9 @@ function App() {
           <AuthProvider>
             <TaskProvider>
               <Routes>
+                {/* Root route with authentication logic */}
+                <Route path="/" element={<RootRoute />} />
+                
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -51,11 +93,6 @@ function App() {
                 } />
                 
                 {/* Protected routes */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />

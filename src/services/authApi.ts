@@ -72,20 +72,30 @@ export interface AuthVerifyResponse {
   };
 }
 
+// Helper function to log cookie state
+const logCookieState = (action: string) => {
+  console.log(`🍪 ${action} - Document cookies:`, document.cookie);
+  const authCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+  console.log(`🍪 ${action} - Auth cookie:`, authCookie || 'NOT FOUND');
+};
+
 // Authentication API service
 export const authApi = {
   // Register a new user
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
+      logCookieState("Before register");
       const response = await fetch(`${API_BASE_URL}/users/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
+        credentials: "include",
       });
 
       const data = await response.json();
+      logCookieState("After register");
       return data;
     } catch (error) {
       console.error("Registration error:", error);
@@ -99,6 +109,9 @@ export const authApi = {
   // Login a user
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
+      console.log("🌐 Starting login request...");
+      logCookieState("Before login");
+      
       const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
         headers: {
@@ -108,7 +121,32 @@ export const authApi = {
         credentials: "include",
       });
 
+      console.log("🌐 Login response status:", response.status);
+      console.log("🌐 Login response headers:", {
+        'set-cookie': response.headers.get('set-cookie'),
+        'content-type': response.headers.get('content-type'),
+      });
+
       const data = await response.json();
+      console.log("🌐 Login response data:", data);
+      
+      logCookieState("After login");
+      
+      // If login is successful but no cookie was set by server, try to set it manually
+      if (data.success && data.data?.auth_token) {
+        const authCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+        if (!authCookie) {
+          console.log("🍪 Setting auth cookie manually...");
+          // Set cookie with secure flags for production
+          const isProduction = window.location.protocol === 'https:';
+          const cookieOptions = isProduction 
+            ? `authToken=${data.data.auth_token}; path=/; secure; samesite=strict; max-age=86400`
+            : `authToken=${data.data.auth_token}; path=/; max-age=86400`;
+          document.cookie = cookieOptions;
+          logCookieState("After manual cookie set");
+        }
+      }
+      
       return data;
     } catch (error) {
       console.error("Login error:", error);
@@ -132,6 +170,7 @@ export const authApi = {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(verifyData),
+          credentials: "include",
         }
       );
 
@@ -159,6 +198,7 @@ export const authApi = {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(resendData),
+          credentials: "include",
         }
       );
 
@@ -175,6 +215,7 @@ export const authApi = {
 
   verifyAuthToken: async () => {
     try {
+      logCookieState("Before token verification");
       const response = await fetch(`${API_BASE_URL}/users/verify-auth-token`, {
         method: "GET",
         headers: {
@@ -184,6 +225,7 @@ export const authApi = {
       });
 
       const data = await response.json();
+      console.log("🌐 Token verification response:", { success: data.success });
       return data;
     } catch (error) {
       console.error("verify auth token error:", error);
@@ -203,6 +245,7 @@ export const authApi = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email }),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -224,6 +267,7 @@ export const authApi = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(verifyData),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -247,6 +291,7 @@ export const authApi = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(resetData),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -294,6 +339,7 @@ export const authApi = {
 
   logedInUser: async () => {
     try {
+      logCookieState("Before fetch user profile");
       const response = await fetch(`${API_BASE_URL}/users/user-profile`, {
         method: "GET",
         headers: {
@@ -303,6 +349,7 @@ export const authApi = {
       });
 
       const data = await response.json();
+      console.log("🌐 User profile response:", { success: data.success, hasData: !!data.data });
       return data;
     } catch (error) {
       console.error("fetch user error:", error);
@@ -339,12 +386,18 @@ export const authApi = {
   // Logout user and clear cookie
   logout: async () => {
     try {
+      logCookieState("Before logout");
       const response = await fetch(`${API_BASE_URL}/users/logout`, {
         method: "POST",
         credentials: "include",
       });
       const data = await response.json();
       localStorage.removeItem("authorizeUser");
+      
+      // Clear auth cookie manually as well
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      logCookieState("After logout");
+      
       return data;
     } catch (error) {
       console.error("Logout error:", error);
