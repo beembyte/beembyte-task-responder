@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Logo from '@/components/Logo';
 import { useAuth } from '@/hooks/useAuth';
-import { getCookie } from '@/utils/formatUtils';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { Loader2 } from 'lucide-react';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, verifyAuthToken } = useAuth();
+  const { login } = useAuth();
+  const { isAuthenticated, user } = useAuthGuard(false); // Don't require auth for login page
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,45 +24,34 @@ const Login: React.FC = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const authToken = getCookie('authToken');
-        const authorizeUser = localStorage.getItem('authorizeUser');
-        
-        if (authToken && authorizeUser) {
-          // Verify the token is still valid
-          await verifyAuthToken();
-          
-          // User is authenticated, check if they need vetting
-          const user = JSON.parse(authorizeUser);
-          const vettingCompleted = localStorage.getItem('vettingCompleted');
-          const hasCompletedRegistration = localStorage.getItem('hasCompletedRegistration');
-          
-          if (hasCompletedRegistration && !vettingCompleted) {
-            navigate('/vetting');
-          } else {
-            const params = new URLSearchParams(location.search);
-            const returnTo = params.get('returnTo') || '/dashboard';
-            navigate(returnTo);
+        if (isAuthenticated !== null) {
+          if (isAuthenticated && user) {
+            // User is authenticated, redirect based on vetting status
+            if (!user.is_vetted) {
+              navigate('/vetting');
+            } else {
+              const params = new URLSearchParams(location.search);
+              const returnTo = params.get('returnTo') || '/dashboard';
+              navigate(returnTo);
+            }
           }
+          setIsCheckingAuth(false);
         }
       } catch (error) {
         console.log('Auth verification failed, user needs to login');
-        // Clear invalid auth data
-        document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        localStorage.removeItem("authorizeUser");
-      } finally {
         setIsCheckingAuth(false);
       }
     };
 
     checkAuthStatus();
-  }, [navigate, location.search, verifyAuthToken]);
+  }, [isAuthenticated, user, navigate, location.search]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const result = await login({ email, password });
+      await login({ email, password });
       // Navigation is handled by useAuth hook
     } catch (error) {
       console.error('Login failed:', error);

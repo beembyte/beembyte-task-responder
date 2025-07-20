@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -13,31 +14,19 @@ import {
 import { handleApiErrors } from "@/utils/apiResponse"
 import type { User } from "@/types"
 import { socketService, socket } from "@/services/socket"
-import { getCookie } from "@/utils/formatUtils"
+
+// Helper function to notify other tabs of auth changes
+const notifyAuthChange = () => {
+  localStorage.setItem('auth-change', Date.now().toString());
+};
 
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isPasswordChanging, setIsPasswordChanging] = useState(false)
   const [resendCountdown, setResendCountdown] = useState(0)
-  const [user, setUser] = useState<User>(() => {
-    // Initialize user state from localStorage
-    try {
-      const storedUser = localStorage.getItem("authorizeUser");
-      return storedUser ? JSON.parse(storedUser) : null;
-    } catch (error) {
-      console.error("Error parsing stored user:", error);
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate()
   const location = useLocation()
-
-  // Helper function to update user state and localStorage
-  const updateUserState = (userData: User) => {
-    console.log("🔐 Updating user state:", { userId: userData?.user_id, isVetted: userData?.is_vetted });
-    setUser(userData);
-    localStorage.setItem("authorizeUser", JSON.stringify(userData));
-  };
 
   const register = async (userData: RegisterRequest) => {
     setIsLoading(true)
@@ -79,10 +68,8 @@ export const useAuth = () => {
         const { auth_token, user } = response.data
         console.log("🔐 Login data extracted:", { hasToken: !!auth_token, hasUser: !!user, userId: user?.user_id });
 
-        // Ensure user is valid before setting it
         if (user) {
-          updateUserState(user as unknown as User);
-          console.log("🔐 User data stored:", { userId: user.user_id, isVetted: user.is_vetted });
+          console.log("🔐 User data received:", { userId: user.user_id, isVetted: user.is_vetted });
 
           // Connect to socket after successful login
           if (user.user_id && user.role) {
@@ -96,19 +83,12 @@ export const useAuth = () => {
             }
           }
 
-          // Add longer delay to ensure cookie is set
+          // Notify other tabs of auth change
+          notifyAuthChange();
+
+          // Add delay to ensure cookie is set
           await new Promise(resolve => setTimeout(resolve, 1000));
           
-          // Check final authentication state
-          const finalCookieCheck = document.cookie.includes('authToken=');
-          const finalStoredUser = localStorage.getItem("authorizeUser");
-          console.log("🔐 Final auth state:", { 
-            hasCookie: finalCookieCheck, 
-            hasStoredUser: !!finalStoredUser,
-            userVetted: user.is_vetted 
-          });
-
-          // Navigate based on vetting status
           console.log("🔐 Checking vetting status:", { isVetted: user.is_vetted });
           
           if (!user.is_vetted) {
@@ -117,26 +97,18 @@ export const useAuth = () => {
             return;
           }
 
-          // Get the returnTo parameter from URL and navigate accordingly
           const params = new URLSearchParams(location.search);
           const returnTo = params.get('returnTo') || '/dashboard';
           console.log("🔐 User is vetted, navigating to:", returnTo);
           navigate(returnTo, { replace: true });
-          
-          // Force page reload to ensure authentication state is recognized
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
           
         } else {
           console.error("🔐 No user data in response");
           toast.error("Login failed - no user data received");
         }
       } else {
-        // Check if the error is specifically about unverified email
         if (typeof response.message === 'object' && response.message?.verified === false) {
           toast.error(response.message.message)
-          // Store email for verification process
           localStorage.setItem("authEmail", credentials.email)
           navigate("/verify-code")
         } else {
@@ -196,7 +168,6 @@ export const useAuth = () => {
       if (response.success) {
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Verification code resent successfully!"
         toast.success(message)
-        // Start countdown for 120 seconds (2 minutes)
         setResendCountdown(120)
         const countdownInterval = setInterval(() => {
           setResendCountdown((prev) => {
@@ -227,11 +198,14 @@ export const useAuth = () => {
       socketService.disconnect()
     } catch (error) {
       console.error("Error disconnecting socket:", error)
-      // Don't block logout due to socket issues
     }
+    
     authApi.logout()
     setUser(null)
-    localStorage.removeItem("authorizeUser")
+    
+    // Notify other tabs of auth change
+    notifyAuthChange();
+    
     navigate("/login")
     toast.success("Successfully logged out")
   }
@@ -242,10 +216,11 @@ export const useAuth = () => {
       const response = await authApi.updateLoggedInUser(profileData)
 
       if (response.success) {
-        const updatedUser = { ...user, ...profileData } as User
-        updateUserState(updatedUser);
         const message = typeof response.message === 'string' ? response.message : response.message?.message || "Profile updated successfully!"
         toast.success(message)
+        
+        // Notify other tabs of potential auth changes
+        notifyAuthChange();
       } else {
         if (typeof response.message === 'string') {
           handleApiErrors({ ...response, message: response.message })
@@ -263,24 +238,23 @@ export const useAuth = () => {
 
   const loggedInUser = async (): Promise<User> => {
     try {
-      if (user) return user;
-
       const response = await authApi.logedInUser();
       if (response.success) {
-        updateUserState(response.data);
+        setUser(response.data);
         return response.data;
       }
+      throw new Error('Failed to get user profile');
     } catch (error) {
       console.error("Error fetching user:", error);
+      throw error;
     }
-    return null;
   };
 
   const refreshUser = async () => {
     try {
       const response = await authApi.logedInUser();
       if (response.success) {
-        updateUserState(response.data);
+        setUser(response.data);
         return response.data;
       }
       throw new Error('Failed to refresh user');
@@ -294,18 +268,17 @@ export const useAuth = () => {
     try {
       const response = await authApi.verifyAuthToken();
       if (!response.success) {
-        // Token is invalid or expired — clean up and redirect
         setUser(null);
-        localStorage.removeItem("authorizeUser");
         toast.error("Session expired. Please login again.");
         navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
       }
+      return response;
     } catch (error) {
       console.error("Token verification error:", error);
       setUser(null);
-      localStorage.removeItem("authorizeUser");
       toast.error("Failed to verify session. Please login again.");
       navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`);
+      throw error;
     }
   };
 

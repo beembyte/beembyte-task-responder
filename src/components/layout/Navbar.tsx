@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bell, Wallet, Menu, X, Home, History, User } from 'lucide-react';
 import Logo from '../Logo';
@@ -8,42 +8,16 @@ import NotificationBadge from '../NotificationBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { logout } = useAuth();
+  const { isAuthenticated, user } = useAuthGuard(false); // Don't require auth for navbar
 
-  // Enhanced authentication state checking
-  useEffect(() => {
-    const checkAuthState = () => {
-      const authCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('authToken='));
-      const storedUser = localStorage.getItem("authorizeUser");
-      
-      // More lenient check - if we have user data, consider authenticated
-      const authenticated = !!(user && (authCookie || storedUser));
-      
-      console.log("🔍 Navbar auth check:", { 
-        hasUser: !!user, 
-        hasCookie: !!authCookie, 
-        hasStoredUser: !!storedUser,
-        authenticated,
-        currentPath: location.pathname 
-      });
-      
-      setIsLoggedIn(authenticated);
-    };
-
-    checkAuthState();
-    
-    // Check auth state whenever user changes
-  }, [user, location.pathname]);
-
-  if (!isLoggedIn && (location.pathname === '/login' || location.pathname === '/register')) {
+  if (!isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')) {
     return null;
   }
 
@@ -70,7 +44,7 @@ const Navbar: React.FC = () => {
     ? user.responder_id 
     : 'N/A';
 
-  console.log("🔍 Navbar render:", { isLoggedIn, userFirstName, currentPath: location.pathname });
+  console.log("🔍 Navbar render:", { isAuthenticated, userFirstName, currentPath: location.pathname });
 
   return (
     <>
@@ -78,7 +52,7 @@ const Navbar: React.FC = () => {
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <Logo />
 
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <>
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-6">
@@ -136,7 +110,7 @@ const Navbar: React.FC = () => {
       </nav>
 
       {/* Mobile Menu Overlay */}
-      {isLoggedIn && mobileMenuOpen && (
+      {isAuthenticated && mobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           {/* Backdrop */}
           <div

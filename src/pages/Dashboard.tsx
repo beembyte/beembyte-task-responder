@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import Navbar from '@/components/layout/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AVAILABILITY_STATUS, User, USER_STATUS } from '@/types';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import useTask, { DashStatsData } from '@/hooks/useTask';
 import { ArrowRight, Clock, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -21,25 +20,11 @@ const getDicebearUrl = (firstName: string) => {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { loggedInUser } = useAuth()
+  const { user } = useAuthGuard(true); // Require auth and get user from server
   const { isLoading, getPendingUnassignedTask, getOngoingTasks, getDashboardStats } = useTask()
-  const [user, setUser] = useState<User | null>(null)
   const [recentTasks, setRecentTasks] = useState<any[]>([])
   const [ongoingTask, setOngoingTask] = useState<any>(null)
   const [dashboardStats, setDashStats] = useState<DashStatsData | null>(null)
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userProfile = await loggedInUser();
-        console.log('Fetched user profile:', userProfile);
-        setUser(userProfile);
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-      }
-    }
-    fetchUser()
-  }, []);
 
   // Redirect non-vetted users to vetting page
   useEffect(() => {
@@ -106,6 +91,15 @@ const Dashboard: React.FC = () => {
   // Don't render anything if user is not vetted (they'll be redirected)
   if (user && user.is_vetted === false) {
     return null;
+  }
+
+  // Show loading if no user data yet
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   const formatDate = (dateString: string) => {

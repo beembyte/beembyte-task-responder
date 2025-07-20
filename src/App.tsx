@@ -24,40 +24,37 @@ import Vetting from '@/pages/Vetting';
 import Profile from '@/pages/Profile';
 import Wallet from '@/pages/Wallet';
 import { Toaster } from '@/components/ui/sonner';
+import { useAuthGuard } from './hooks/useAuthGuard';
 
 const queryClient = new QueryClient();
 
-// Root route component to handle initial routing logic
+// Root route component that handles authentication-based routing
 const RootRoute = () => {
-  const hasAuthCookie = document.cookie.includes('authToken=');
-  const storedUser = localStorage.getItem("authorizeUser");
-  const isAuthenticated = !!storedUser && (hasAuthCookie || !!storedUser);
+  const { isAuthenticated, user } = useAuthGuard(false); // Don't require auth for root check
   
   console.log("🔍 RootRoute check:", { 
-    hasAuthCookie, 
-    hasStoredUser: !!storedUser, 
-    isAuthenticated 
+    isAuthenticated, 
+    userVetted: user?.is_vetted 
   });
 
-  if (isAuthenticated) {
-    try {
-      const user = JSON.parse(storedUser);
-      console.log("🔍 RootRoute user check:", { 
-        userId: user?.user_id, 
-        isVetted: user?.is_vetted 
-      });
-      
-      if (!user.is_vetted) {
-        console.log("🔍 RootRoute redirecting to: /vetting");
-        window.location.href = '/vetting';
-        return null;
-      } else {
-        console.log("🔍 RootRoute redirecting to: /dashboard");
-        window.location.href = '/dashboard';
-        return null;
-      }
-    } catch (error) {
-      console.error("🔍 Error parsing stored user:", error);
+  // Show loading while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && user) {
+    if (!user.is_vetted) {
+      console.log("🔍 RootRoute redirecting to: /vetting");
+      window.location.href = '/vetting';
+      return null;
+    } else {
+      console.log("🔍 RootRoute redirecting to: /dashboard");
+      window.location.href = '/dashboard';
+      return null;
     }
   }
   
