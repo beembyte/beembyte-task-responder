@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from "../config/env";
 
 interface FieldError {
@@ -75,8 +74,10 @@ export interface AuthVerifyResponse {
 // Helper function to log cookie state
 const logCookieState = (action: string) => {
   console.log(`🍪 ${action} - Document cookies:`, document.cookie);
-  const authCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-  console.log(`🍪 ${action} - Auth cookie:`, authCookie || 'NOT FOUND');
+  const authCookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("authToken="));
+  console.log(`🍪 ${action} - Auth cookie:`, authCookie || "NOT FOUND");
 };
 
 // Authentication API service
@@ -111,7 +112,7 @@ export const authApi = {
     try {
       console.log("🌐 Starting login request...");
       logCookieState("Before login");
-      
+
       const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
         headers: {
@@ -123,30 +124,32 @@ export const authApi = {
 
       console.log("🌐 Login response status:", response.status);
       console.log("🌐 Login response headers:", {
-        'set-cookie': response.headers.get('set-cookie'),
-        'content-type': response.headers.get('content-type'),
+        "set-cookie": response.headers.get("set-cookie"),
+        "content-type": response.headers.get("content-type"),
       });
 
       const data = await response.json();
       console.log("🌐 Login response data:", data);
-      
+
       logCookieState("After login");
-      
+
       // If login is successful but no cookie was set by server, try to set it manually
       if (data.success && data.data?.auth_token) {
-        const authCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+        const authCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("authToken="));
         if (!authCookie) {
           console.log("🍪 Setting auth cookie manually...");
           // Set cookie with secure flags for production
-          const isProduction = window.location.protocol === 'https:';
-          const cookieOptions = isProduction 
+          const isProduction = window.location.protocol === "https:";
+          const cookieOptions = isProduction
             ? `authToken=${data.data.auth_token}; path=/; secure; samesite=strict; max-age=86400`
             : `authToken=${data.data.auth_token}; path=/; max-age=86400`;
           document.cookie = cookieOptions;
           logCookieState("After manual cookie set");
         }
       }
-      
+
       return data;
     } catch (error) {
       console.error("Login error:", error);
@@ -163,7 +166,7 @@ export const authApi = {
   ): Promise<AuthVerifyResponse> => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/responder/signup-verification`,
+        `${API_BASE_URL}/users/signup-verification`,
         {
           method: "POST",
           headers: {
@@ -191,7 +194,7 @@ export const authApi = {
   ): Promise<AuthResponse> => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/responder/resend-signup-verification`,
+        `${API_BASE_URL}/users/resend-signup-verification`,
         {
           method: "POST",
           headers: {
@@ -349,7 +352,10 @@ export const authApi = {
       });
 
       const data = await response.json();
-      console.log("🌐 User profile response:", { success: data.success, hasData: !!data.data });
+      console.log("🌐 User profile response:", {
+        success: data.success,
+        hasData: !!data.data,
+      });
       return data;
     } catch (error) {
       console.error("fetch user error:", error);
@@ -393,11 +399,12 @@ export const authApi = {
       });
       const data = await response.json();
       localStorage.removeItem("authorizeUser");
-      
+
       // Clear auth cookie manually as well
-      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie =
+        "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       logCookieState("After logout");
-      
+
       return data;
     } catch (error) {
       console.error("Logout error:", error);
