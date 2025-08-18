@@ -191,7 +191,7 @@ const Vetting: React.FC = () => {
       const result = await submitVetting(submissionData);
 
       if (result.success) {
-        navigate('/dashboard');
+        window.location.href = "https://beembyte.com/profile";
       } else {
         toast({
           variant: "destructive",
