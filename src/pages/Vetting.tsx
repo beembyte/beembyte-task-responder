@@ -46,7 +46,7 @@ const Vetting: React.FC = () => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState('');
-  
+
   const [formData, setFormData] = useState({
     job_title: '',
     years_of_experience: 0,
@@ -91,7 +91,7 @@ const Vetting: React.FC = () => {
       });
       return;
     }
-    
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -115,7 +115,7 @@ const Vetting: React.FC = () => {
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
-      preferred_categories: checked 
+      preferred_categories: checked
         ? [...prev.preferred_categories, categoryId]
         : prev.preferred_categories.filter(item => item !== categoryId)
     }));
@@ -124,7 +124,7 @@ const Vetting: React.FC = () => {
   const handleToolChange = (toolId: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
-      tools_technologies: checked 
+      tools_technologies: checked
         ? [...prev.tools_technologies, toolId]
         : prev.tools_technologies.filter(item => item !== toolId)
     }));
@@ -163,7 +163,7 @@ const Vetting: React.FC = () => {
     }
 
     let resumeUrl = '';
-    
+
     try {
       // Upload resume file if provided
       if (resumeFile) {
@@ -187,11 +187,11 @@ const Vetting: React.FC = () => {
         call_platform: formData.call_platform,
         ...(resumeUrl && { resume: resumeUrl })
       };
-      
+
       const result = await submitVetting(submissionData);
-      
+
       if (result.success) {
-        navigate('/dashboard');
+        window.location.href = "https://beembyte.com/profile";
       } else {
         toast({
           variant: "destructive",
@@ -223,8 +223,8 @@ const Vetting: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <Label htmlFor="country">Country *</Label>
-                <Select 
-                  value={formData.country} 
+                <Select
+                  value={formData.country}
                   onValueChange={handleCountryChange}
                   disabled={isLoadingCountries}
                 >
@@ -242,16 +242,16 @@ const Vetting: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="state">State/Region *</Label>
-                <Select 
-                  value={formData.state} 
+                <Select
+                  value={formData.state}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
                   disabled={!selectedCountryCode || isLoadingStates}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={
-                      isLoadingStates ? "Loading states..." : 
-                      !selectedCountryCode ? "Select country first" : 
-                      "Select your state/region"
+                      isLoadingStates ? "Loading states..." :
+                        !selectedCountryCode ? "Select country first" :
+                          "Select your state/region"
                     } />
                   </SelectTrigger>
                   <SelectContent>
@@ -303,7 +303,7 @@ const Vetting: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label>Tools/Technologies *</Label>
                 {isLoadingTools ? (
@@ -323,7 +323,7 @@ const Vetting: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div>
                 <Label>Preferred Categories *</Label>
                 {isLoadingCategories ? (
@@ -343,7 +343,7 @@ const Vetting: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="portfolio">Portfolio Link</Label>
                 <Input
@@ -372,7 +372,7 @@ const Vetting: React.FC = () => {
                   rows={4}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="skills">Skills</Label>
                 <div className="space-y-3">
@@ -406,7 +406,7 @@ const Vetting: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="resume">Upload Resume (Optional)</Label>
                 <div className="mt-2">
@@ -470,7 +470,7 @@ const Vetting: React.FC = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                
+
                 <div>
                   <Label>Preferred Time *</Label>
                   <Select value={callTime} onValueChange={setCallTime}>
@@ -490,7 +490,7 @@ const Vetting: React.FC = () => {
                   </Select>
                 </div>
               </div>
-              
+
               <div>
                 <Label>Preferred Call Platform *</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
@@ -505,15 +505,15 @@ const Vetting: React.FC = () => {
                     >
                       {platform.icon === 'zoom' ? (
                         <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="24" height="24" rx="4" fill="#2D8CFF"/>
-                          <path d="M7 8h6v8l-6-4V8z" fill="white"/>
-                          <path d="M17 8h-4v8h4v-8z" fill="white"/>
+                          <rect width="24" height="24" rx="4" fill="#2D8CFF" />
+                          <path d="M7 8h6v8l-6-4V8z" fill="white" />
+                          <path d="M17 8h-4v8h4v-8z" fill="white" />
                         </svg>
                       ) : (
                         <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="24" height="24" rx="4" fill="#34A853"/>
-                          <path d="M8 12l2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path fill="white" d="M9 12l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <rect width="24" height="24" rx="4" fill="#34A853" />
+                          <path d="M8 12l2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path fill="white" d="M9 12l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       )}
                       <span className="font-medium">{platform.name}</span>
@@ -568,8 +568,8 @@ const Vetting: React.FC = () => {
               <ChevronRight size={16} />
             </Button>
           ) : (
-            <Button 
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               disabled={isSubmitting || isUploading}
               className="flex items-center space-x-2"
             >

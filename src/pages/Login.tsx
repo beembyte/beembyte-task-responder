@@ -49,7 +49,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       await login({ email, password });
       // Navigation is handled by useAuth hook
@@ -137,7 +137,7 @@ const Login: React.FC = () => {
               )}
             </Button>
           </form>
-
+          {/* 
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -156,7 +156,7 @@ const Login: React.FC = () => {
                 Apple
               </Button>
             </div>
-          </div>
+          </div> */}
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">

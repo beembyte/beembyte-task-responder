@@ -179,7 +179,7 @@ const Register: React.FC = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="social-sign-up">
+            {/* <TabsContent value="social-sign-up">
               <div className="space-y-4">
                 <Button variant="outline" className="w-full py-6">
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@ const Register: React.FC = () => {
                   Sign up with GitHub
                 </Button>
               </div>
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </CardContent>
         <CardFooter className="flex justify-center">
