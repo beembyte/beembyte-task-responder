@@ -31,10 +31,10 @@ const queryClient = new QueryClient();
 // Root route component that handles authentication-based routing
 const RootRoute = () => {
   const { isAuthenticated, user } = useAuthGuard(false); // Don't require auth for root check
-  
-  console.log("🔍 RootRoute check:", { 
-    isAuthenticated, 
-    userVetted: user?.is_vetted 
+
+  console.log("🔍 RootRoute check:", {
+    isAuthenticated,
+    userVetted: user?.is_vetted
   });
 
   // Show loading while checking authentication
@@ -57,7 +57,7 @@ const RootRoute = () => {
       return null;
     }
   }
-  
+
   console.log("🔍 RootRoute redirecting to: /login");
   window.location.href = '/login';
   return null;
@@ -73,22 +73,22 @@ function App() {
               <Routes>
                 {/* Root route with authentication logic */}
                 <Route path="/" element={<RootRoute />} />
-                
+
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                {/* <Route path="/register" element={<Register />} /> */}
                 <Route path="/verify-code" element={<VerifyCode />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/verify-reset-otp" element={<VerifyResetOTP />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                
+
                 {/* Vetting route with special protection */}
                 <Route path="/vetting" element={
                   <VettingProtectedRoute>
                     <Vetting />
                   </VettingProtectedRoute>
                 } />
-                
+
                 {/* Protected routes */}
                 <Route path="/dashboard" element={
                   <ProtectedRoute>

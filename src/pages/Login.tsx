@@ -158,14 +158,6 @@ const Login: React.FC = () => {
             </div>
           </div> */}
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-primary hover:underline">
-              Create one now
-            </Link>
-          </p>
-        </CardFooter>
       </Card>
     </div>
   );
