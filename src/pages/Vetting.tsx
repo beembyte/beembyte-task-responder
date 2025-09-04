@@ -46,6 +46,10 @@ const Vetting: React.FC = () => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState('');
+  const [categorySearch, setCategorySearch] = useState('');
+  const [toolSearch, setToolSearch] = useState('');
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllTools, setShowAllTools] = useState(false);
 
   const [formData, setFormData] = useState({
     job_title: '',
@@ -74,12 +78,66 @@ const Vetting: React.FC = () => {
       case 2:
         return !!(formData.job_title && formData.years_of_experience && formData.tools_technologies.length > 0 && formData.preferred_categories.length > 0);
       case 3:
-        return true; // Resume is optional, bio and skills are optional
+        return true; // Resume is optional, bio is optional
       case 4:
         return !!(callDate && callTime && formData.call_platform);
       default:
         return true;
     }
+  };
+
+  const getRequiredFieldsForStep = (step: number): string[] => {
+    switch (step) {
+      case 1:
+        return ['country', 'state', 'city'];
+      case 2:
+        return ['job_title', 'years_of_experience', 'tools_technologies', 'preferred_categories'];
+      case 3:
+        return [];
+      case 4:
+        return ['preferred_callDate', 'preferred_callTime', 'call_platform'];
+      default:
+        return [];
+    }
+  };
+
+  const isFieldRequired = (fieldName: string): boolean => {
+    const requiredFields = getRequiredFieldsForStep(currentStep);
+    return requiredFields.includes(fieldName);
+  };
+
+  const isFieldEmpty = (fieldName: string): boolean => {
+    switch (fieldName) {
+      case 'country':
+        return !formData.country;
+      case 'state':
+        return !formData.state;
+      case 'city':
+        return !formData.city;
+      case 'job_title':
+        return !formData.job_title;
+      case 'years_of_experience':
+        return !formData.years_of_experience;
+      case 'tools_technologies':
+        return formData.tools_technologies.length === 0;
+      case 'preferred_categories':
+        return formData.preferred_categories.length === 0;
+      case 'preferred_callDate':
+        return !callDate;
+      case 'preferred_callTime':
+        return !callTime;
+      case 'call_platform':
+        return !formData.call_platform;
+      default:
+        return false;
+    }
+  };
+
+  const getFieldBorderClass = (fieldName: string): string => {
+    if (isFieldRequired(fieldName) && isFieldEmpty(fieldName)) {
+      return "border-red-500 focus:border-red-500";
+    }
+    return "";
   };
 
   const handleNext = () => {
@@ -188,17 +246,8 @@ const Vetting: React.FC = () => {
         ...(resumeUrl && { resume: resumeUrl })
       };
 
-      const result = await submitVetting(submissionData);
-
-      if (result.success) {
-        window.location.href = "https://beembyte.com/profile";
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Vetting Submission Failed",
-          description: "Please check your information and try again.",
-        });
-      }
+      await submitVetting(submissionData);
+      // The useVetting hook handles navigation to dashboard on success
     } catch (error) {
       console.error('Vetting submission error:', error);
       toast({
@@ -228,7 +277,7 @@ const Vetting: React.FC = () => {
                   onValueChange={handleCountryChange}
                   disabled={isLoadingCountries}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={getFieldBorderClass('country')}>
                     <SelectValue placeholder={isLoadingCountries ? "Loading countries..." : "Select your country"} />
                   </SelectTrigger>
                   <SelectContent>
@@ -247,7 +296,7 @@ const Vetting: React.FC = () => {
                   onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
                   disabled={!selectedCountryCode || isLoadingStates}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={getFieldBorderClass('state')}>
                     <SelectValue placeholder={
                       isLoadingStates ? "Loading states..." :
                         !selectedCountryCode ? "Select country first" :
@@ -270,6 +319,7 @@ const Vetting: React.FC = () => {
                   value={formData.city}
                   onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                   placeholder="Enter your city"
+                  className={getFieldBorderClass('city')}
                 />
               </div>
             </div>
@@ -289,6 +339,7 @@ const Vetting: React.FC = () => {
                     value={formData.job_title}
                     onChange={(e) => setFormData(prev => ({ ...prev, job_title: e.target.value }))}
                     placeholder="e.g., Frontend Developer"
+                    className={getFieldBorderClass('job_title')}
                   />
                 </div>
                 <div>
@@ -300,46 +351,101 @@ const Vetting: React.FC = () => {
                     value={formData.years_of_experience}
                     onChange={(e) => setFormData(prev => ({ ...prev, years_of_experience: parseInt(e.target.value) || 0 }))}
                     placeholder="e.g., 5"
+                    className={getFieldBorderClass('years_of_experience')}
                   />
                 </div>
               </div>
 
               <div>
-                <Label>Tools/Technologies *</Label>
-                {isLoadingTools ? (
-                  <p className="text-sm text-gray-500">Loading tools...</p>
+                <Label className={isFieldRequired('preferred_categories') && isFieldEmpty('preferred_categories') ? 'text-red-500' : ''}>Preferred Categories *</Label>
+                {isLoadingCategories ? (
+                  <p className="text-sm text-gray-500">Loading categories...</p>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
-                    {tools.map(tool => (
-                      <div key={tool._id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
-                        <Checkbox
-                          id={`tool-${tool._id}`}
-                          checked={formData.tools_technologies.includes(tool._id)}
-                          onCheckedChange={(checked) => handleToolChange(tool._id, checked as boolean)}
-                        />
-                        <Label htmlFor={`tool-${tool._id}`} className="text-sm cursor-pointer">{tool.name}</Label>
-                      </div>
-                    ))}
+                  <div className="space-y-3 mt-3">
+                    <Input
+                      placeholder="Search categories..."
+                      value={categorySearch}
+                      onChange={(e) => setCategorySearch(e.target.value)}
+                      className="w-full"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {categories
+                        .filter(category => 
+                          category.name.toLowerCase().includes(categorySearch.toLowerCase())
+                        )
+                        .slice(0, showAllCategories ? categories.length : 10)
+                        .map(category => (
+                          <div key={category._id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                            <Checkbox
+                              id={`cat-${category._id}`}
+                              checked={formData.preferred_categories.includes(category._id)}
+                              onCheckedChange={(checked) => handleCategoryChange(category._id, checked as boolean)}
+                            />
+                            <Label htmlFor={`cat-${category._id}`} className="text-sm cursor-pointer">{category.name}</Label>
+                          </div>
+                        ))}
+                    </div>
+                    {categories.filter(category => 
+                      category.name.toLowerCase().includes(categorySearch.toLowerCase())
+                    ).length > 10 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowAllCategories(!showAllCategories)}
+                        className="w-full"
+                      >
+                        {showAllCategories ? 'Show Less' : `Show All (${categories.filter(category => 
+                          category.name.toLowerCase().includes(categorySearch.toLowerCase())
+                        ).length})`}
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
 
               <div>
-                <Label>Preferred Categories *</Label>
-                {isLoadingCategories ? (
-                  <p className="text-sm text-gray-500">Loading categories...</p>
+                <Label className={isFieldRequired('tools_technologies') && isFieldEmpty('tools_technologies') ? 'text-red-500' : ''}>Tools/Technologies *</Label>
+                {isLoadingTools ? (
+                  <p className="text-sm text-gray-500">Loading tools...</p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                    {categories.map(category => (
-                      <div key={category._id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
-                        <Checkbox
-                          id={`cat-${category._id}`}
-                          checked={formData.preferred_categories.includes(category._id)}
-                          onCheckedChange={(checked) => handleCategoryChange(category._id, checked as boolean)}
-                        />
-                        <Label htmlFor={`cat-${category._id}`} className="text-sm cursor-pointer">{category.name}</Label>
-                      </div>
-                    ))}
+                  <div className="space-y-3 mt-3">
+                    <Input
+                      placeholder="Search tools..."
+                      value={toolSearch}
+                      onChange={(e) => setToolSearch(e.target.value)}
+                      className="w-full"
+                    />
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {tools
+                        .filter(tool => 
+                          tool.name.toLowerCase().includes(toolSearch.toLowerCase())
+                        )
+                        .slice(0, showAllTools ? tools.length : 10)
+                        .map(tool => (
+                          <div key={tool._id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                            <Checkbox
+                              id={`tool-${tool._id}`}
+                              checked={formData.tools_technologies.includes(tool._id)}
+                              onCheckedChange={(checked) => handleToolChange(tool._id, checked as boolean)}
+                            />
+                            <Label htmlFor={`tool-${tool._id}`} className="text-sm cursor-pointer">{tool.name}</Label>
+                          </div>
+                        ))}
+                    </div>
+                    {tools.filter(tool => 
+                      tool.name.toLowerCase().includes(toolSearch.toLowerCase())
+                    ).length > 10 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowAllTools(!showAllTools)}
+                        className="w-full"
+                      >
+                        {showAllTools ? 'Show Less' : `Show All (${tools.filter(tool => 
+                          tool.name.toLowerCase().includes(toolSearch.toLowerCase())
+                        ).length})`}
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -373,39 +479,6 @@ const Vetting: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="skills">Skills</Label>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <Input
-                      id="skills"
-                      value={newSkill}
-                      onChange={(e) => setNewSkill(e.target.value)}
-                      placeholder="Add a skill"
-                      onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
-                    />
-                    <Button type="button" onClick={handleAddSkill} variant="outline">
-                      Add
-                    </Button>
-                  </div>
-                  {selectedSkills.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedSkills.map((skill, index) => (
-                        <div key={index} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
-                          <span>{skill}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSkill(skill)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
 
               <div>
                 <Label htmlFor="resume">Upload Resume (Optional)</Label>
@@ -451,7 +524,8 @@ const Vetting: React.FC = () => {
                         variant={"outline"}
                         className={cn(
                           "w-full justify-start text-left font-normal mt-2",
-                          !callDate && "text-muted-foreground"
+                          !callDate && "text-muted-foreground",
+                          getFieldBorderClass('preferred_callDate')
                         )}
                         onClick={() => setIsDatePickerOpen(true)}
                       >
@@ -474,7 +548,7 @@ const Vetting: React.FC = () => {
                 <div>
                   <Label>Preferred Time *</Label>
                   <Select value={callTime} onValueChange={setCallTime}>
-                    <SelectTrigger className="mt-2">
+                    <SelectTrigger className={cn("mt-2", getFieldBorderClass('preferred_callTime'))}>
                       <SelectValue placeholder="Select preferred time" />
                     </SelectTrigger>
                     <SelectContent>
@@ -492,7 +566,7 @@ const Vetting: React.FC = () => {
               </div>
 
               <div>
-                <Label>Preferred Call Platform *</Label>
+                <Label className={isFieldRequired('call_platform') && isFieldEmpty('call_platform') ? 'text-red-500' : ''}>Preferred Call Platform *</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                   {CALL_PLATFORMS.map(platform => (
                     <div

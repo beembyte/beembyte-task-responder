@@ -23,15 +23,22 @@ export const useVetting = () => {
         });
         
         try {
+          // Set flag to prevent auth guard from redirecting back to vetting
+          sessionStorage.setItem('vetting-submitted', 'true');
+          
           // Refresh user profile to get updated vetting status
           await refreshUser();
           
-          // Navigate to dashboard after successful submission
-          navigate('/dashboard');
+          // Small delay to ensure user state is updated
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 100);
         } catch (error) {
           console.error('Failed to refresh user after vetting:', error);
           // Still navigate to dashboard even if refresh fails
-          navigate('/dashboard');
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 100);
         }
       } else {
         toast({

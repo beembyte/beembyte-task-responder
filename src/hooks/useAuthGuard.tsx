@@ -33,19 +33,27 @@ export const useAuthGuard = (requireAuth = true) => {
             });
             
             setIsAuthenticated(true);
-            setUser(userResponse.data);
+            const hasVettingOverride = sessionStorage.getItem('vetting-submitted') === 'true';
+            const effectiveVetted = Boolean(userResponse.data?.is_vetted || hasVettingOverride);
+            setUser({ ...userResponse.data, is_vetted: effectiveVetted });
             
             // Handle vetting redirects only if auth is required
             if (requireAuth) {
-              if (!userResponse.data.is_vetted && location.pathname !== '/vetting') {
-                console.log("🛡️ Redirecting to vetting - user not vetted");
-                navigate('/vetting');
+              // If user is effectively vetted and on vetting page, go to dashboard
+              if (effectiveVetted && location.pathname === '/vetting') {
+                console.log("🛡️ Redirecting to dashboard - vetted (effective)");
+                // Only clear the flag when backend confirms vetted to persist across refresh
+                if (userResponse.data?.is_vetted) {
+                  sessionStorage.removeItem('vetting-submitted');
+                }
+                navigate('/dashboard');
                 return;
               }
               
-              if (userResponse.data.is_vetted && location.pathname === '/vetting') {
-                console.log("🛡️ Redirecting to dashboard - user already vetted");
-                navigate('/dashboard');
+              // If user not effectively vetted and not on vetting, send to vetting
+              if (!effectiveVetted && location.pathname !== '/vetting') {
+                console.log("🛡️ Redirecting to vetting - user not vetted");
+                navigate('/vetting');
                 return;
               }
             }
